@@ -61,9 +61,10 @@ Coming soon...
 
 ## Contributors
 
-* Yu [@archerfeel](https://github.com/archerfeel)
-* antong530 [@antong530](https://github.com/antong530)
-* dalvikchen [@dalvikchen](https://github.com/dalvikchen)
+* Zhang Yu [@archerfeel](https://github.com/archerfeel)
+* An Tong [@antong530](https://github.com/antong530)
+* Chen Lei [@dalvikchen](https://github.com/dalvikchen)
+* Wang Li [@waally](https://github.com/waally)
 
 ## License
 
