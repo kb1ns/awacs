@@ -47,7 +47,7 @@ AWACS is a non-intrusive APM for Java platform.
 
 ## Plugins
 
-So far, we provide springmvc plugin(for Spring webapp QPS) and mxbean plugin(for JVM index).
+So far, we provide springmvc plugin(for Spring webapp QPS) and mxbean plugin(for JVM metrics).
 
 ## Documents
 
