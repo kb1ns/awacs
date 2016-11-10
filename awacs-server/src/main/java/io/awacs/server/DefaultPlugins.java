@@ -77,27 +77,32 @@ public class DefaultPlugins implements Plugins {
                 logger.info("Plugin {} configuration found.", pluginName);
                 ImmutableMap<String, String> pluginConfig = configuration.getSubProperties(Configurations.PLUGIN_PREFIX + "." + pluginName + ".");
 
-                String handlerClassName = pluginConfig.get(Configurations.HANDLER_CLASS);
+                String pluginClassName = pluginConfig.get(Configurations.PLUGIN_CLASS);
                 String keyType = pluginConfig.get(Configurations.KEY_CLASS);
                 String keyValue = pluginConfig.get(Configurations.KEY_VALUE);
-
-                String pluginClassName = pluginConfig.get(Configurations.PLUGIN_CLASS);
                 String pluginPathRoot = Configurations.getPluginPath();
                 String relativePath = "/awacs-" + pluginName + "-plugin.jar";
                 String pluginPath = pluginPathRoot + relativePath;
                 String fileHash = Files.hash(new File(pluginPath), Hashing.sha1()).toString();
-
+                ImmutableMap<String, String> pluginProperties = configuration.getSubProperties(Configurations.PLUGIN_PREFIX + "." + pluginName + "." + Configurations.PLUGIN_PROPERTIES + ".");
+                Map<String, String> props = new HashMap<>();
+                for (String key : pluginProperties.keySet())
+                    props.put(key, pluginProperties.get(key));
                 PluginDescriptor descriptor = new PluginDescriptor()
                         .setPluginClass(pluginClassName)
                         .setHash(fileHash)
                         .setName(pluginName)
                         .setKeyClass(keyType)
                         .setKeyValue(keyValue)
+                        .setProperties(props)
                         .setDownloadUrl(relativePath);
 
+                String handlerClassName = pluginConfig.get(Configurations.HANDLER_CLASS);
                 Class<?> clazz = Class.forName(handlerClassName);
                 PluginHandler handler = (PluginHandler) clazz.newInstance();
-                handler.init(new Configuration(pluginConfig));
+                ImmutableMap<String, String> handlerProperties = configuration.getSubProperties(Configurations.PLUGIN_PREFIX + "." + pluginName + "." + Configurations.HANDLER_PROPERTIES + ".");
+                handler.init(new Configuration(handlerProperties));
+
                 if (handler instanceof RepositoriesAware) {
                     ((RepositoriesAware) handler).setContext(repositories);
                 }

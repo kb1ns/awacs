@@ -21,7 +21,7 @@
 
     <groupId>io.awacs</groupId>
     <artifactId>awacs-root</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.4</version>
     <modules>
         <module>awacs-core</module>
         <module>awacs-protocol</module>
@@ -66,12 +66,14 @@
         </developer>
         <developer>
             <name>Lei Chen</name>
+            <email></email>
             <roles>
                 <role>manager</role>
             </roles>
         </developer>
         <developer>
             <name>Li Wang</name>
+            <email></email>
             <roles>
                 <role>developer</role>
             </roles>

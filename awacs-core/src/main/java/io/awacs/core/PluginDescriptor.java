@@ -28,7 +28,7 @@ public final class PluginDescriptor {
 
     private String downloadUrl;
 
-    private Map<String, Object> properties;
+    private Map<String, String> properties;
 
     private String pluginClass;
 
@@ -48,7 +48,7 @@ public final class PluginDescriptor {
         return this;
     }
 
-    public PluginDescriptor setProperties(Map<String, Object> properties) {
+    public PluginDescriptor setProperties(Map<String, String> properties) {
         this.properties = properties;
         return this;
     }
@@ -81,7 +81,7 @@ public final class PluginDescriptor {
         return downloadUrl;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 
@@ -100,60 +100,4 @@ public final class PluginDescriptor {
     public String getHash() {
         return hash;
     }
-
-//    public static class Builder {
-//
-//        private String name;
-//
-//        private String downloadUrl;
-//
-//        private Map<String, Object> properties;
-//
-//        private String pluginClass;
-//
-//        private String keyClass;
-//
-//        private String key;
-//
-//        private String hash;
-//
-//        public PluginDescriptor build() {
-//            return new PluginDescriptor(name, downloadUrl, properties, pluginClass, keyClass, key, hash);
-//        }
-//
-//        public Builder setName(String name) {
-//            this.name = name;
-//            return this;
-//        }
-//
-//        public Builder setDownloadUrl(String downloadUrl) {
-//            this.downloadUrl = downloadUrl;
-//            return this;
-//        }
-//
-//        public Builder setProperties(Map<String, Object> properties) {
-//            this.properties = properties;
-//            return this;
-//        }
-//
-//        public Builder setPluginClass(String pluginClass) {
-//            this.pluginClass = pluginClass;
-//            return this;
-//        }
-//
-//        public Builder setKeyClass(String keyClass) {
-//            this.keyClass = keyClass;
-//            return this;
-//        }
-//
-//        public Builder setKey(String key) {
-//            this.key = key;
-//            return this;
-//        }
-//
-//        public Builder setHash(String hash) {
-//            this.hash = hash;
-//            return this;
-//        }
-//    }
 }

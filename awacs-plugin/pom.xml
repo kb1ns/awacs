@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-root</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.0</version>
+        <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -28,17 +28,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>awacs-springmvc-plugin</module>
         <module>awacs-mxbean-plugin</module>
+        <module>awacs-stacktrace-plugin</module>
     </modules>
 
     <dependencies>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-agent</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>io.awacs</groupId>
             <artifactId>awacs-email-repository</artifactId>

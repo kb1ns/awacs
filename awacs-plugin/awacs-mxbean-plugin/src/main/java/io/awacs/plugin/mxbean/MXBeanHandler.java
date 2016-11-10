@@ -41,10 +41,9 @@ public class MXBeanHandler implements PluginHandler {
     public Message handle(Message message, InetSocketAddress address) {
         try {
             Document doc = Document.parse(new String(message.body()));
-            String collection = "key_" + message.getKey();
             doc.put("host", address.getAddress().getHostAddress());
             doc.put("port", address.getPort());
-            mongoRepository.save(collection, doc);
+            mongoRepository.save("mxbean", doc);
         } catch (Exception e) {
             e.printStackTrace();
         }

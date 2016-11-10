@@ -31,53 +31,57 @@ import java.util.stream.Collectors;
  */
 public class Configurations {
 
-    public static String SERVER_PREFIX = "awacs.servers";
+    public static final String SERVER_PREFIX = "awacs.servers";
 
-    public static String HTTP_BIND_HOST = "http_bind_host";
+    public static final String HTTP_BIND_HOST = "http_bind_host";
 
-    public static String DEFAULT_HTTP_BIND_HOST = "0.0.0.0";
+    public static final String DEFAULT_HTTP_BIND_HOST = "0.0.0.0";
 
-    public static String HTTP_BIND_PORT = "http_bind_port";
+    public static final String HTTP_BIND_PORT = "http_bind_port";
 
-    public static String DEFAULT_HTTP_BIND_PORT = "7100";
+    public static final String DEFAULT_HTTP_BIND_PORT = "7100";
 
-    public static String HTTP_BOSS_CORE = "http_boss_core";
+    public static final String HTTP_BOSS_CORE = "http_boss_core";
 
-    public static String DEFAULT_HTTP_BOSS_CORE = "1";
+    public static final String DEFAULT_HTTP_BOSS_CORE = "1";
 
-    public static String HTTP_WORKER_CORE = "http_worker_core";
+    public static final String HTTP_WORKER_CORE = "http_worker_core";
 
-    public static String DEFAULT_HTTP_WORKER_CORE = String.valueOf(Runtime.getRuntime().availableProcessors() * 2);
+    public static final String DEFAULT_HTTP_WORKER_CORE = String.valueOf(Runtime.getRuntime().availableProcessors() * 2);
 
-    public static String TCP_BIND_HOST = "tcp_bind_host";
+    public static final String TCP_BIND_HOST = "tcp_bind_host";
 
-    public static String DEFAULT_TCP_BIND_HOST = "0.0.0.0";
+    public static final String DEFAULT_TCP_BIND_HOST = "0.0.0.0";
 
-    public static String TCP_BIND_PORT = "tcp_bind_port";
+    public static final String TCP_BIND_PORT = "tcp_bind_port";
 
-    public static String DEFAULT_TCP_BIND_PORT = "7200";
+    public static final String DEFAULT_TCP_BIND_PORT = "7200";
 
-    public static String TCP_BOSS_CORE = "tcp_boss_core";
+    public static final String TCP_BOSS_CORE = "tcp_boss_core";
 
-    public static String DEFAULT_TCP_BOSS_CORE = "1";
+    public static final String DEFAULT_TCP_BOSS_CORE = "1";
 
-    public static String TCP_WORKER_CORE = "tcp_worker_core";
+    public static final String TCP_WORKER_CORE = "tcp_worker_core";
 
-    public static String DEFAULT_TCP_WORKER_CORE = String.valueOf(Runtime.getRuntime().availableProcessors() * 2);
+    public static final String DEFAULT_TCP_WORKER_CORE = String.valueOf(Runtime.getRuntime().availableProcessors() * 2);
 
-    public static String PLUGIN_PREFIX = "awacs.plugins";
+    public static final String PLUGIN_PREFIX = "awacs.plugins";
 
-    public static String PLUGIN_CLASS = "pluginClass";
+    public static final String PLUGIN_CLASS = "pluginClass";
 
-    public static String HANDLER_CLASS = "handlerClass";
+    public static final String PLUGIN_PROPERTIES = "pluginProperties";
 
-    public static String KEY_CLASS = "keyClass";
+    public static final String HANDLER_PROPERTIES = "handlerProperties";
 
-    public static String KEY_VALUE = "keyValue";
+    public static final String HANDLER_CLASS = "handlerClass";
 
-    public static String REPOSITORY_PREFIX = "awacs.repositories";
+    public static final String KEY_CLASS = "keyClass";
 
-    public static String REPOSITORY_CLASS = "class";
+    public static final String KEY_VALUE = "keyValue";
+
+    public static final String REPOSITORY_PREFIX = "awacs.repositories";
+
+    public static final String REPOSITORY_CLASS = "class";
 
     public static Configuration loadConfigurations() {
         ResourceBundle bundle = ResourceBundle.getBundle("awacs");

@@ -20,14 +20,18 @@
     <parent>
         <artifactId>awacs-plugin</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.0</version>
+        <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>awacs-mxbean-plugin</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-agent</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
