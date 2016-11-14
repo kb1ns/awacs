@@ -45,19 +45,10 @@ AWACS is a non-intrusive APM for Java platform.
 	curl 127.0.0.1:8080/v1/test2/hello
 	```
 
-## Plugins
-
-So far, we provide stacktrace plugin(for Spring webapp method call stack trace) and mxbean plugin(for JVM index).
-
 ## Documents
 
 * [wiki]()
-* [user guide]()
-* [contributor guide]()
-
-## Deploy
-
-Coming soon...
+* [文档]()
 
 ## Contributors
 
