@@ -24,7 +24,7 @@ AWACS is a non-intrusive APM for Java platform.
 
 2. AWACS defaults use MongoDB as data storage, so we need start MongoDB before
  
-3. Open conf/awacs.properties and modify MongoDB's host and port(default is 127.0.0.1:27017)
+3. Open awacs-server/conf/awacs.properties and modify MongoDB's host and port(default is 127.0.0.1:27017)
 
 4. Start AWACS
 
