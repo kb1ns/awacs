@@ -47,8 +47,8 @@ AWACS is a non-intrusive APM for Java platform.
 
 ## Documents
 
-* [wiki](https://github.com/archerfeel/AWACS/wiki)
-* [文档]()
+* [wiki]()
+* [文档](https://github.com/archerfeel/AWACS/wiki)
 
 ## Contributors
 
