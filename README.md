@@ -1,5 +1,5 @@
 # AWACS
-
+[![Build Status](https://api.travis-ci.org/archerfeel/AWACS.svg)](https://travis-ci.org/archerfeel/AWACS)
 
 ## Overview
 
