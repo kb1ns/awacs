@@ -1,4 +1,4 @@
-# AWACS
+## Welcome to AWACS
 
 [wiki]()
 
@@ -6,7 +6,7 @@
 
 AWACS是一款针对Java应用, 无代码侵入的开源APM. 基于插件的架构使AWACS有非常高的可定制性, 开发者可以自己开发插件.
 
-![幻灯片2](/docs/static/structure.jpg)
+![](../static/structure.jpg)
 
 * server：AWACS的服务端, 提供agent启动时的配置和插件下载以及接收应用在运行期上报的数据;
 * plugin：监控插件, 独立打包成jar;
