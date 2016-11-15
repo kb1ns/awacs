@@ -34,6 +34,7 @@ public class BinaryMessageDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out)
             throws Exception {
         int readable = in.readableBytes();
+        //FIXME
         if (readable > BinaryMessage.MAX_PACKET_SIZE) {
             in.skipBytes(readable);
             throw new TooLongFrameException();
