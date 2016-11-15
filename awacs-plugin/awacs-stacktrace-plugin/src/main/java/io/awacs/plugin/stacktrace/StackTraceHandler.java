@@ -32,6 +32,7 @@ import org.bson.Document;
 import javax.annotation.Resource;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -47,13 +48,13 @@ public class StackTraceHandler implements PluginHandler {
     @Resource
     private MongoRepository mongoRepository;
 
-    private List<String> toList;
+    private List<String> toList = Collections.emptyList();
 
-    private List<String> ccList;
+    private List<String> ccList = Collections.emptyList();
 
-    private boolean enableNotification;
+    private boolean enableNotification = false;
 
-    private List<String> excludeExceptionPrefixes;
+    private List<String> excludeExceptionPrefixes = Collections.emptyList();
 
     private static final String ENABLE_NOTIFICATION = "notification.enable";
 
@@ -91,11 +92,11 @@ public class StackTraceHandler implements PluginHandler {
         } else {
             JSONArray methodCallChain = json.getJSONArray("stack");
             json.put("stack", buildCallerStack(methodCallChain));
-            try {
-                mongoRepository.save("stacktrace_plugin", Document.parse(json.toJSONString()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        }
+        try {
+            mongoRepository.save("stacktrace_plugin", Document.parse(json.toJSONString()));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }

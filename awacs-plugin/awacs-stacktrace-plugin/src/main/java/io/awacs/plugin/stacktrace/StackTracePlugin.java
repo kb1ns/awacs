@@ -58,7 +58,7 @@ public class StackTracePlugin implements Plugin {
 
     //发送线程的堆栈信息
     public static void incrAccess(List stack) {
-        logger.info("Event fired.");
+        logger.debug("Normal access, event fired.");
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
         report.put("stack", stack);
@@ -71,7 +71,7 @@ public class StackTracePlugin implements Plugin {
 
     //发送异常信息
     public static void incrFailure(Throwable t) {
-        logger.info("Event fired.");
+        logger.info("Exception occur, event fired.");
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
         report.put("stack", t.getStackTrace());
