@@ -168,7 +168,7 @@ abstract class ClassTransformer {
     }
 
     protected boolean isGetOrSet(MethodNode mn) {
-        return mn.name.startsWith("get") || mn.name.startsWith("set");
+        return mn.name.startsWith("get") || mn.name.startsWith("set") || mn.name.startsWith("is");
     }
 
     protected boolean isTinyMethod(MethodNode mn) {
