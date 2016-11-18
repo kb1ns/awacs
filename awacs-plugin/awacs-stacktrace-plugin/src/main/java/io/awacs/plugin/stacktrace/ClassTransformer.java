@@ -90,6 +90,7 @@ abstract class ClassTransformer {
             src.name = src.name + "_origin_" + cn.name.substring(_slash + 1);
             src.visibleAnnotations = null;
             src.visibleLocalVariableAnnotations = null;
+            src.access = src.access | Opcodes.ACC_SYNTHETIC;
 
             if (terminated) {
                 transformTerminatedMethod(src, proxy, cn);
