@@ -53,11 +53,14 @@ abstract class ClassTransformer {
                 continue;
             }
             boolean terminated = isTerminatedMethod(src);
-            if (!terminated && isGetOrSet(src)) {
-                continue;
+            if (terminated) {
+                interceptTerminatedMethod(src, cn);
+            } else if (!isGetOrSet(src)) {
+                interceptPlainMethod(src, cn);
             }
-
-
+//            if (!terminated && isGetOrSet(src)) {
+//                continue;
+//            }
             //copy exceptions
 //            String[] exceptions = null;
 //            if (src.exceptions != null) {
@@ -110,17 +113,16 @@ abstract class ClassTransformer {
         inst.add(new LdcInsnNode(0));
         inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        AbstractInsnNode ret = inst.getLast();
+        mn.instructions.insert(inst);
+        AbstractInsnNode ret = mn.instructions.getLast();
         mn.instructions.remove(ret);
-        inst.add(mn.instructions);
-        inst.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        inst.add(new LdcInsnNode(mn.name));
-        inst.add(new LdcInsnNode(1));
-        inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
+        mn.instructions.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        mn.instructions.add(new LdcInsnNode(mn.name));
+        mn.instructions.add(new LdcInsnNode(1));
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        inst.add(ret);
-        mn.instructions = inst;
-        mn.maxStack = Math.max(mn.maxStack, 5);
+        mn.instructions.add(ret);
+        mn.maxStack = mn.maxStack + 3;
     }
 
     private void interceptTerminatedMethod(MethodNode mn, ClassNode cn) {
@@ -131,32 +133,55 @@ abstract class ClassTransformer {
         mn.tryCatchBlocks.add(new TryCatchBlockNode(l0, l1, l2, "java/lang/Exception"));
         InsnList inst = new InsnList();
         inst.add(l0);
-        //其实方法初始化方法调用
         inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "init", "()V", false));
         inst.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
         inst.add(new LdcInsnNode(mn.name));
         inst.add(new LdcInsnNode(0));
-        //方法开始调用
         inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        AbstractInsnNode ret = inst.getLast();
+        mn.instructions.insert(inst);
+        AbstractInsnNode ret = mn.instructions.getLast();
         mn.instructions.remove(ret);
-        inst.add(mn.instructions);
-        inst.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        inst.add(new LdcInsnNode(mn.name));
-        inst.add(new LdcInsnNode(1));
-        inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
+        mn.instructions.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        mn.instructions.add(new LdcInsnNode(mn.name));
+        mn.instructions.add(new LdcInsnNode(1));
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        inst.add(l1);
-        inst.add(ret);
-        inst.add(l2);
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "dump",
+                "()Ljava/util/List;", false));
+        //发送线程信息
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess",
+                "(Ljava/util/List;)V", false));
+        mn.instructions.add(l1);
+        mn.instructions.add(ret);
+        mn.instructions.add(l2);
         //进行异常捕获并抛出
-        inst.add(new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"}));
-        inst.add(new VarInsnNode(Opcodes.ASTORE, varIndex));
-        inst.add(new VarInsnNode(Opcodes.ALOAD, varIndex));
-        inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrFailure", "(Ljava/lang/Throwable;)V", false));
-        inst.add(new VarInsnNode(Opcodes.ALOAD, varIndex));
-        inst.add(new InsnNode(Opcodes.ATHROW));
+        mn.instructions.add(new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"}));
+        mn.instructions.add(new VarInsnNode(Opcodes.ASTORE, 0));
+        mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrFailure",
+                "(Ljava/lang/Throwable;)V", false));
+        mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        mn.instructions.add(new InsnNode(Opcodes.ATHROW));
+        mn.maxLocals = mn.maxLocals + 1;
+        mn.maxStack = mn.maxStack + 5;
+    }
+
+    private int getParameterSize(MethodNode mn) {
+        String params = mn.desc.substring(1, mn.desc.indexOf(')'));
+        int size = 0;
+        for (int i = 0; i < params.length(); i++) {
+            if (params.charAt(i) == 'L') {
+                size++;
+                while (params.charAt(i) != ';')
+                    i++;
+            } else if (params.charAt(i) == 'J' || params.charAt(i) == 'D') {
+                size += 2;
+            } else if (params.charAt(i) != '[') {
+                size++;
+            }
+        }
+        return size + ((mn.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC ? 0 : 1);
     }
 
     //判断是否为原始类型

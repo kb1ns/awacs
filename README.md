@@ -1,7 +1,7 @@
 # AWACS
 [![Build Status](https://travis-ci.org/archerfeel/AWACS.svg?branch=master)](https://travis-ci.org/archerfeel/AWACS)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/archerfeel/AWACS/blob/master/LICENSE)
-[![Version](https://img.shields.io/badge/AWACS-0.1.5-orange.svg)](https://github.com/archerfeel/AWACS/tree/0.1.5)
+[![Version](https://img.shields.io/badge/AWACS-0.1.6-orange.svg)](https://github.com/archerfeel/AWACS/tree/0.1.6)
 
 ## Overview
 
@@ -37,14 +37,14 @@ AWACS is a non-intrusive APM for Java platform.
 5. AWACS includes a simple springmvc webapp demo, simply start:
 
 	```
-	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.4.jar
+	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.6.jar
 	```
 
 6. Test webapp and check MongoDB
 
 	```
-	curl 127.0.0.1:8080/v1/test1?name=test
-	curl 127.0.0.1:8080/v1/test2/hello
+	curl 127.0.0.1:8080/v1/test/hello
+	curl 127.0.0.1:8080/v1/test/hello1
 	```
 
 ## Documents

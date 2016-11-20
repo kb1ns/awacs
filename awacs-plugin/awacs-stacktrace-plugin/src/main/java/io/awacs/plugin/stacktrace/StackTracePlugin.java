@@ -125,7 +125,7 @@ public class StackTracePlugin implements Plugin {
                     }
                     ClassNode cn = new ClassNode();
                     ClassReader cr = new ClassReader(classfileBuffer);
-                    cr.accept(cn, 0);
+                    cr.accept(cn, ClassReader.SKIP_DEBUG);
                     ctf.visit(cn);
                     ClassWriter cw = new ClassWriter(0);
                     cn.accept(cw);
