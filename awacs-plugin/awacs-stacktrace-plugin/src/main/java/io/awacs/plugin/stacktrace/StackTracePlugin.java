@@ -70,17 +70,21 @@ public class StackTracePlugin implements Plugin {
     }
 
     //发送异常信息
-    public static void incrFailure(Throwable t) {
+    public static RuntimeException incrFailure(Throwable e) {
         logger.info("Exception occur, event fired.");
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
-        report.put("stack", t.getStackTrace());
-        report.put("exception", t.getClass().getCanonicalName());
+        report.put("stack", e.getStackTrace());
+        report.put("exception", e.getClass().getCanonicalName());
         MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
                 .setKey(key)
                 .setVersion(BinaryMessage.C_VERSION)
                 .setBody(report.toJSONString().getBytes())
                 .build());
+        if (e instanceof RuntimeException)
+            return (RuntimeException) e;
+        else
+            return new RuntimeException(e);
     }
 
     @Override
