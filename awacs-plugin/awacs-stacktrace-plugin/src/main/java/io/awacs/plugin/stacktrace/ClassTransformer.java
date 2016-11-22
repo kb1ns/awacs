@@ -83,73 +83,11 @@ abstract class ClassTransformer {
                 src.name = src.name + "_origin_" + cn.name.substring(_slash + 1);
                 src.visibleAnnotations = null;
                 src.visibleLocalVariableAnnotations = null;
-
                 transformTerminatedMethod(src, proxy, cn);
-
             } else {
                 transformPlainMethod(src, cn);
             }
         }
-    }
-
-    private void interceptPlainMethod(MethodNode mn, ClassNode cn) {
-        InsnList inst = new InsnList();
-        inst.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        inst.add(new LdcInsnNode(mn.name));
-        inst.add(new LdcInsnNode(0));
-        inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        mn.instructions.insert(inst);
-        AbstractInsnNode ret = mn.instructions.getLast();
-        mn.instructions.remove(ret);
-        mn.instructions.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        mn.instructions.add(new LdcInsnNode(mn.name));
-        mn.instructions.add(new LdcInsnNode(1));
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        mn.instructions.add(ret);
-        mn.maxStack = mn.maxStack + 5;
-    }
-
-    private void interceptTerminatedMethod(MethodNode mn, ClassNode cn) {
-        LabelNode l0 = new LabelNode();
-        LabelNode l1 = new LabelNode();
-        LabelNode l2 = new LabelNode();
-        //添加try catch语句
-        mn.tryCatchBlocks.add(new TryCatchBlockNode(l0, l1, l2, "java/lang/Exception"));
-        InsnList inst = new InsnList();
-        inst.add(l0);
-        inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "init", "()V", false));
-        inst.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        inst.add(new LdcInsnNode(mn.name));
-        inst.add(new LdcInsnNode(0));
-        inst.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        mn.instructions.insert(inst);
-        AbstractInsnNode ret = mn.instructions.getLast();
-        mn.instructions.remove(ret);
-        mn.instructions.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        mn.instructions.add(new LdcInsnNode(mn.name));
-        mn.instructions.add(new LdcInsnNode(1));
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "dump",
-                "()Ljava/util/List;", false));
-        //发送线程信息
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess",
-                "(Ljava/util/List;)V", false));
-        mn.instructions.add(l1);
-        mn.instructions.add(ret);
-        mn.instructions.add(l2);
-        //进行异常捕获并抛出
-        mn.instructions.add(new FrameNode(Opcodes.F_FULL, 1, new Object[]{cn.name}, 1, new Object[]{"java/lang/Exception"}));
-//        int varIndex = getParameterSize(mn);
-//        mn.instructions.add(new VarInsnNode(Opcodes.ASTORE, varIndex));
-//        mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varIndex));
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrFailure",
-                "(Ljava/lang/Throwable;)Ljava/lang/RuntimeException;", false));
-        mn.instructions.add(new InsnNode(Opcodes.ATHROW));
-        mn.maxStack = mn.maxStack + 5;
     }
 
     //判断是否为原始类型

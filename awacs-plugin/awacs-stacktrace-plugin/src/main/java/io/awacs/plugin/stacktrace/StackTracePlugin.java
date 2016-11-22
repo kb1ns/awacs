@@ -70,7 +70,7 @@ public class StackTracePlugin implements Plugin {
     }
 
     //发送异常信息
-    public static RuntimeException incrFailure(Throwable e) {
+    public static void incrFailure(Throwable e) {
         logger.info("Exception occur, event fired.");
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
@@ -81,10 +81,6 @@ public class StackTracePlugin implements Plugin {
                 .setVersion(BinaryMessage.C_VERSION)
                 .setBody(report.toJSONString().getBytes())
                 .build());
-        if (e instanceof RuntimeException)
-            return (RuntimeException) e;
-        else
-            return new RuntimeException(e);
     }
 
     @Override
@@ -112,12 +108,6 @@ public class StackTracePlugin implements Plugin {
 
     @Override
     public void boot() {
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                StackTracePlugin.incrFailure(e);
-            }
-        });
         inst.addTransformer(new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
