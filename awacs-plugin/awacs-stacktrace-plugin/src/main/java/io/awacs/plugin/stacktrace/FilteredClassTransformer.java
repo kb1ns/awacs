@@ -28,31 +28,6 @@ import java.util.List;
  */
 class FilteredClassTransformer extends ClassTransformer {
 
-    private String[] filterClassPrefix;
-
-    FilteredClassTransformer(String[] filterClassPrefix) {
-        this.filterClassPrefix = filterClassPrefix;
-    }
-
-    @Override
-    public boolean filterClass(String className) {
-        if (className.startsWith("io/awacs/plugin/")) {
-            return false;
-        } else if (filterClassPrefix == null || filterClassPrefix.length == 0) {
-            return !(className.startsWith("java") ||
-                    className.startsWith("sun") ||
-                    className.startsWith("jdk") ||
-                    className.startsWith("com/sun/") ||
-                    className.startsWith("com/intellij/") ||
-                    className.startsWith("org/"));
-        } else {
-            boolean flag = false;
-            for (String prefix : filterClassPrefix)
-                flag = flag || (className.startsWith(prefix.replaceAll("\\.", "/")));
-            return flag;
-        }
-    }
-
     /**
      * 方法过滤
      * (!接口方法)&&(!抽象方法)&&(!本地方法)&&(!初始化方法)&&(!类初始化方法)&&(!main方法)

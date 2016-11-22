@@ -31,9 +31,6 @@ import java.util.List;
  */
 abstract class ClassTransformer {
 
-    //对类进行过滤
-    public abstract boolean filterClass(String className);
-
     //对方法进行过滤
     protected abstract boolean filterMethod(ClassNode cn, MethodNode mn);
 
@@ -53,48 +50,44 @@ abstract class ClassTransformer {
                 continue;
             }
             boolean terminated = isTerminatedMethod(src);
-            if (!terminated && isGetOrSet(src)) {
-                continue;
-            }
-            //copy exceptions
-            String[] exceptions = null;
-            if (src.exceptions != null) {
-                exceptions = new String[src.exceptions.size()];
-                for (int i = 0; i < src.exceptions.size(); i++) {
-                    exceptions[i] = src.exceptions.get(i).toString();
-                }
-            }
-
-            //declare method
-            MethodNode proxy = new MethodNode(src.access, src.name, src.desc, src.signature, exceptions);
-            appended.add(proxy);
-
-            //copy method annotations
-            List<AnnotationNode> methodAnns = null;
-            if (src.visibleAnnotations != null) {
-                methodAnns = new ArrayList<>(src.visibleAnnotations.size());
-                methodAnns.addAll(src.visibleAnnotations);
-            }
-            proxy.visibleAnnotations = methodAnns;
-
-            //copy parameter annotations
-            List[] parameterAnns = null;
-            if (src.visibleParameterAnnotations != null) {
-                parameterAnns = new List[src.visibleParameterAnnotations.length];
-                System.arraycopy(src.visibleParameterAnnotations, 0, parameterAnns, 0, src.visibleParameterAnnotations.length);
-            }
-            proxy.visibleParameterAnnotations = parameterAnns;
-            //clear origin method's annotation and change name
-            int _slash = cn.name.lastIndexOf('/');
-            //修改原始方法名，删除原始方法的注解
-            src.name = src.name + "_origin_" + cn.name.substring(_slash + 1);
-            src.visibleAnnotations = null;
-            src.visibleLocalVariableAnnotations = null;
 
             if (terminated) {
+                //copy exceptions
+                String[] exceptions = null;
+                if (src.exceptions != null) {
+                    exceptions = new String[src.exceptions.size()];
+                    for (int i = 0; i < src.exceptions.size(); i++) {
+                        exceptions[i] = src.exceptions.get(i).toString();
+                    }
+                }
+                //declare method
+                MethodNode proxy = new MethodNode(src.access, src.name, src.desc, src.signature, exceptions);
+                appended.add(proxy);
+                //copy method annotations
+                List<AnnotationNode> methodAnns = null;
+                if (src.visibleAnnotations != null) {
+                    methodAnns = new ArrayList<>(src.visibleAnnotations.size());
+                    methodAnns.addAll(src.visibleAnnotations);
+                }
+                proxy.visibleAnnotations = methodAnns;
+                //copy parameter annotations
+                List[] parameterAnns = null;
+                if (src.visibleParameterAnnotations != null) {
+                    parameterAnns = new List[src.visibleParameterAnnotations.length];
+                    System.arraycopy(src.visibleParameterAnnotations, 0, parameterAnns, 0, src.visibleParameterAnnotations.length);
+                }
+                proxy.visibleParameterAnnotations = parameterAnns;
+                //clear origin method's annotation and change name
+                int _slash = cn.name.lastIndexOf('/');
+                //修改原始方法名，删除原始方法的注解
+                src.name = src.name + "_origin_" + cn.name.substring(_slash + 1);
+                src.visibleAnnotations = null;
+                src.visibleLocalVariableAnnotations = null;
+
                 transformTerminatedMethod(src, proxy, cn);
+
             } else {
-                transformPlainMethod(src, proxy, cn);
+                transformPlainMethod(src, cn);
             }
         }
         cn.methods.addAll(appended);
@@ -333,98 +326,27 @@ abstract class ClassTransformer {
      * 3、调用StackFrames.push方法(标示为1)：定义常量到操作数，然后调用方法
      * 4、调用返回方法：根据返回值添加返回指令
      */
-    private void transformPlainMethod(MethodNode origin, MethodNode proxy, ClassNode owner) {
-        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
-        proxy.instructions.add(new LdcInsnNode(proxy.name));
-        proxy.instructions.add(new LdcInsnNode(0));
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
+    private void transformPlainMethod(MethodNode mn, ClassNode cn) {
+        InsnList before = new InsnList();
+        before.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        before.add(new LdcInsnNode(mn.name));
+        before.add(new LdcInsnNode(0));
+        before.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        int varIndex = 0;
-        if ((proxy.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
-            proxy.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            varIndex = 1;
-        }
-        List<String> parameters = resolveParameters(proxy.desc);
-        for (String param : parameters) {
-            VarInsnNode insnNode;
-            switch (param) {
-                case "J":
-                    insnNode = new VarInsnNode(Opcodes.LLOAD, varIndex);
-                    varIndex += 2;
-                    break;
-                case "D":
-                    insnNode = new VarInsnNode(Opcodes.DLOAD, varIndex);
-                    varIndex += 2;
-                    break;
-                case "F":
-                    insnNode = new VarInsnNode(Opcodes.FLOAD, varIndex++);
-                    break;
-                case "I":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "S":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "Z":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "B":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "C":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                default:
-                    insnNode = new VarInsnNode(Opcodes.ALOAD, varIndex++);
-                    break;
+        mn.instructions.insert(before);
+        InsnList after = new InsnList();
+        after.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        after.add(new LdcInsnNode(mn.name));
+        after.add(new LdcInsnNode(1));
+        after.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
+                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
+        for (int i = 0; i < mn.instructions.size(); i++) {
+            int opcode = mn.instructions.get(i).getOpcode();
+            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
+                mn.instructions.insertBefore(mn.instructions.get(i), after);
             }
-            proxy.instructions.add(insnNode);
         }
-        if ((proxy.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC) {
-            proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, origin.name, origin.desc, false));
-        } else {
-            proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, origin.name, origin.desc, false));
-        }
-        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
-        proxy.instructions.add(new LdcInsnNode(proxy.name));
-        proxy.instructions.add(new LdcInsnNode(1));
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        String returnType = origin.desc.substring(origin.desc.indexOf(')') + 1);
-        switch (returnType) {
-            case "J":
-                proxy.instructions.add(new InsnNode(Opcodes.LRETURN));
-                break;
-            case "D":
-                proxy.instructions.add(new InsnNode(Opcodes.DRETURN));
-                break;
-            case "F":
-                proxy.instructions.add(new InsnNode(Opcodes.FRETURN));
-                break;
-            case "I":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "S":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "C":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "B":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "Z":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "V":
-                proxy.instructions.add(new InsnNode(Opcodes.RETURN));
-                break;
-            default:
-                proxy.instructions.add(new InsnNode(Opcodes.ARETURN));
-                break;
-        }
-        proxy.maxLocals = Math.max(varIndex, 2);
-        proxy.maxStack = Math.max(varIndex, 5);
+        mn.maxStack = mn.maxStack + 5;
     }
 
 }
