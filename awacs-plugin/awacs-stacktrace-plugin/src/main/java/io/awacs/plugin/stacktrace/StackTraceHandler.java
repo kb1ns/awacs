@@ -24,6 +24,8 @@ import io.awacs.core.EnableInjection;
 import io.awacs.core.InitializationException;
 import io.awacs.core.PluginHandler;
 import io.awacs.core.transport.Message;
+import io.awacs.core.util.LoggerPlus;
+import io.awacs.core.util.LoggerPlusFactory;
 import io.awacs.repository.EmailRepository;
 import io.awacs.repository.MailForm;
 import io.awacs.repository.MongoRepository;
@@ -41,6 +43,8 @@ import java.util.Stack;
  */
 @EnableInjection
 public class StackTraceHandler implements PluginHandler {
+
+    private static final LoggerPlus logger = LoggerPlusFactory.getLogger(PluginHandler.class);
 
     @Resource
     private EmailRepository emailRepository;
@@ -68,7 +72,9 @@ public class StackTraceHandler implements PluginHandler {
 
     @Override
     public Message handle(Message message, InetSocketAddress address) {
-        JSONObject json = JSONObject.parseObject(new String(message.body()));
+        String content = new String(message.body());
+        logger.debug(content);
+        JSONObject json = JSONObject.parseObject(content);
         json.put("host", address.getAddress().getHostAddress());
         json.put("pid", message.getPid());
         json.put("timestamp", message.getTimestamp());
@@ -145,5 +151,10 @@ public class StackTraceHandler implements PluginHandler {
             if (excludes != null)
                 excludeExceptionPrefixes = Arrays.asList(excludes.split(","));
         }
+    }
+
+    public static void main(String[] args) {
+        JSONObject obj = JSONObject.parseObject("{\"stack\":[{\"caller\":\"com.letvpicture.backend.act.api.controller.UserInfoController#videoList\",\"flag\":0,\"timestamp\":1479721335804},{\"caller\":\"com.letvpicture.backend.act.api.controller.UserInfoController#parseParmToString\",\"flag\":0,\"timestamp\":1479721335804},{\"caller\":\"com.letvpicture.backend.act.api.controller.UserInfoController#parseParmToString\",\"flag\":1,\"timestamp\":1479721335804},{\"caller\":\"com.letvpicture.common.client.HttpClient#create\",\"flag\":0,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.common.client.HttpClient#init\",\"flag\":0,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.common.client.HttpClient#init\",\"flag\":1,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.common.client.HttpClient#create\",\"flag\":1,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.backend.act.api.controller.UserInfoController#parseParmToString\",\"flag\":0,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.backend.act.api.controller.UserInfoController#parseParmToString\",\"flag\":1,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.common.client.HttpClient#doRequest\",\"flag\":0,\"timestamp\":1479721335805},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#create\",\"flag\":0,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#create\",\"flag\":1,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#ret\",\"flag\":0,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#ret\",\"flag\":1,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#msg\",\"flag\":0,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#msg\",\"flag\":1,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#body\",\"flag\":0,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#body\",\"flag\":1,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#build\",\"flag\":0,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.common.bean.RspBean$Builder#build\",\"flag\":1,\"timestamp\":1479721335819},{\"caller\":\"com.letvpicture.backend.act.api.controller.UserInfoController#videoList\",\"flag\":1,\"timestamp\":1479721335819}],\"thread\":\"http-apr-9000-exec-15\"}");
+        System.out.println(buildCallerStack(obj.getJSONArray("stack")).toJSONString());
     }
 }
