@@ -300,17 +300,24 @@ abstract class ClassTransformer {
         before.add(new LdcInsnNode(0));
         before.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        mn.instructions.insert(before);
-        InsnList after = new InsnList();
-        after.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        after.add(new LdcInsnNode(mn.name));
-        after.add(new LdcInsnNode(1));
-        after.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
+        InsnList end = new InsnList();
+        end.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        end.add(new LdcInsnNode(mn.name));
+        end.add(new LdcInsnNode(1));
+        end.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
+
+        List<AbstractInsnNode> insts = new LinkedList<>();
         for (int i = 0; i < mn.instructions.size(); i++) {
             int opcode = mn.instructions.get(i).getOpcode();
             if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
-                mn.instructions.insertBefore(mn.instructions.get(i), after);
+                insts.add(mn.instructions.get(i));
+            }
+        }
+        if (!insts.isEmpty()) {
+            mn.instructions.insert(before);
+            for (AbstractInsnNode node : insts) {
+                mn.instructions.insertBefore(node, end);
             }
         }
         mn.maxStack = mn.maxStack + 5;
