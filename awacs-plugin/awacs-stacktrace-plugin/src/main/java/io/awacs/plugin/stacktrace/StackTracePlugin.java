@@ -27,8 +27,8 @@ import io.awacs.core.util.LoggerPlusFactory;
 import io.awacs.protocol.binary.BinaryMessage;
 import io.awacs.protocol.binary.ByteKey;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.ClassNode;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -48,7 +48,7 @@ public class StackTracePlugin implements Plugin {
 
     private static Key<?> key;
 
-    private static ClassTransformer ctf;
+    private static ClassFilter classFilter;
 
     private Instrumentation inst;
 
@@ -94,7 +94,7 @@ public class StackTracePlugin implements Plugin {
             key = ByteKey.getKey(descriptor.getKeyClass(), descriptor.getKeyValue());
             String prefixes = descriptor.getProperties().get("packagePrefix");
             String[] filters = prefixes == null ? null : prefixes.split(",");
-            ctf = new FilteredClassTransformer(filters);
+            classFilter = new ClassFilter(filters);
         } catch (NoSuchKeyTypeException e) {
             e.printStackTrace();
         }
@@ -122,17 +122,13 @@ public class StackTracePlugin implements Plugin {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
                 try {
-                    if (loader == null || className == null)
-                        return classfileBuffer;
-                    if (!ctf.filterClass(className)) {
+                    if (!classFilter.doFilter(className)) {
                         return classfileBuffer;
                     }
-                    ClassNode cn = new ClassNode();
-                    ClassReader cr = new ClassReader(classfileBuffer);
-                    cr.accept(cn, ClassReader.SKIP_DEBUG);
-                    ctf.visit(cn);
                     ClassWriter cw = new ClassWriter(0);
-                    cn.accept(cw);
+                    ClassVisitor cv = new StackTraceClassAdaptor(cw);
+                    ClassReader cr = new ClassReader(classfileBuffer);
+                    cr.accept(cv, 0);
                     return cw.toByteArray();
                 } catch (Exception e) {
                     e.printStackTrace();
