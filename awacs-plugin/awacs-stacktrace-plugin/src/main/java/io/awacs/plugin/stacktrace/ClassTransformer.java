@@ -81,6 +81,7 @@ abstract class ClassTransformer {
                 int _slash = cn.name.lastIndexOf('/');
                 //修改原始方法名，删除原始方法的注解
                 src.name = src.name + "_origin_" + cn.name.substring(_slash + 1);
+                src.access = src.access & ~Opcodes.ACC_PUBLIC | Opcodes.ACC_PRIVATE;
                 src.visibleAnnotations = null;
                 src.visibleLocalVariableAnnotations = null;
                 transformTerminatedMethod(src, proxy, cn);
@@ -88,6 +89,7 @@ abstract class ClassTransformer {
                 transformPlainMethod(src, cn);
             }
         }
+        cn.methods.addAll(appended);
     }
 
     //判断是否为原始类型
@@ -138,6 +140,7 @@ abstract class ClassTransformer {
         else
             throw new IllegalDescriptorException(s);
     }
+
     protected boolean isMainMethod(MethodNode mn) {
         return mn.name.equals("main") && mn.desc.equals("([Ljava/lang/String;)V") &&
                 (mn.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC;
