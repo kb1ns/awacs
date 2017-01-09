@@ -26,7 +26,7 @@ import io.awacs.core.transport.Message;
  */
 public class BinaryMessage implements Message {
 
-    public static final int MAX_PACKET_SIZE = 1 << 31;
+    public static final int MAX_PACKET_SIZE = Integer.MAX_VALUE;
 
     private ByteKey key;
 
