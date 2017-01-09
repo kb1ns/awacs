@@ -21,11 +21,12 @@ import io.awacs.core.transport.Key;
 import io.awacs.core.transport.Message;
 
 /**
+ *
  * Created by pixyonly on 8/23/16.
  */
 public class BinaryMessage implements Message {
 
-    public static final int MAX_PACKET_SIZE = 1 << 19;
+    public static final int MAX_PACKET_SIZE = 1 << 31;
 
     private ByteKey key;
 

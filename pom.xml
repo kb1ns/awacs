@@ -21,7 +21,7 @@
 
     <groupId>io.awacs</groupId>
     <artifactId>awacs-root</artifactId>
-    <version>0.1.7</version>
+    <version>0.1.8</version>
     <modules>
         <module>awacs-core</module>
         <module>awacs-protocol</module>
@@ -33,15 +33,15 @@
     </modules>
 
     <scm>
-        <connection>scm:git:https://github.com/archerfeel/AWACS.git</connection>
-        <url>https://github.com/archerfeel/AWACS</url>
-        <developerConnection>scm:git:https://github.com/archerfeel/AWACS.git</developerConnection>
+        <connection>scm:git:https://github.com/archerfeel/awacs.git</connection>
+        <url>https://github.com/ArcherFeel/awacs</url>
+        <developerConnection>scm:git:https://github.com/ArcherFeel/awacs.git</developerConnection>
     </scm>
     <packaging>pom</packaging>
 
     <name>AWACS</name>
     <description>A Non-intrusive APM for Java Platform.</description>
-    <url>https://github.com/archerfeel/AWACS</url>
+    <url>https://github.com/ArcherFeel/awacs</url>
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -80,7 +80,7 @@
         </developer>
     </developers>
     <issueManagement>
-        <url>https://github.com/archerfeel/AWACS/issues</url>
+        <url>https://github.com/ArcherFeel/awacs/issues</url>
     </issueManagement>
 
     <build>

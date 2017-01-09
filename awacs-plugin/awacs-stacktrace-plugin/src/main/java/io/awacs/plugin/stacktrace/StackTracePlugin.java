@@ -76,6 +76,7 @@ public class StackTracePlugin implements Plugin {
         report.put("thread", Thread.currentThread().getName());
         report.put("stack", e.getStackTrace());
         report.put("exception", e.getClass().getCanonicalName());
+        report.put("message", e.getMessage());
         MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
                 .setKey(key)
                 .setVersion(BinaryMessage.C_VERSION)
