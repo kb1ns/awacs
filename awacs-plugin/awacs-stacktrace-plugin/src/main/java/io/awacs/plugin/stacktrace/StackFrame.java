@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 AWACS Project.
+ * Copyright 2016-2017 AWACS Project.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,10 @@ package io.awacs.plugin.stacktrace;
  */
 public class StackFrame {
 
+    private final static int METHOD_ENTER = 0;
+
+    private final static int METHOD_LEFT = 1;
+
     private String caller;
 
     private long timestamp;
@@ -32,6 +36,10 @@ public class StackFrame {
         this.caller = clazz + "#" + method;
         this.timestamp = System.currentTimeMillis();
         this.flag = flag;
+    }
+
+    String id() {
+        return caller + "_" + flag;
     }
 
     public String getCaller() {

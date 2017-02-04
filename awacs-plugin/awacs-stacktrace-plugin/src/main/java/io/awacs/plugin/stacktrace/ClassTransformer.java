@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 AWACS Project.
+ * Copyright 2016-2017 AWACS Project.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,11 +85,15 @@ abstract class ClassTransformer {
                 src.visibleAnnotations = null;
                 src.visibleLocalVariableAnnotations = null;
                 transformTerminatedMethod(src, proxy, cn);
-            } else {
+            } else if (!isTinyMethod(src)) {
                 transformPlainMethod(src, cn);
             }
         }
         cn.methods.addAll(appended);
+    }
+
+    private static boolean isTinyMethod(MethodNode method) {
+        return method.instructions.size() < 4 || method.maxStack < 2;
     }
 
     //判断是否为原始类型
@@ -236,9 +240,9 @@ abstract class ClassTransformer {
                 "(Ljava/lang/String;Ljava/lang/String;I)V", false));
         //方法线程信息获取并清除
         proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "dump",
-                "()Ljava/util/List;", false));
+                "()Ljava/util/Collection;", false));
         //发送线程信息
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess", "(Ljava/util/List;)V", false));
+        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess", "(Ljava/util/Collection;)V", false));
         proxy.instructions.add(l1);
         //判断返回值类型
         String returnType = origin.desc.substring(origin.desc.indexOf(')') + 1);

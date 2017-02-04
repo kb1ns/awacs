@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 AWACS Project.
+ * Copyright 2016-2017 AWACS Project.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package io.awacs.plugin.stacktrace;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by pixyonly on 16/10/25.
@@ -28,24 +25,29 @@ import java.util.Map;
 public class StackFrames {
 
     //为每一个线程保存一个线程栈信息列表
-    private static Map<Long, List<StackFrame>> entry = new HashMap<>();
+    private static Map<Long, Map<String, StackFrame>> entry = new HashMap<>();
 
     //初始化当前线程的线程栈信息列表：在起始跟踪方法的开始调用
     public static void init() {
-        entry.put(Thread.currentThread().getId(), new LinkedList<StackFrame>());
+        entry.put(Thread.currentThread().getId(), new LinkedHashMap<String, StackFrame>());
     }
 
     //保存当前线程的线程栈信息(包含结束和开始信息，通过flag字段来区分)到线程栈信息列表
     public static void push(String clazz, String method, int flag) {
         Long id = Thread.currentThread().getId();
         if (entry.get(id) != null) {
-            entry.get(id).add(new StackFrame(clazz, method, flag));
+            StackFrame frame = new StackFrame(clazz, method, flag);
+            if (flag == 0) {
+                entry.get(id).putIfAbsent(frame.id(), frame);
+            } else if (flag == 1) {
+                entry.get(id).put(frame.id(), frame);
+            }
         }
     }
 
     //清除当前线程的线程栈信息列表：在起始跟踪方法的结束调用
-    public static List dump() {
-        return entry.remove(Thread.currentThread().getId());
+    public static Collection dump() {
+        return entry.remove(Thread.currentThread().getId()).values();
     }
 
 }
