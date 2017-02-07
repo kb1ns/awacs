@@ -1,5 +1,5 @@
 /**
- * Copyright 2016-2017 AWACS Project.
+ * Copyright 2016 AWACS Project.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public class StackTracePlugin implements Plugin {
     //发送线程的堆栈信息
     public static void incrAccess(Collection stack) {
         logger.debug("Request complete, event fired.");
+        //TODO reset thread caller stack
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
         report.put("stack", stack);
@@ -72,6 +73,7 @@ public class StackTracePlugin implements Plugin {
     //发送异常信息
     public static void incrFailure(Throwable e) {
         logger.info("Exception occur, event fired.");
+        //TODO reset thread caller stack
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
         report.put("stack", e.getStackTrace());

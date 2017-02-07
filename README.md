@@ -1,5 +1,5 @@
 # AWACS
-[![Build Status](https://travis-ci.org/ArcherFeel/awacs.svg?branch=master)](https://travis-ci.org/ArcherFeel/awacs)
+[![Build Status](https://travis-ci.org/ArcherFeel/AWACS.svg?branch=master)](https://travis-ci.org/ArcherFeel/awacs)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/ArcherFeel/awacs/blob/master/LICENSE)
 [![Version](https://img.shields.io/badge/AWACS-0.1.8-orange.svg)](https://github.com/ArcherFeel/awacs/tree/0.1.8)
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2016-2017 AWACS Project.
+ * Copyright 2016 AWACS Project.
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class StackTraceHandler implements PluginHandler {
             seq.remove(0);
             stack.push(head);
             JSONObject rec = null;
-            while (!stack.isEmpty()) {
+            while (!stack.isEmpty() && !seq.isEmpty()) {
                 JSONObject _head = seq.getJSONObject(0);
                 seq.remove(0);
                 JSONObject top = stack.peek();
@@ -131,7 +131,7 @@ public class StackTraceHandler implements PluginHandler {
             }
             return rec;
         } catch (Exception e) {
-            throw new IllegalArgumentException(seq.toJSONString());
+            throw new IllegalArgumentException(seq.toJSONString(), e);
         }
     }
 
@@ -152,5 +152,6 @@ public class StackTraceHandler implements PluginHandler {
                 excludeExceptionPrefixes = Arrays.asList(excludes.split(","));
         }
     }
+
 
 }

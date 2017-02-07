@@ -106,6 +106,10 @@ class NettyClient implements Client<BinaryMessage> {
     }
 
     public void finalize() {
+        try {
+            super.finalize();
+        } catch (Throwable ignored) {
+        }
         stop();
     }
 
