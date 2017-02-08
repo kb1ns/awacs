@@ -24,7 +24,7 @@ import org.objectweb.asm.tree.ClassNode;
  *
  * Created by pixyonly on 16/11/22.
  */
-public class StackTraceClassAdaptor extends ClassNode {
+class StackTraceClassAdaptor extends ClassNode {
 
     public StackTraceClassAdaptor(ClassVisitor cv) {
         super(Opcodes.ASM5);

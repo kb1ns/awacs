@@ -1,3 +1,19 @@
+/**
+ * Copyright 2016 AWACS Project.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.awacs.plugin.stacktrace;
 
 import java.util.LinkedHashMap;
@@ -16,8 +32,6 @@ public class CallElement {
 
     private int callCounter = 1;
 
-    private transient boolean matchExpected = true;
-
     private long timestamp;
 
     private long elapsedTime = 0l;
@@ -35,16 +49,16 @@ public class CallElement {
 
     public CallElement end() {
         this.elapsedTime = System.currentTimeMillis() - this.timestamp;
-        this.matchExpected = false;
         return this;
     }
 
-    public void callSub(CallElement callee) {
+    public CallElement callSub(CallElement callee) {
         CallElement yetValue = subElements.putIfAbsent(callee.id(), callee);
         if (yetValue != null) {
             yetValue.callCounter++;
-            yetValue.matchExpected = true;
+            return yetValue;
         }
+        return callee;
     }
 
     @Override

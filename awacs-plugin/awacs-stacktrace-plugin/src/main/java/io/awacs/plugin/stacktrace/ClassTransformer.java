@@ -157,11 +157,10 @@ abstract class ClassTransformer {
     /**
      * 修改起始代理方法，步骤：
      * 1、添加try catch语句                 try{
-     * 2、初始化当前线程的线程栈信息列表        io.awacs.plugin.stacktrace.StackFrames.init();
-     * 3、保存当前线程的开始信息                io.awacs.plugin.stacktrace.StackFrames.push(className,methodName,0);
+     * 2、初始化当前线程的线程栈信息列表        io.awacs.plugin.stacktrace.CallStack.initStack();
+     * 3、保存当前线程的开始信息                io.awacs.plugin.stacktrace.StackFrames.methodEnter(className,methodName);
      * 4、调用原始方法                          Object val = methodName_origin_className(args);
-     * 5、保存当前线程的结束信息                io.awacs.plugin.stacktrace.StackFrames.push(className,methodName,1);
-     * 5、清除当前线程的线程栈信息列表          List list = io.awacs.plugin.stacktrace.StackFrames.dump();
+     * 5、保存当前线程的结束信息                io.awacs.plugin.stacktrace.StackFrames.methodQuit();
      * 7、发送当前线程的线程栈信息列表          io.awacs.plugin.stacktrace.StackTracePlugin.incrAccess(list);
      * 8、调用返回方法                          return val;
      * }catch(java.lang.Exception e){
@@ -177,13 +176,13 @@ abstract class ClassTransformer {
         proxy.tryCatchBlocks.add(new TryCatchBlockNode(l0, l1, l2, "java/lang/Exception"));
         proxy.instructions.add(l0);
         //其实方法初始化方法调用
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "init", "()V", false));
+        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
         proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
         proxy.instructions.add(new LdcInsnNode(proxy.name));
-        proxy.instructions.add(new LdcInsnNode(0));
+//        proxy.instructions.add(new LdcInsnNode(0));
         //方法开始调用
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
+        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
+                "(Ljava/lang/String;Ljava/lang/String;)V", false));
         int varIndex = 0;//本地变量区的游标，用于计算最终大小
         //判断是否为静态方法,如果不是静态方法还需要加载this到操作数区
         if ((proxy.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
@@ -232,18 +231,17 @@ abstract class ClassTransformer {
             proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, origin.name, origin.desc, false));
         else
             proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, origin.name, origin.desc, false));
-        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
-        proxy.instructions.add(new LdcInsnNode(proxy.name));
-        proxy.instructions.add(new LdcInsnNode(1));
+//        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
+//        proxy.instructions.add(new LdcInsnNode(proxy.name));
+//        proxy.instructions.add(new LdcInsnNode(1));
         //方法结束调用
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
-        //TODO 合并:方法线程信息获取并清除
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "dump",
-                "()Ljava/util/Collection;", false));
+        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
+                "()V", false));
+//        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "dump",
+//                "()Ljava/util/Collection;", false));
         //发送线程信息
         proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess",
-                "(Ljava/util/Collection;)V", false));
+                "()V", false));
         proxy.instructions.add(l1);
         //判断返回值类型
         String returnType = origin.desc.substring(origin.desc.indexOf(')') + 1);
@@ -288,29 +286,23 @@ abstract class ClassTransformer {
         proxy.instructions.add(new VarInsnNode(Opcodes.ALOAD, varIndex));
         proxy.instructions.add(new InsnNode(Opcodes.ATHROW));
         proxy.maxLocals = varIndex + 1;
-        proxy.maxStack = Math.max(varIndex, 5);
+        proxy.maxStack = Math.max(varIndex, 4);
     }
 
-    /**
-     * 修改非起始代理方法，步骤：
-     * 1、调用StackFrames.push方法(标示为0)：定义常量到操作数，然后调用方法
-     * 2、调用原始方法：从本地变量去装载this对象和参数到操作数去，然后调用原始方法
-     * 3、调用StackFrames.push方法(标示为1)：定义常量到操作数，然后调用方法
-     * 4、调用返回方法：根据返回值添加返回指令
-     */
+
     private void transformPlainMethod(MethodNode mn, ClassNode cn) {
         InsnList before = new InsnList();
         before.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
         before.add(new LdcInsnNode(mn.name));
-        before.add(new LdcInsnNode(0));
-        before.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
+//        before.add(new LdcInsnNode(0));
+        before.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
+                "(Ljava/lang/String;Ljava/lang/String;)V", false));
         InsnList end = new InsnList();
-        end.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        end.add(new LdcInsnNode(mn.name));
-        end.add(new LdcInsnNode(1));
-        end.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackFrames", "push",
-                "(Ljava/lang/String;Ljava/lang/String;I)V", false));
+//        end.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+//        end.add(new LdcInsnNode(mn.name));
+//        end.add(new LdcInsnNode(1));
+        end.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
+                "()V", false));
 
         List<AbstractInsnNode> insts = new LinkedList<>();
         for (int i = 0; i < mn.instructions.size(); i++) {
@@ -325,7 +317,7 @@ abstract class ClassTransformer {
                 mn.instructions.insertBefore(node, end);
             }
         }
-        mn.maxStack = mn.maxStack + 5;
+        mn.maxStack = mn.maxStack + 2;
     }
 
 }

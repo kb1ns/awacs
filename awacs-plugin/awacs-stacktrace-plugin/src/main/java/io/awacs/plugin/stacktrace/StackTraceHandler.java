@@ -17,7 +17,6 @@
 package io.awacs.plugin.stacktrace;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.awacs.core.Configuration;
 import io.awacs.core.EnableInjection;
@@ -36,7 +35,6 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Created by pixyonly on 16/10/26.
@@ -95,45 +93,15 @@ public class StackTraceHandler implements PluginHandler {
                     emailRepository.send(mail);
                 }
             }
-        } else {
-            JSONArray methodCallChain = json.getJSONArray("stack");
-            json.put("stack", buildCallerStack(methodCallChain));
         }
         try {
-            mongoRepository.save("stacktrace_plugin", Document.parse(json.toJSONString()));
+            mongoRepository.save("stacktrace", Document.parse(json.toJSONString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private static JSONObject buildCallerStack(JSONArray seq) {
-        try {
-            Stack<JSONObject> stack = new Stack<>();
-            JSONObject head = seq.getJSONObject(0);
-            seq.remove(0);
-            stack.push(head);
-            JSONObject rec = null;
-            while (!stack.isEmpty() && !seq.isEmpty()) {
-                JSONObject _head = seq.getJSONObject(0);
-                seq.remove(0);
-                JSONObject top = stack.peek();
-                top.putIfAbsent("methods", new JSONArray());
-                if (_head.getIntValue("flag") == 0) {
-                    top.getJSONArray("methods").add(_head);
-                    stack.push(_head);
-                } else {
-                    top.remove("flag");
-                    top.put("elapsedTime", _head.getLongValue("timestamp") - top.getLongValue("timestamp"));
-                    top.remove("timestamp");
-                    rec = stack.pop();
-                }
-            }
-            return rec;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(seq.toJSONString(), e);
-        }
-    }
 
     @Override
     public void init(Configuration configuration) throws InitializationException {
