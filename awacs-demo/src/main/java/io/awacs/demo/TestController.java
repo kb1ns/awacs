@@ -55,6 +55,7 @@ public class TestController {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 4; i++) {
                 int r = random.nextInt(36);
+                bis2();
                 if (r < 10) {
                     sb.append((char) ('0' + r));
                 } else {
@@ -85,7 +86,7 @@ public class TestController {
 
     public void bis2() {
         try {
-            Thread.sleep(500);
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

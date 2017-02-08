@@ -30,6 +30,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.EventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +56,8 @@ public final class MessageReportServer implements Server, Configurable {
 
     private Plugins plugins;
 
+    private EventExecutorGroup businessGroup;
+
     public void setPlugins(Plugins plugins) {
         this.plugins = plugins;
     }
@@ -65,14 +69,11 @@ public final class MessageReportServer implements Server, Configurable {
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.DEBUG))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
-
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        //可更换
                         ch.pipeline().addLast(new BinaryMessageDecoder());
                         ch.pipeline().addLast(new BinaryMessageEncoder());
-                        //
-                        ch.pipeline().addLast(new MessageReportRouter(MessageReportServer.this));
+                        ch.pipeline().addLast(businessGroup, new MessageReportRouter(MessageReportServer.this));
                     }
                 })
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -87,6 +88,7 @@ public final class MessageReportServer implements Server, Configurable {
     public void stop() {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
+        businessGroup.shutdownGracefully();
     }
 
 
@@ -101,6 +103,7 @@ public final class MessageReportServer implements Server, Configurable {
         int workerCore = Integer.parseInt(serverConfig.getOrDefault(Configurations.TCP_WORKER_CORE, Configurations.DEFAULT_TCP_WORKER_CORE));
         boss = new NioEventLoopGroup(bossCore);
         worker = new NioEventLoopGroup(workerCore);
+        businessGroup = new DefaultEventExecutorGroup(16);
     }
 
     /**
@@ -119,7 +122,6 @@ public final class MessageReportServer implements Server, Configurable {
                 throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
             PluginHandler handler = owner.plugins.getPluginHandler(message.getKey());
-            //TODO 交由线程组执行
             Message ret = handler.handle(message, address);
             if (ret == null) {
                 logger.debug("plugin method returns void.");

@@ -1,3 +1,8 @@
+## 0.1.9 (Final version of 0.1.x)
+
+- compress report message
+- using executor in awacs server
+
 ## 0.1.6 (2016-11-20)
 
 - support Dubbo
