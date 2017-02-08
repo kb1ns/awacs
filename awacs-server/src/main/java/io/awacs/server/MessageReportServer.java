@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 AWACS Project.
+ * Copyright 2016-2017 AWACS Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.net.InetSocketAddress;
 
 
 /**
+ *
  * Created by pixyonly on 8/24/16.
  */
 public final class MessageReportServer implements Server, Configurable {
@@ -118,6 +119,7 @@ public final class MessageReportServer implements Server, Configurable {
                 throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
             PluginHandler handler = owner.plugins.getPluginHandler(message.getKey());
+            //TODO 交由线程组执行
             Message ret = handler.handle(message, address);
             if (ret == null) {
                 logger.debug("plugin method returns void.");

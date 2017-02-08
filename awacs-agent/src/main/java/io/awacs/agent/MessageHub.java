@@ -19,25 +19,21 @@ package io.awacs.agent;
 
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.Subscribe;
-import io.awacs.core.transport.Message;
 import io.awacs.core.transport.ResponseHandler;
 import io.awacs.protocol.binary.BinaryMessage;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ *
  * Created by pixyonly on 16/9/12.
  */
 public enum MessageHub {
 
     instance {
-
     };
 
     private NettyClient nettyClient;
-
-    private LinkedBlockingQueue<Message> mq;
 
     private AsyncEventBus eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
 

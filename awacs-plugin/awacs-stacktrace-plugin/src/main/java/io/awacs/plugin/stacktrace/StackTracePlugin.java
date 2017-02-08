@@ -34,7 +34,6 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
-import java.util.List;
 
 /**
  * Created by pixyonly on 16/10/25.
@@ -57,21 +56,28 @@ public class StackTracePlugin implements Plugin {
     }
 
     //发送线程的堆栈信息
-    public static void incrAccess(List stack) {
-        logger.debug("Normal access, event fired.");
-        JSONObject report = new JSONObject();
-        report.put("thread", Thread.currentThread().getName());
-        report.put("stack", stack);
+    public static void incrAccess() {
+        logger.debug("Request complete, event fired.");
+        String report = buildAccessReport(CallStack.reset());
         MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
                 .setKey(key)
                 .setVersion(BinaryMessage.C_VERSION)
-                .setBody(report.toJSONString().getBytes())
+                .setBody(report.getBytes())
                 .build());
+    }
+
+    private static String buildAccessReport(CallElement root) {
+        return "{\"thread\":\""
+                + Thread.currentThread().getName()
+                + "\",\"stack\":"
+                + root
+                + "}";
     }
 
     //发送异常信息
     public static void incrFailure(Throwable e) {
         logger.info("Exception occur, event fired.");
+        CallStack.reset();
         JSONObject report = new JSONObject();
         report.put("thread", Thread.currentThread().getName());
         report.put("stack", e.getStackTrace());
