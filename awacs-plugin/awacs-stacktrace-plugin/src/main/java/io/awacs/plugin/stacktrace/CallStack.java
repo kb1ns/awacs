@@ -44,7 +44,10 @@ public class CallStack {
         Deque<CallElement> stack = roots.get(Thread.currentThread().getId());
         if (stack != null && !stack.isEmpty()) {
             if (stack.size() > 1) {
-                stack.pop().end();
+                CallElement completed = stack.pop().end();
+                if (completed.isNoneCost()) {
+                    stack.element().removeSub(completed.id());
+                }
             } else {
                 stack.element().end();
             }

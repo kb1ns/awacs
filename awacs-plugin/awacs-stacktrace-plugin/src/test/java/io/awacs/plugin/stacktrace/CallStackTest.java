@@ -20,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- *
  * Created by pixyonly on 2/7/17.
  */
 public class CallStackTest {
@@ -48,6 +47,7 @@ public class CallStackTest {
             CallStack.methodEnter("io/awacs/plugin/stacktrace/CallStackTest$Stub0", "stubMethod0");
             stubMethod1();
             stubMethod3();
+            stubMethod4();
             CallStack.methodQuit();
         }
 
@@ -57,6 +57,7 @@ public class CallStackTest {
                 if (i % 2 == 0)
                     stubMethod2();
             }
+            stubMethod4();
             CallStack.methodQuit();
         }
 
@@ -79,6 +80,10 @@ public class CallStackTest {
                 e.printStackTrace();
             }
             CallStack.methodQuit();
+        }
+
+        public void stubMethod4() {
+
         }
     }
 }

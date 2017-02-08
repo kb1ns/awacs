@@ -34,7 +34,7 @@ public class CallElement {
 
     private long timestamp;
 
-    private long elapsedTime = 0l;
+    private long elapsedTime = -1l;
 
     CallElement(String clazz, String method) {
         this.clazz = clazz;
@@ -52,6 +52,10 @@ public class CallElement {
         return this;
     }
 
+    public boolean isNoneCost() {
+        return this.elapsedTime == 0;
+    }
+
     public CallElement callSub(CallElement callee) {
         CallElement yetValue = subElements.putIfAbsent(callee.id(), callee);
         if (yetValue != null) {
@@ -59,6 +63,10 @@ public class CallElement {
             return yetValue;
         }
         return callee;
+    }
+
+    public void removeSub(String id) {
+        subElements.remove(id);
     }
 
     @Override
