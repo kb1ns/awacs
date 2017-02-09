@@ -36,7 +36,7 @@ public class CallStackTest {
         CallStack.initStack();
         CallStack.methodEnter("io/awacs/plugin/stacktrace/CallStackTest", "test");
         stub1.stubMethod0();
-        CallStack.methodQuit();
+        CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest", "test");
         System.out.println(CallStack.reset());
     }
 
@@ -47,8 +47,9 @@ public class CallStackTest {
             CallStack.methodEnter("io/awacs/plugin/stacktrace/CallStackTest$Stub0", "stubMethod0");
             stubMethod1();
             stubMethod3();
-            stubMethod4();
-            CallStack.methodQuit();
+            stubMethod4(4);
+            stubMethod4(-5);
+            CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest$Stub0", "stubMethod0");
         }
 
         public void stubMethod1() {
@@ -57,8 +58,8 @@ public class CallStackTest {
                 if (i % 2 == 0)
                     stubMethod2();
             }
-            stubMethod4();
-            CallStack.methodQuit();
+            stubMethod4(1);
+            CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest$Stub1", "stubMethod1");
         }
 
         public void stubMethod2() {
@@ -69,7 +70,7 @@ public class CallStackTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            CallStack.methodQuit();
+            CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest$Stub2", "stubMethod2");
         }
 
         public void stubMethod3() {
@@ -79,11 +80,17 @@ public class CallStackTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            CallStack.methodQuit();
+            CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest$Stub3", "stubMethod3");
         }
 
-        public void stubMethod4() {
-
+        public int stubMethod4(int i) {
+            CallStack.methodEnter("io/awacs/plugin/stacktrace/CallStackTest$Stub4", "stubMethod4");
+            if (i % 2 == 0) {
+                CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest$Stub4", "stubMethod4");
+                return 1;
+            }
+            CallStack.methodQuit("io/awacs/plugin/stacktrace/CallStackTest$Stub4", "stubMethod4");
+            return -1;
         }
     }
 }

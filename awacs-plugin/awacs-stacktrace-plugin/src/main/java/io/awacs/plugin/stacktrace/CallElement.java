@@ -34,7 +34,7 @@ public class CallElement {
 
     private long timestamp;
 
-    private long elapsedTime = -1l;
+    private long elapsedTime;
 
     CallElement(String clazz, String method) {
         this.clazz = clazz;
@@ -53,14 +53,14 @@ public class CallElement {
     }
 
     public boolean isNoneCost() {
-        return this.elapsedTime == 0;
+        return this.elapsedTime <= 1;
     }
 
     public CallElement callSub(CallElement callee) {
-        CallElement yetValue = subElements.putIfAbsent(callee.id(), callee);
-        if (yetValue != null) {
-            yetValue.callCounter++;
-            return yetValue;
+        CallElement associated = subElements.putIfAbsent(callee.id(), callee);
+        if (associated != null) {
+            associated.callCounter++;
+            return associated;
         }
         return callee;
     }

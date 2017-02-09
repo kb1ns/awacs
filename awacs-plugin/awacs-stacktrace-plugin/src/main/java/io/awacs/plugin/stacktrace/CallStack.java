@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ *
+ *
  * Created by pixyonly on 2/7/17.
  */
 public class CallStack {
@@ -40,7 +42,7 @@ public class CallStack {
         }
     }
 
-    public static void methodQuit() {
+    public static void methodQuit(String clazz, String method) {
         Deque<CallElement> stack = roots.get(Thread.currentThread().getId());
         if (stack != null && !stack.isEmpty()) {
             if (stack.size() > 1) {
@@ -49,6 +51,7 @@ public class CallStack {
                     stack.element().removeSub(completed.id());
                 }
             } else {
+                //stack over
                 stack.element().end();
             }
         }
@@ -61,7 +64,10 @@ public class CallStack {
     public static CallElement reset() {
         Deque<CallElement> stack = roots.remove(Thread.currentThread().getId());
         if (stack != null && !stack.isEmpty()) {
-            return stack.poll();
+            if (stack.size() > 1)
+                return new CallElement(stack.pollLast().id(), "(error)");
+            else
+                return stack.pop();
         }
         return null;
     }

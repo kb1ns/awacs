@@ -183,7 +183,8 @@ abstract class ClassTransformer {
         //方法开始调用
         proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
                 "(Ljava/lang/String;Ljava/lang/String;)V", false));
-        int varIndex = 0;//本地变量区的游标，用于计算最终大小
+        //本地变量区的游标，用于计算最终大小
+        int varIndex = 0;
         //判断是否为静态方法,如果不是静态方法还需要加载this到操作数区
         if ((proxy.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
             proxy.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -231,15 +232,12 @@ abstract class ClassTransformer {
             proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, origin.name, origin.desc, false));
         else
             proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, origin.name, origin.desc, false));
-//        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
-//        proxy.instructions.add(new LdcInsnNode(proxy.name));
-//        proxy.instructions.add(new LdcInsnNode(1));
         //方法结束调用
+        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
+        proxy.instructions.add(new LdcInsnNode(proxy.name));
         proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
-                "()V", false));
-//        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "dump",
-//                "()Ljava/util/Collection;", false));
-        //发送线程信息
+                "(Ljava/lang/String;Ljava/lang/String;)V", false));
+        //发送调用栈信息
         proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess",
                 "()V", false));
         proxy.instructions.add(l1);
@@ -291,31 +289,27 @@ abstract class ClassTransformer {
 
 
     private void transformPlainMethod(MethodNode mn, ClassNode cn) {
-        InsnList before = new InsnList();
-        before.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        before.add(new LdcInsnNode(mn.name));
-//        before.add(new LdcInsnNode(0));
-        before.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
+        InsnList enter = new InsnList();
+        enter.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        enter.add(new LdcInsnNode(mn.name));
+        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
                 "(Ljava/lang/String;Ljava/lang/String;)V", false));
-        InsnList end = new InsnList();
-//        end.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-//        end.add(new LdcInsnNode(mn.name));
-//        end.add(new LdcInsnNode(1));
-        end.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
-                "()V", false));
 
-        List<AbstractInsnNode> insts = new LinkedList<>();
+        List<AbstractInsnNode> returnLocations = new LinkedList<>();
         for (int i = 0; i < mn.instructions.size(); i++) {
             int opcode = mn.instructions.get(i).getOpcode();
             if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
-                insts.add(mn.instructions.get(i));
+                returnLocations.add(mn.instructions.get(i));
             }
         }
-        if (!insts.isEmpty()) {
-            mn.instructions.insert(before);
-            for (AbstractInsnNode node : insts) {
-                mn.instructions.insertBefore(node, end);
-            }
+        mn.instructions.insert(enter);
+        for (AbstractInsnNode ret : returnLocations) {
+            InsnList quit = new InsnList();
+            quit.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+            quit.add(new LdcInsnNode(mn.name));
+            quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
+                    "(Ljava/lang/String;Ljava/lang/String;)V", false));
+            mn.instructions.insertBefore(ret, quit);
         }
         mn.maxStack = mn.maxStack + 2;
     }

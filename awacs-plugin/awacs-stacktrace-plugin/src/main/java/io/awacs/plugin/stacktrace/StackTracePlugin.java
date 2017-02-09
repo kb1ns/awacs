@@ -67,10 +67,11 @@ public class StackTracePlugin implements Plugin {
     }
 
     private static String buildAccessReport(CallElement root) {
+        String stack = root != null ? root.toString() : "{}";
         return "{\"thread\":\""
                 + Thread.currentThread().getName()
                 + "\",\"stack\":"
-                + root
+                + stack
                 + "}";
     }
 

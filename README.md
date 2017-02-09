@@ -37,7 +37,7 @@ AWACS is a non-intrusive APM for Java platform.
 5. AWACS includes a simple springmvc webapp demo, simply start:
 
 	```
-	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.8.jar
+	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.9.jar
 	```
 
 6. Test webapp and check MongoDB
