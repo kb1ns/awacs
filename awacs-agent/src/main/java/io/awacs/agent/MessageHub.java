@@ -53,8 +53,8 @@ public enum MessageHub {
 
     @Subscribe
     public void handleBinaryMessage(BinaryMessage message) {
-        //TODO 消息队列
         nettyClient.request(message, new RequestFailureHandler());
+//        nettyClient.fwrite(message);
     }
 
     public static class RequestFailureHandler implements ResponseHandler<BinaryMessage> {

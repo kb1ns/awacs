@@ -26,4 +26,6 @@ public interface Client<V extends Message> extends LifecycleAware {
 
     void request(V msg, ResponseHandler<V> handler);
 
+    void fwrite(V msg);
+
 }
