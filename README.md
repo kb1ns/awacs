@@ -1,7 +1,7 @@
 # AWACS
 [![Build Status](https://travis-ci.org/ArcherFeel/AWACS.svg?branch=master)](https://travis-ci.org/ArcherFeel/awacs)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/ArcherFeel/awacs/blob/master/LICENSE)
-[![Version](https://img.shields.io/badge/AWACS-0.1.9-orange.svg)](https://github.com/ArcherFeel/awacs/tree/0.1.9)
+[![Version](https://img.shields.io/badge/AWACS-0.1.10-orange.svg)](https://github.com/ArcherFeel/awacs/tree/0.1.10)
 
 ## Overview
 
@@ -20,7 +20,9 @@ AWACS is a non-intrusive APM for Java platform.
 1. Compile & Extract
 
 	```
-	cd awacs && mvn clean package
+	cd awacs
+	git checkout v0.1.10
+	mvn clean package
 	cd awacs-server/target && unzip awacs-server.zip
 	```
 
@@ -37,7 +39,7 @@ AWACS is a non-intrusive APM for Java platform.
 5. AWACS includes a simple springmvc webapp demo, simply start:
 
 	```
-	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.9.jar
+	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.10.jar
 	```
 
 6. Test webapp and check MongoDB
