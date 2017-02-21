@@ -21,7 +21,7 @@ AWACS is a non-intrusive APM for Java platform.
 
 	```
 	cd awacs
-	git checkout v0.1.10
+	git checkout 0.1.10
 	mvn clean package
 	cd awacs-server/target && unzip awacs-server.zip
 	```
