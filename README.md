@@ -49,42 +49,39 @@ AWACS is a non-intrusive APM for Java platform.
 	curl 127.0.0.1:8080/v1/img
 	mongo
 	db.stacktrace.find().pretty()
-	```
 	
-	method call stack:
-	
-	```
 	{
-	"_id" : ObjectId("58fa2096c2aac76c70c1ca6e"),
-	"stack" : {
-		"caller" : "io.awacs.demo.TestController#test2",
-		"subMethods" : [
-			{
-				"caller" : "io.awacs.demo.TestController#bis1",
-				"subMethods" : [
-					{
-						"caller" : "io.awacs.demo.TestController#bis2",
-						"subMethods" : [ ],
-						"callCount" : 1,
-						"timestamp" : NumberLong("1492787342081"),
-						"elapsedTime" : 101
-					}
-				],
-				"callCount" : 1,
-				"timestamp" : NumberLong("1492787341581"),
-				"elapsedTime" : 601
-			}
-		],
-		"callCount" : 1,
-		"timestamp" : NumberLong("1492787341581"),
-		"elapsedTime" : 601
-	},
-	"host" : "127.0.0.1",
-	"pid" : 93432,
-	"thread" : "qtp1349414238-26",
-	"timestamp" : 1492787342
-}
-```
+		"_id" : ObjectId("58fa2096c2aac76c70c1ca6e"),
+		"stack" : {
+			"caller" : "io.awacs.demo.TestController#test2",
+			"subMethods" : [
+				{
+					"caller" : "io.awacs.demo.TestController#bis1",
+					"subMethods" : [
+						{
+							"caller" : "io.awacs.demo.TestController#bis2",
+							"subMethods" : [ ],
+							"callCount" : 1,
+							"timestamp" : NumberLong("1492787342081"),
+							"elapsedTime" : 101
+						}
+					],
+					"callCount" : 1,
+					"timestamp" : NumberLong("1492787341581"),
+					"elapsedTime" : 601
+				}
+			],
+			"callCount" : 1,
+			"timestamp" : NumberLong("1492787341581"),
+			"elapsedTime" : 601
+		},
+		"host" : "127.0.0.1",
+		"pid" : 93432,
+		"thread" : "qtp1349414238-26",
+		"timestamp" : 1492787342
+	}
+	```
+
 
 
 ## Documents
