@@ -1,5 +1,5 @@
 # AWACS
-[![Build Status](https://travis-ci.org/ArcherFeel/AWACS.svg?branch=master)](https://travis-ci.org/ArcherFeel/awacs)
+[![Build Status](https://travis-ci.org/Archerfeel/awacs.svg?branch=master)](https://travis-ci.org/Archerfeel/awacs)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/ArcherFeel/awacs/blob/master/LICENSE)
 [![Version](https://img.shields.io/badge/AWACS-0.1.10-orange.svg)](https://github.com/ArcherFeel/awacs/tree/0.1.10)
 
@@ -21,7 +21,7 @@ AWACS is a non-intrusive APM for Java platform.
 
 	```
 	cd awacs
-	git checkout v0.1.10
+	git checkout 0.1.10
 	mvn clean package
 	cd awacs-server/target && unzip awacs-server.zip
 	```
@@ -47,6 +47,8 @@ AWACS is a non-intrusive APM for Java platform.
 	```
 	curl 127.0.0.1:8080/v1/test/hello
 	curl 127.0.0.1:8080/v1/img
+	mongo
+	db.stacktrace.find().pretty()
 	```
 
 ## Documents
