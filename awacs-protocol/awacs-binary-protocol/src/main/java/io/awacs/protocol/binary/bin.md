@@ -25,7 +25,7 @@
 
 - Timestamp: 秒级Unix时间戳
  
-## Header
+## Header TODO add requestId to enable multiplexing
 
 	Byte/     0        |       1       |       2       |       3       |
         /              |               |               |               |

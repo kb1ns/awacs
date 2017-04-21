@@ -36,7 +36,8 @@ public enum MessageHub {
 
     void register(NettyClient nettyClient) {
         this.nettyClient = nettyClient;
-        messageAccumulator = new MessageAccumulator(nettyClient, 100, 1024*1024*10, 10000, 5000);
+        //TODO move to configuration
+        this.messageAccumulator = new MessageAccumulator(nettyClient, 100, 1024*1024*10, 10000, 5000);
     }
 
     public void publish(Message message) {
