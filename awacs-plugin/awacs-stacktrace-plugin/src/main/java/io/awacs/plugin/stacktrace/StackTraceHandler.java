@@ -71,7 +71,6 @@ public class StackTraceHandler implements PluginHandler {
     @Override
     public Message handle(Message message, InetSocketAddress address) {
         String content = new String(message.body());
-        logger.debug(content);
         JSONObject json = JSONObject.parseObject(content);
         json.put("host", address.getAddress().getHostAddress());
         json.put("pid", message.getPid());

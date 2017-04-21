@@ -1,4 +1,9 @@
-## 0.1.9 (Final version of 0.1.x)
+## 0.1.11
+
+- batch send
+- response from server
+
+## 0.1.9
 
 - compress report message
 - using executor in awacs server

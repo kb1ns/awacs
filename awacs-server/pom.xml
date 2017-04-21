@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-root</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.10</version>
+        <version>0.1.11</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -56,6 +56,18 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.16</version>
+        </dependency>
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-mongo-repository</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-email-repository</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -29,7 +29,7 @@ import java.util.Random;
 /**
  * Created by antong on 16/9/19.
  */
-class NettyChannelFactory extends BasePoolableObjectFactory<ChannelFuture> {
+final class NettyChannelFactory extends BasePoolableObjectFactory<ChannelFuture> {
 
     private static final LoggerPlus logger = LoggerPlusFactory.getLogger(NettyClient.class);
 

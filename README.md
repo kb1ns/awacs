@@ -21,8 +21,8 @@ AWACS is a non-intrusive APM for Java platform.
 
 	```
 	cd awacs
-	git checkout 0.1.10
-	mvn clean package
+	git checkout 0.1.11
+	mvn clean package -Dmaven.test.skip=true
 	cd awacs-server/target && unzip awacs-server.zip
 	```
 
@@ -39,7 +39,7 @@ AWACS is a non-intrusive APM for Java platform.
 5. AWACS includes a simple springmvc webapp demo, simply start:
 
 	```
-	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.10.jar
+	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.11.jar
 	```
 
 6. Test webapp and check MongoDB

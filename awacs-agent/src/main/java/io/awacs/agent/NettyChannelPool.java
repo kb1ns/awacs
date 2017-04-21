@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Created by antong on 16/9/19.
  */
-class NettyChannelPool {
+final class NettyChannelPool {
 
     private GenericObjectPool<ChannelFuture> pool;
 

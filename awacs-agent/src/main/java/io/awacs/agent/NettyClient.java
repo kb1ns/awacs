@@ -22,22 +22,21 @@ import io.awacs.core.util.LoggerPlus;
 import io.awacs.core.util.LoggerPlusFactory;
 import io.awacs.protocol.binary.BinaryMessage;
 import io.awacs.protocol.binary.BinaryMessageDecoder;
-import io.awacs.protocol.binary.BinaryMessageEncoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.bytes.ByteArrayEncoder;
 
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
  * Created by antong on 16/9/8.
  */
-class NettyClient implements Client<BinaryMessage> {
+final class NettyClient implements Client<BinaryMessage> {
 
     private static final LoggerPlus logger = LoggerPlusFactory.getLogger(NettyClient.class);
 
@@ -58,34 +57,23 @@ class NettyClient implements Client<BinaryMessage> {
         return bootstrap;
     }
 
-    //TODO retrieve response from pipeline
+
     @Override
-    public void request(BinaryMessage msg, ResponseHandler<BinaryMessage> handler) {
+    public void send(byte[] msg) {
         ChannelFuture channelFuture = null;
         try {
             channelFuture = pool.borrowChannel();
             Channel channel = channelFuture.channel();
             channel.writeAndFlush(msg);
             logger.debug("Message send successful, remote address: {}", channel.remoteAddress());
-        } catch (Exception e) {
-            handler.onFailure(e);
         } finally {
             pool.returnObject(channelFuture);
         }
     }
 
-    @Deprecated
     @Override
-    public void fwrite(BinaryMessage msg) {
-        ChannelFuture channelFuture = null;
-        try {
-            channelFuture = pool.borrowChannel();
-            Channel channel = channelFuture.channel();
-            channel.write(msg);
-            logger.debug("Message write to buffer, remote address: {}", channel.remoteAddress());
-        } finally {
-            pool.returnObject(channelFuture);
-        }
+    public void send(byte[] msg, ResponseHandler<BinaryMessage> handler) {
+
     }
 
     @Override
@@ -101,10 +89,10 @@ class NettyClient implements Client<BinaryMessage> {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
                             pipeline.addLast(new BinaryMessageDecoder());
-                            pipeline.addLast(new BinaryMessageEncoder());
+                            pipeline.addLast(new ByteArrayEncoder());
+//                            pipeline.addLast(new BinaryMessageEncoder());
                         }
                     });
-
             pool = new NettyChannelPool(bootstrap, addresses);
         } catch (Exception e) {
             e.printStackTrace();

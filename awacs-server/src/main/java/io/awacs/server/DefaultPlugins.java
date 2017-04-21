@@ -76,7 +76,6 @@ public class DefaultPlugins implements Plugins {
             try {
                 logger.info("Plugin {} configuration found.", pluginName);
                 ImmutableMap<String, String> pluginConfig = configuration.getSubProperties(Configurations.PLUGIN_PREFIX + "." + pluginName + ".");
-
                 String pluginClassName = pluginConfig.get(Configurations.PLUGIN_CLASS);
                 String keyType = pluginConfig.get(Configurations.KEY_CLASS);
                 String keyValue = pluginConfig.get(Configurations.KEY_VALUE);

@@ -38,6 +38,8 @@ public interface Message {
 
     byte[] serialize();
 
+    int size();
+
     abstract class Builder<M extends Message> {
 
         protected Key<?> key;

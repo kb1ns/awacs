@@ -17,12 +17,9 @@
 
 package io.awacs.agent;
 
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.Subscribe;
+import io.awacs.core.transport.Message;
 import io.awacs.core.transport.ResponseHandler;
 import io.awacs.protocol.binary.BinaryMessage;
-
-import java.util.concurrent.Executors;
 
 /**
  *
@@ -35,26 +32,20 @@ public enum MessageHub {
 
     private NettyClient nettyClient;
 
-    private AsyncEventBus eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
+    private MessageAccumulator messageAccumulator;
 
     void register(NettyClient nettyClient) {
         this.nettyClient = nettyClient;
-        eventBus.register(this);
+        messageAccumulator = new MessageAccumulator(nettyClient, 100, 1024*1024*10, 10000, 5000);
     }
 
-    public void publish(Object event) {
-        eventBus.post(event);
+    public void publish(Message message) {
+        messageAccumulator.append(message, null);
     }
 
     void unregister() {
-        eventBus.unregister(this);
-        nettyClient = null;
-    }
-
-    @Subscribe
-    public void handleBinaryMessage(BinaryMessage message) {
-        nettyClient.request(message, new RequestFailureHandler());
-//        nettyClient.fwrite(message);
+        messageAccumulator.close();
+        nettyClient.stop();
     }
 
     public static class RequestFailureHandler implements ResponseHandler<BinaryMessage> {
