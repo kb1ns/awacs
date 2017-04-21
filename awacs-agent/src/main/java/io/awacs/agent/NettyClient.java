@@ -95,7 +95,6 @@ class NettyClient implements Client<BinaryMessage> {
             this.group = new NioEventLoopGroup();
             bootstrap.group(group);
             bootstrap.channel(NioSocketChannel.class)
-                    .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
