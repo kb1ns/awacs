@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 final class MessageAccumulator {
 
-    private boolean batchInProgress = false;
+    private AtomicBoolean batchInProgress = new AtomicBoolean(false);
 
     private List<Message> batch;
 
@@ -59,6 +60,8 @@ final class MessageAccumulator {
     private NettyClient client;
 
     private ExecutorService executorService;
+    
+    private Timeout batchStandingBy;
 
     MessageAccumulator(NettyClient client,
                        int maxBatchSize,
@@ -91,18 +94,20 @@ final class MessageAccumulator {
     }
 
     synchronized void append(Message message, final ResponseHandler<? extends Message> callback) {
-        if (!batchInProgress) {
-            batchInProgress = true;
-            this.timer.newTimeout(new TimerTask() {
+        if (!batchInProgress.get()) {
+            batchInProgress.set(true);
+            batchStandingBy = timer.newTimeout(new TimerTask() {
                 @Override
                 public void run(Timeout timeout) throws Exception {
-                    final List<Message> ready = Lists.newArrayList();
-                    ready.addAll(batch);
-                    final byte[] buf = new byte[chunkBytes.intValue()];
-                    flush(ready, buf);
-                    batch.clear();
-                    chunkBytes.set(0);
-                    batchInProgress = false;
+                    synchronized(MessageAccumulator.this) {
+                        final List<Message> ready = Lists.newArrayList();
+                        ready.addAll(batch);
+                        final byte[] buf = new byte[chunkBytes.intValue()];
+                        flush(ready, buf);
+                        batch.clear();
+                        chunkBytes.set(0);
+                        batchInProgress.set(false);
+                    }
                 }
             }, lingerMs, TimeUnit.MILLISECONDS);
         }
@@ -115,6 +120,8 @@ final class MessageAccumulator {
             flush(ready, buf);
             batch.clear();
             chunkBytes.set(0);
+            batchInProgress.set(false);
+            batchStandingBy.cancel();
         }
     }
 
