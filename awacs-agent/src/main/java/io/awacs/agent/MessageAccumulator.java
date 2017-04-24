@@ -75,7 +75,7 @@ final class MessageAccumulator {
         this.lingerMs = lingerms;
         this.timeout = timeout;
         this.timer = new HashedWheelTimer();
-        executorService = Executors.newSingleThreadExecutor();
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     void flush(final Collection<Message> ready, final byte[] buf) {
