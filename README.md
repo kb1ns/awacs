@@ -1,3 +1,4 @@
+
 # AWACS
 [![Build Status](https://travis-ci.org/Archerfeel/awacs.svg?branch=master)](https://travis-ci.org/Archerfeel/awacs)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/ArcherFeel/awacs/blob/master/LICENSE)
@@ -5,12 +6,12 @@
 
 ## Overview
 
-AWACS is a non-intrusive APM for Java platform.
+AWACS is a non-intrusive Java APM(NOT GOOGLE DAPPER IMPLEMENTATION).
 
 ## Features
 
-* Real-time monitoring and alarm
-* No code intrusion(official plugin)
+* Real-time monitoring
+* No SDK dependent
 * Plugin based architecture
 * Little performance impact
 * Support custom monitor plugin and data storage
@@ -42,7 +43,7 @@ AWACS is a non-intrusive APM for Java platform.
 	java -javaagent:/path/to/awacs/awacs-agent/target/awacs-agent.jar=http://127.0.0.1:7200 -jar /path/to/awacs/awacs-demo/target/awacs-demo-0.1.11.jar
 	```
 
-6. Test webapp and check MongoDB
+6. Test webapp and check MongoDB 
 
 	```
 	curl 127.0.0.1:8080/v1/test/hello
