@@ -31,17 +31,14 @@
         <dependency>
             <groupId>io.awacs</groupId>
             <artifactId>awacs-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.awacs</groupId>
             <artifactId>awacs-binary-protocol</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
-            <version>1.6</version>
         </dependency>
     </dependencies>
 
