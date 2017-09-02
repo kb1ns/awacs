@@ -24,7 +24,7 @@ import io.awacs.core.transport.Message;
  */
 public class BinaryMessage implements Message {
 
-    public static final int MAX_PACKET_SIZE = Integer.MAX_VALUE;
+    public static final int MAX_PACKET_SIZE = 1 << 20;
 
     private ByteKey key;
 
@@ -110,9 +110,8 @@ public class BinaryMessage implements Message {
                 Byte.toUnsignedInt(headers[6]) << 8) | Byte.toUnsignedInt(headers[7]);
         int pid = (Byte.toUnsignedInt(headers[8]) << 24) | (Byte.toUnsignedInt(headers[9]) << 16) | (
                 Byte.toUnsignedInt(headers[10]) << 8) | Byte.toUnsignedInt(headers[11]);
-        int timestamp =
-                (Byte.toUnsignedInt(headers[12]) << 24) | (Byte.toUnsignedInt(headers[13]) << 16) | (
-                        Byte.toUnsignedInt(headers[14]) << 8) | Byte.toUnsignedInt(headers[15]);
+        int timestamp = (Byte.toUnsignedInt(headers[12]) << 24) | (Byte.toUnsignedInt(headers[13]) << 16) | (
+                Byte.toUnsignedInt(headers[14]) << 8) | Byte.toUnsignedInt(headers[15]);
 
         return new BinaryMessageBuilder().setKey(k).setVersion(v).setPid(pid)
                 .setTimestamp(timestamp).setBody(body).build();

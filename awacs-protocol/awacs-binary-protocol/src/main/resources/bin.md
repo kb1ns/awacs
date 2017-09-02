@@ -1,4 +1,4 @@
-## Header(Deprecated)
+## version 1(deprecated)
 
 	Byte/     0        |       1       |       2       |       3       |
         /              |               |               |               |
@@ -18,36 +18,47 @@
 - Version: 0x01
 
 - Key: user-defined
-	
+
 - Body length: body总长度(单位byte)
 
 - PID: 进程号
 
 - Timestamp: 秒级Unix时间戳
- 
-## Header TODO add requestId to enable multiplexing
+
+## version 2
 
 	Byte/     0        |       1       |       2       |       3       |
         /              |               |               |               |
        +---------------+---------------+---------------+---------------+
       0|             Magic             |    Version    |      Key      |
        +---------------+---------------+---------------+---------------+
-      4|                           Body length                         |
+      4|                            REQ-ID                             |
        +---------------+---------------+---------------+---------------+
-      8|                              PID                              |
+      8|                           BODY-LEN                            |
        +---------------+---------------+---------------+---------------+
-     12|                           Timestamp                           |
-       +---------------+---------------+---------------+---------------+
-       Total 16 bytes
+     12|         NAMESPACE-LEN         |              NOP              |
+       +---------------+---------------+-------------------------------+
+     16|                           NAMESPACE                           |
+       |                            N bytes                            |
+       +---------------+---------------+-------------------------------+
+       |                              BODY                             |
+       |                            N bytes                            |
+       +---------------+---------------+-------------------------------+
+       
+       
 
-- Magic: 0x5C4E
+- Magic: 0x5c4e
 
-- Version: 0x01
+- Version: 0x02
 
 - Key: user-defined
-	
+
+- REQ-ID: 0~2^32
+
+- Namespace length
+
 - Body length: body总长度(单位byte)
 
-- PID: 进程号
+- Namespace
 
-- Timestamp: 秒级Unix时间戳
+- Body 

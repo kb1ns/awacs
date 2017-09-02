@@ -32,7 +32,7 @@ public class CallStackTest {
     }
 
     @Test
-    public void test() {
+    public void testAccess() {
         CallStack.initStack();
         CallStack.methodEnter("io/awacs/plugin/stacktrace/CallStackTest", "test");
         stub1.stubMethod0();

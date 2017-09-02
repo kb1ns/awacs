@@ -53,7 +53,7 @@ public class CallElement {
     }
 
     public boolean isNoneCost() {
-        return this.elapsedTime <= 1;
+        return this.elapsedTime <= 5;
     }
 
     public CallElement callSub(CallElement callee) {

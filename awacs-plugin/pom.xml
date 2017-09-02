@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-root</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.11</version>
+        <version>0.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -32,19 +32,28 @@
         <module>awacs-stacktrace-plugin</module>
     </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-email-repository</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-mongo-repository</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-agent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-mongo-repository</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-email-repository</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-influx-repository</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

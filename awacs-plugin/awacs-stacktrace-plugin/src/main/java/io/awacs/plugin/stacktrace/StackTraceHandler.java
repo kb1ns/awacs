@@ -16,7 +16,7 @@
 
 package io.awacs.plugin.stacktrace;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.awacs.core.Configuration;
 import io.awacs.core.EnableInjection;
@@ -27,14 +27,14 @@ import io.awacs.core.util.LoggerPlus;
 import io.awacs.core.util.LoggerPlusFactory;
 import io.awacs.repository.EmailRepository;
 import io.awacs.repository.MailForm;
-import io.awacs.repository.MongoRepository;
-import org.bson.Document;
+import io.awacs.repository.influx.InfluxRepository;
+import org.influxdb.dto.Point;
 
 import javax.annotation.Resource;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by pixyonly on 16/10/26.
@@ -48,7 +48,7 @@ public class StackTraceHandler implements PluginHandler {
     private EmailRepository emailRepository;
 
     @Resource
-    private MongoRepository mongoRepository;
+    private InfluxRepository influxRepository;
 
     private List<String> toList = Collections.emptyList();
 
@@ -58,13 +58,17 @@ public class StackTraceHandler implements PluginHandler {
 
     private List<String> excludeExceptionPrefixes = Collections.emptyList();
 
+    private List<String> includeExceptionPrefixes = Collections.emptyList();
+
     private static final String ENABLE_NOTIFICATION = "notification.enable";
 
     private static final String NOTIFICATION_RECIPIENTS_TO = "notification.recipients.to";
 
     private static final String NOTIFICATION_RECIPIENTS_CC = "notification.recipients.cc";
 
-    private static final String NOTIFICATION_EXCEPTION_PREFIX = "notification.excludeExceptionPrefix";
+    private static final String NOTIFICATION_EXCEPTION_EXCLUDE_PREFIX = "notification.excludeExceptionPrefix";
+
+    private static final String NOTIFICATION_EXCEPTION_INCLUDE_PREFIX = "notification.includeExceptionPrefix";
 
     private static final boolean DEFAULT_ENABLE_NOTIFICATION = false;
 
@@ -72,32 +76,61 @@ public class StackTraceHandler implements PluginHandler {
     public Message handle(Message message, InetSocketAddress address) {
         String content = new String(message.body());
         JSONObject json = JSONObject.parseObject(content);
-        json.put("host", address.getAddress().getHostAddress());
-        json.put("pid", message.getPid());
-        json.put("timestamp", message.getTimestamp());
+
         if (json.containsKey("exception")) {
+            String pretty = prettify(json.getJSONArray("stack"));
+            Point err = Point.measurement("").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+                    .tag("ip", address.getAddress().getHostAddress())
+                    .tag("exception", json.getString("exception"))
+                    .addField("message", json.getString("message"))
+                    .addField("thread", json.getString("thread"))
+                    .addField("pid", message.getPid())
+                    .addField("stack", pretty)
+                    .addField("execution_time", -1)
+                    .build();
+            influxRepository.write(err);
             if (enableNotification) {
-                boolean valid = true;
+                boolean valid = false;
                 for (String prefix : excludeExceptionPrefixes) {
+                    if (json.getString("exception").startsWith(prefix)) {
+                        valid = true;
+                        break;
+                    }
+                }
+                for (String prefix : includeExceptionPrefixes) {
                     if (json.getString("exception").startsWith(prefix)) {
                         valid = false;
                         break;
                     }
                 }
-                if (valid) {
-                    MailForm mail = new MailForm().setText(JSON.toJSONString(json, true))
+                if (!valid) {
+                    String template = String.format("Host: %s\nPID: %d\nThread: %s\nthrows %s:%s\n%s",
+                            address.getAddress().getHostAddress(),
+                            message.getPid(),
+                            json.getString("thread"),
+                            json.getString("exception"),
+                            json.getString("message"),
+                            pretty);
+                    MailForm mail = new MailForm().setSubject("Server warning")
+                            .setText(template)
                             .setTo(toList)
-                            .setCc(ccList)
-                            .setSubject(String.format("Warning from %s", address.getAddress().getHostAddress()));
+                            .setCc(ccList);
                     emailRepository.send(mail);
                 }
             }
+            return null;
         }
-        try {
-            mongoRepository.save("stacktrace", Document.parse(json.toJSONString()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JSONObject stack = json.getJSONObject("stack");
+        //TODO config measurement
+        Point p = Point.measurement("").time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+                .tag("ip", address.getAddress().getHostAddress())
+                .tag("entry", stack.getString("caller").replaceAll("/", "."))
+                .addField("thread", json.getString("thread"))
+                .addField("pid", message.getPid())
+                .addField("stack", prettify(stack))
+                .addField("execution_time", stack.getIntValue("elapsedTime"))
+                .build();
+        influxRepository.write(p);
         return null;
     }
 
@@ -107,18 +140,74 @@ public class StackTraceHandler implements PluginHandler {
         enableNotification = configuration.getBoolean(ENABLE_NOTIFICATION, DEFAULT_ENABLE_NOTIFICATION);
         if (enableNotification) {
             String to = configuration.getString(NOTIFICATION_RECIPIENTS_TO);
-            if (to != null)
-                toList = Arrays.asList(to.split(","));
+            if (to != null) {
+                String[] r = to.split(",");
+                for (String t : r) {
+                    toList.add(t.trim());
+                }
+            }
 
             String cc = configuration.getString(NOTIFICATION_RECIPIENTS_CC);
-            if (cc != null)
-                ccList = Arrays.asList(cc.split(","));
+            if (cc != null) {
+                String[] r = cc.split(",");
+                for (String t : r) {
+                    ccList.add(t.trim());
+                }
+            }
 
-            String excludes = configuration.getString(NOTIFICATION_EXCEPTION_PREFIX);
-            if (excludes != null)
-                excludeExceptionPrefixes = Arrays.asList(excludes.split(","));
+            String excludes = configuration.getString(NOTIFICATION_EXCEPTION_EXCLUDE_PREFIX);
+            if (excludes != null) {
+                String[] r = excludes.split(",");
+                for (String t : r) {
+                    excludeExceptionPrefixes.add(t.trim());
+                }
+            }
+
+            String includes = configuration.getString(NOTIFICATION_EXCEPTION_INCLUDE_PREFIX);
+            if (includes != null) {
+                String[] r = includes.split(",");
+                for (String t : r) {
+                    includeExceptionPrefixes.add(t.trim());
+                }
+            }
         }
     }
 
+    String prettify(JSONObject json) {
+        return tabLevel(json, 0).toString();
+    }
 
+    String prettify(JSONArray json) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < json.size(); i++) {
+            JSONObject span = json.getJSONObject(i);
+            if (span.getBooleanValue("nativeMethod"))
+                break;
+            sb.append('-').append(span.getString("className"))
+                    .append('#')
+                    .append(span.getString("methodName"))
+                    .append('@')
+                    .append(span.getIntValue("lineNumber"))
+                    .append('\n');
+        }
+        return sb.toString();
+    }
+
+    private StringBuilder tabLevel(JSONObject sub, int tab) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < tab * 2; i++)
+            sb.append("+");
+        sb.append(sub.getString("caller").replaceAll("/", "."))
+                .append(":")
+                .append(sub.getIntValue("elapsedTime"))
+                .append("|")
+                .append(sub.getIntValue("callCount"));
+        JSONArray subMethods = sub.getJSONArray("subMethods");
+        if (!subMethods.isEmpty() && sub.getIntValue("elapsedTime") > 0) {
+            for (int i = 0; i < subMethods.size(); i++) {
+                sb.append('\n').append(tabLevel(subMethods.getJSONObject(i), tab + 1));
+            }
+        }
+        return sb;
+    }
 }

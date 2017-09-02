@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-root</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.11</version>
+        <version>0.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,6 +29,17 @@
     <modules>
         <module>awacs-mongo-repository</module>
         <module>awacs-email-repository</module>
+        <module>awacs-influx-repository</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 </project>

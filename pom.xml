@@ -21,16 +21,16 @@
 
     <groupId>io.awacs</groupId>
     <artifactId>awacs-root</artifactId>
-    <version>0.1.11</version>
+    <version>0.2.2</version>
     <modules>
-        <module>awacs-core</module>
-        <module>awacs-protocol</module>
         <module>awacs-agent</module>
+        <module>awacs-common</module>
+        <module>awacs-core</module>
         <module>awacs-plugin</module>
+        <module>awacs-protocol</module>
         <module>awacs-repository</module>
         <module>awacs-server</module>
     </modules>
-
     <scm>
         <connection>scm:git:https://github.com/archerfeel/awacs.git</connection>
         <url>https://github.com/ArcherFeel/awacs</url>
@@ -81,7 +81,6 @@
     <issueManagement>
         <url>https://github.com/ArcherFeel/awacs/issues</url>
     </issueManagement>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -130,6 +129,11 @@
             <dependency>
                 <groupId>io.awacs</groupId>
                 <artifactId>awacs-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-repository</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.11</version>
+        <version>0.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,7 +30,6 @@
         <dependency>
             <groupId>io.awacs</groupId>
             <artifactId>awacs-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>

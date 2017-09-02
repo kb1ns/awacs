@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-plugin</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.1.11</version>
+        <version>0.2.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,12 +30,23 @@
         <dependency>
             <groupId>io.awacs</groupId>
             <artifactId>awacs-agent</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-all</artifactId>
             <version>5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-email-repository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-mongo-repository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-influx-repository</artifactId>
         </dependency>
     </dependencies>
 

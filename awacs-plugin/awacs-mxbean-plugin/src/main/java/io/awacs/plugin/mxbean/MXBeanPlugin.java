@@ -20,7 +20,7 @@ package io.awacs.plugin.mxbean;
 import io.awacs.core.NoSuchKeyTypeException;
 import io.awacs.core.Plugin;
 import io.awacs.core.PluginDescriptor;
-import io.awacs.agent.MessageHub;
+import io.awacs.agent.net.MessageHub;
 import io.awacs.protocol.binary.BinaryMessage;
 import io.awacs.protocol.binary.ByteKey;
 
