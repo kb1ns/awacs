@@ -15,16 +15,18 @@
  *
  */
 
-package io.awacs.core.transport;
-
-import io.awacs.core.LifecycleAware;
-import io.awacs.core.Plugins;
+package io.awacs.server;
 
 /**
- * Created by pixyonly on 8/24/16.
+ * Created by pixyonly on 16/10/3.
  */
-public interface Server extends LifecycleAware {
+public class RepositoryNotFoundException extends Exception {
 
-    void setPlugins(Plugins plugins);
+    public RepositoryNotFoundException() {
+        super("Cannot find repository through type.");
+    }
 
+    public RepositoryNotFoundException(String repositoryId) {
+        super("Cannot find repository " + repositoryId);
+    }
 }

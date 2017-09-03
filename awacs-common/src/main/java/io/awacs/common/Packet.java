@@ -28,6 +28,14 @@ public class Packet {
         this.body = body;
     }
 
+    public int size() {
+        return body.getBytes().length + namespace.getBytes().length + 16;
+    }
+
+    public byte key() {
+        return this.key;
+    }
+
     public byte[] serialize() {
         byte[] bb = body.getBytes();
         byte[] ab = namespace.getBytes();

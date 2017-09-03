@@ -16,24 +16,26 @@
 
 package io.awacs.repository;
 
-import io.awacs.core.Configurable;
-import io.awacs.core.Configuration;
-import io.awacs.core.InitializationException;
-import io.awacs.core.util.LoggerPlus;
-import io.awacs.core.util.LoggerPlusFactory;
-import io.awacs.core.util.ThreadPoolHelper;
+import io.awacs.common.Configuration;
+import io.awacs.common.InitializationException;
+import io.awacs.common.Packet;
+import io.awacs.common.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.*;
+import java.net.InetSocketAddress;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * Created by pixyonly on 16/9/27.
  */
-public class EmailRepository implements Configurable {
+public class EmailRepository implements Repository {
 
-    private static final LoggerPlus logger = LoggerPlusFactory.getLogger(EmailRepository.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailRepository.class);
 
     private String username;
 
@@ -55,9 +57,9 @@ public class EmailRepository implements Configurable {
                         msg.addRecipient(Message.RecipientType.CC, new InternetAddress(cc));
                     msg.setText(mail.getText());
                     Transport.send(msg);
-                    logger.info("Email sent.");
+                    log.info("Email sent.");
                 } catch (Exception e) {
-                    logger.warn("Email send failed.", e);
+                    log.warn("Email send failed.", e);
                 }
             }
         });
@@ -77,4 +79,8 @@ public class EmailRepository implements Configurable {
         });
     }
 
+    @Override
+    public Packet confirm(Packet recieve, InetSocketAddress remote) {
+        return null;
+    }
 }

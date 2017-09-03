@@ -39,21 +39,6 @@
                 <artifactId>awacs-agent</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.awacs</groupId>
-                <artifactId>awacs-mongo-repository</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.awacs</groupId>
-                <artifactId>awacs-email-repository</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.awacs</groupId>
-                <artifactId>awacs-influx-repository</artifactId>
-                <version>${project.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

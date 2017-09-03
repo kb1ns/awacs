@@ -17,16 +17,10 @@
 
 package io.awacs.server;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import io.awacs.core.Configuration;
-import io.awacs.core.PluginDescriptor;
-import io.awacs.core.Repositories;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import io.awacs.common.Configuration;
 
 /**
+ *
  * Created by antong on 16/9/12.
  */
 public class Bootstrap {
@@ -34,28 +28,12 @@ public class Bootstrap {
     public static void main(String[] args) throws Exception {
         Configuration configuration = Configurations.loadConfigurations();
 
-        Repositories repositories = new DefaultRepositories();
+        Repositories repositories = new Repositories();
         repositories.init(configuration);
 
-        DefaultPlugins plugins = new DefaultPlugins();
-        plugins.setRepositories(repositories);
-        plugins.init(configuration);
-
-        List<String> addrs = Configurations.exportServerAddr(configuration);
-        List<PluginDescriptor> descriptors = plugins.keySet().parallelStream().map(plugins::getPluginDescriptor).collect(Collectors.toList());
-        JSONObject json = new JSONObject();
-        json.put("plugins", descriptors);
-        json.put("serverAddrs", addrs);
-        Configurations.dump(JSON.toJSONString(json, true));
-
-        MessageReportServer tcpServer = new MessageReportServer();
-        tcpServer.init(configuration);
-        tcpServer.setPlugins(plugins);
-
-        StaticResourceServer httpServer = new StaticResourceServer();
-        httpServer.init(configuration);
-
-        httpServer.start();
-        tcpServer.start();
+        ServerEntry server = new ServerEntry();
+        server.init(configuration);
+        server.load(repositories);
+        server.start();
     }
 }

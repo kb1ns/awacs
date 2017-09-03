@@ -17,16 +17,18 @@
 
 package io.awacs.server;
 
-import com.google.common.collect.ImmutableMap;
-import io.awacs.core.Configuration;
+import io.awacs.common.Configuration;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 /**
+ *
  * Created by pixyonly on 16/9/30.
  */
 public class Configurations {
@@ -55,15 +57,15 @@ public class Configurations {
 
     public static final String TCP_BIND_PORT = "tcp_bind_port";
 
-    public static final String DEFAULT_TCP_BIND_PORT = "7200";
+    public static final int DEFAULT_TCP_BIND_PORT = 7200;
 
     public static final String TCP_BOSS_CORE = "tcp_boss_core";
 
-    public static final String DEFAULT_TCP_BOSS_CORE = "1";
+    public static final int DEFAULT_TCP_BOSS_CORE = 1;
 
     public static final String TCP_WORKER_CORE = "tcp_worker_core";
 
-    public static final String DEFAULT_TCP_WORKER_CORE = String.valueOf(Runtime.getRuntime().availableProcessors() * 2);
+    public static final int DEFAULT_TCP_WORKER_CORE = Runtime.getRuntime().availableProcessors() * 2;
 
     public static final String PLUGIN_PREFIX = "awacs.plugins";
 
@@ -94,14 +96,14 @@ public class Configurations {
         return new Configuration(map);
     }
 
-    public static List<String> exportServerAddr(Configuration configuration) {
-        ImmutableMap<String, String> map = configuration.getSubProperties(SERVER_PREFIX + ".");
-        Set<String> serverNames = map.keySet().stream().map(key -> key.substring(0, key.indexOf("."))).collect(Collectors.toSet());
-        List<String> addrs = new ArrayList<>(serverNames.size());
-        addrs.addAll(serverNames.stream().map(serverName -> map.getOrDefault(serverName + "." + TCP_BIND_HOST, DEFAULT_TCP_BIND_HOST) + ":" +
-                map.getOrDefault(serverName + "." + TCP_BIND_PORT, DEFAULT_TCP_BIND_PORT)).collect(Collectors.toList()));
-        return addrs;
-    }
+//    public static List<String> exportServerAddr(Configuration configuration) {
+//        ImmutableMap<String, String> map = configuration.getSubProperties(SERVER_PREFIX + ".");
+//        Set<String> serverNames = map.keySet().stream().map(key -> key.substring(0, key.indexOf("."))).collect(Collectors.toSet());
+//        List<String> addrs = new ArrayList<>(serverNames.size());
+//        addrs.addAll(serverNames.stream().map(serverName -> map.getOrDefault(serverName + "." + TCP_BIND_HOST, DEFAULT_TCP_BIND_HOST) + ":" +
+//                map.getOrDefault(serverName + "." + TCP_BIND_PORT, DEFAULT_TCP_BIND_PORT)).collect(Collectors.toList()));
+//        return addrs;
+//    }
 
     public static String getPluginPath() {
         return System.getProperty("awacs.home", System.getProperty("user.dir")) + "/plugins/";

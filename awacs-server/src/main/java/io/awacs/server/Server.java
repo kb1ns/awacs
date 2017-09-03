@@ -15,10 +15,17 @@
  *
  */
 
-package io.awacs.core;
+package io.awacs.server;
 
 /**
- * Created by pixyonly on 16/10/1.
+ *
+ * Created by pixyonly on 8/24/16.
  */
-public interface RepositoriesAware extends ContextAware<Repositories> {
+public interface Server {
+
+    void load(Repositories repositories);
+
+    void start();
+
+    void stop();
 }

@@ -1,17 +1,21 @@
 package io.awacs.repository.influx;
 
-import io.awacs.core.Configurable;
-import io.awacs.core.Configuration;
-import io.awacs.core.InitializationException;
+import io.awacs.common.Configuration;
+import io.awacs.common.InitializationException;
+import io.awacs.common.Packet;
+import io.awacs.common.Repository;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
+import java.net.InetSocketAddress;
+
 /**
+ *
  * Created by pixyonly on 31/08/2017.
  */
-public class InfluxRepository implements Configurable {
+public class InfluxRepository implements Repository {
 
     @Override
     public void init(Configuration configuration) throws InitializationException {
@@ -25,5 +29,10 @@ public class InfluxRepository implements Configurable {
 
     public void write(Point point) {
 
+    }
+
+    @Override
+    public Packet confirm(Packet recieve, InetSocketAddress remote) {
+        return null;
     }
 }

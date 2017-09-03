@@ -27,8 +27,6 @@
     <artifactId>awacs-repository</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>awacs-mongo-repository</module>
-        <module>awacs-email-repository</module>
         <module>awacs-influx-repository</module>
     </modules>
 

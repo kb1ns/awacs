@@ -17,18 +17,19 @@
 
 package io.awacs.repository;
 
-import io.awacs.core.Configurable;
-import io.awacs.core.Configuration;
-import io.awacs.core.InitializationException;
-import io.awacs.core.util.ThreadPoolHelper;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoSecurityException;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import io.awacs.common.Configuration;
+import io.awacs.common.InitializationException;
+import io.awacs.common.Packet;
+import io.awacs.common.Repository;
 import org.bson.Document;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +38,8 @@ import java.util.Map;
 /**
  * Created by pixyonly on 16/9/27.
  */
-public class MongoRepository implements Configurable {
+public class MongoRepository implements Repository {
+
     private static final String ADDRESS = "addresses";
     private static final String CREDENTIAL = "credentials";
     private static final String DB = "db";
@@ -48,15 +50,6 @@ public class MongoRepository implements Configurable {
     private static final boolean DEFAULT_IMMEDIATE_FLUSH = true;
     private MongoConnection mongoConnection;
 
-    public void save(final String collection, final Document doc) throws Exception {
-        ThreadPoolHelper.instance.submit(new Runnable() {
-            @Override
-            public void run() {
-                mongoConnection.getInstance(collection).insertOne(doc);
-            }
-        });
-    }
-
     @Override
     public void init(Configuration configuration) throws InitializationException {
         try {
@@ -66,9 +59,7 @@ public class MongoRepository implements Configurable {
                 String[] hostport = addr.split(":");
                 addresses.add(new ServerAddress(hostport[0], Integer.valueOf(hostport[1])));
             }
-
             String db = configuration.getString(DB, DEFAULT_DB);
-
             List<MongoCredential> credentials = new LinkedList<>();
             String[] creds = configuration.getString(CREDENTIAL, DEFAULT_CREDENTIAL).split(",");
             if (!creds[0].equals("")) {
@@ -89,6 +80,17 @@ public class MongoRepository implements Configurable {
             e.printStackTrace();
             throw new InitializationException();
         }
+    }
+
+    @Override
+    public Packet confirm(Packet recieve, InetSocketAddress remote) {
+//        ThreadPoolHelper.instance.submit(new Runnable() {
+//            @Override
+//            public void run() {
+//                mongoConnection.getInstance(collection).insertOne(doc);
+//            }
+//        });
+        return null;
     }
 
     private static class MongoConnection {

@@ -1,6 +1,7 @@
 package io.awacs.agent;
 
 import io.awacs.agent.net.Callback;
+import io.awacs.agent.net.PacketQueue;
 import io.awacs.common.Packet;
 
 import java.util.concurrent.Future;
@@ -15,8 +16,11 @@ public enum Sender {
 
     private String namespace;
 
-    void setNamespace(String namespace) {
+    private PacketQueue queue;
+
+    void init(String namespace, PacketQueue queue) {
         this.namespace = namespace;
+        this.queue = queue;
     }
 
     public Future<byte[]> send(byte key, String body, Callback cb) {
@@ -24,10 +28,11 @@ public enum Sender {
     }
 
     private Future<byte[]> doSend(Packet packet, Callback cb) {
+        queue.enqueue(packet, cb);
         return null;
     }
 
     public void close() {
-
+        queue.close();
     }
 }

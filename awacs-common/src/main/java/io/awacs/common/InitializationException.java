@@ -15,12 +15,11 @@
  *
  */
 
-package io.awacs.core;
+package io.awacs.common;
 
 /**
- * Created by pixyonly on 16/10/1.
+ * Created by pixyonly on 16/9/29.
  */
-public interface ContextAware<T> {
+public class InitializationException extends Exception {
 
-    void setContext(T t);
 }

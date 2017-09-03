@@ -16,6 +16,7 @@
 
 package io.awacs.agent;
 
+import io.awacs.agent.net.PacketQueue;
 import io.awacs.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import java.lang.instrument.Instrumentation;
 import java.util.*;
 
 /**
- *
  * Created by pixyonly on 16/9/3.
  */
 public enum AWACS {
@@ -40,6 +40,8 @@ public enum AWACS {
     List<PluginDescriptor> descriptors;
 
     List<Plugin> plugins;
+
+    PacketQueue queue;
 
     public void prepare(Instrumentation inst) {
         M.inst = inst;
@@ -59,7 +61,7 @@ public enum AWACS {
         for (String p : pluginList) {
             descriptors.add(new PluginDescriptor(p)
                     .setClassName(config.getString("plugins." + p + ".class"))
-                    .setPluginProperties(config.getSubProperties("plugins." + p + ".conf.")));
+                    .setPluginProperties(new Configuration(config.getSubProperties("plugins." + p + ".conf."))));
             log.info("Load plugin {}", p);
         }
         log.info("AWACS prepared.");
@@ -67,7 +69,8 @@ public enum AWACS {
 
     public void run() {
         //TODO
-        Sender.I.setNamespace("");
+        queue = new PacketQueue();
+        Sender.I.init("", queue);
         for (PluginDescriptor descriptor : descriptors) {
             try {
                 Class<?> clazz = classLoader.findClass(descriptor.getClassName());
@@ -92,6 +95,7 @@ public enum AWACS {
                 for (Plugin plugin : plugins) {
                     plugin.over();
                 }
+                queue.close();
             }
         });
     }

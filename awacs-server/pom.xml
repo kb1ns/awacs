@@ -29,15 +29,7 @@
     <dependencies>
         <dependency>
             <groupId>io.awacs</groupId>
-            <artifactId>awacs-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-binary-protocol</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
+            <artifactId>awacs-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -50,6 +42,15 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.0.33.Final</version>
         </dependency>
         <dependency>
             <groupId>io.awacs</groupId>

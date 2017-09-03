@@ -90,6 +90,10 @@ public final class Configuration {
         return Collections.unmodifiableMap(result);
     }
 
+    public Configuration getSubConfig(String prefix) {
+        return new Configuration(getSubProperties(prefix));
+    }
+
     /**
      * Associates all of the given map's keys and values in the Context.
      */

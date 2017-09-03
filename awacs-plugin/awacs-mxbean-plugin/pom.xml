@@ -32,16 +32,6 @@
             <artifactId>awacs-agent</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-email-repository</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-mongo-repository</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

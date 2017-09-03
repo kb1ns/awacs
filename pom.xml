@@ -108,11 +108,6 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>1.7.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>1.7.7</version>
             </dependency>
@@ -128,17 +123,7 @@
             </dependency>
             <dependency>
                 <groupId>io.awacs</groupId>
-                <artifactId>awacs-core</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.awacs</groupId>
                 <artifactId>awacs-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.awacs</groupId>
-                <artifactId>awacs-binary-protocol</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -1,6 +1,6 @@
 package io.awacs.agent;
 
-import java.util.Map;
+import io.awacs.common.Configuration;
 
 /**
  *
@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public interface Plugin {
 
-    void init(Map<String, String> properties);
+    void init(Configuration properties);
 
     void rock();
 

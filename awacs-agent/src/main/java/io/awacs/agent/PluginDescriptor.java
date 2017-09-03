@@ -1,6 +1,6 @@
 package io.awacs.agent;
 
-import java.util.Map;
+import io.awacs.common.Configuration;
 
 /**
  *
@@ -12,7 +12,7 @@ final class PluginDescriptor {
 
     private String className;
 
-    private Map<String, String> pluginProperties;
+    private Configuration pluginProperties;
 
     public PluginDescriptor(String pluginName) {
         this.pluginName = pluginName;
@@ -31,12 +31,12 @@ final class PluginDescriptor {
         return this;
     }
 
-    public Map<String, String> getPluginProperties() {
-        return pluginProperties;
-    }
-
-    public PluginDescriptor setPluginProperties(Map<String, String> pluginProperties) {
+    public PluginDescriptor setPluginProperties(Configuration pluginProperties) {
         this.pluginProperties = pluginProperties;
         return this;
+    }
+
+    public Configuration getPluginProperties() {
+        return pluginProperties;
     }
 }

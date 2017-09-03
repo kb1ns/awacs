@@ -16,12 +16,13 @@
 
 package io.awacs.server;
 
-import com.google.common.collect.ImmutableMap;
-import io.awacs.core.*;
-import io.awacs.core.transport.Message;
-import io.awacs.core.transport.Server;
-import io.awacs.protocol.binary.BinaryMessageDecoder;
-import io.awacs.protocol.binary.BinaryMessageEncoder;
+import io.awacs.common.Configurable;
+import io.awacs.common.Configuration;
+import io.awacs.common.Packet;
+import io.awacs.common.Repository;
+import io.awacs.server.codec.PacketDecoder;
+import io.awacs.server.codec.PacketEncoder;
+import io.awacs.common.InitializationException;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -35,14 +36,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 /**
  * Created by pixyonly on 8/24/16.
  */
-public final class MessageReportServer implements Server, Configurable {
+public final class ServerEntry implements Server, Configurable {
 
-    private final static Logger logger = LoggerFactory.getLogger(MessageReportServer.class);
+    private final static Logger log = LoggerFactory.getLogger(ServerEntry.class);
 
     private EventLoopGroup boss;
 
@@ -52,12 +54,15 @@ public final class MessageReportServer implements Server, Configurable {
 
     private int port;
 
-    private Plugins plugins;
-
     private EventExecutorGroup businessGroup;
 
-    public void setPlugins(Plugins plugins) {
-        this.plugins = plugins;
+    private Repositories repos;
+
+    private final ReentrantReadWriteLock repoLock = new ReentrantReadWriteLock();
+
+    @Override
+    public void load(Repositories repositories) {
+        this.repos = repositories;
     }
 
     @Override
@@ -69,9 +74,9 @@ public final class MessageReportServer implements Server, Configurable {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline().addLast(new BinaryMessageDecoder());
-                        ch.pipeline().addLast(new BinaryMessageEncoder());
-                        ch.pipeline().addLast(businessGroup, new MessageReportRouter(MessageReportServer.this));
+                        ch.pipeline().addLast(new PacketDecoder());
+                        ch.pipeline().addLast(new PacketEncoder());
+                        ch.pipeline().addLast(businessGroup, new Dispatcher(ServerEntry.this));
                     }
                 })
                 .childOption(ChannelOption.TCP_NODELAY, true)
@@ -90,43 +95,48 @@ public final class MessageReportServer implements Server, Configurable {
         businessGroup.shutdownGracefully();
     }
 
-
     @Override
     public void init(Configuration configuration) throws InitializationException {
-
         String serverName = configuration.getString(Configurations.SERVER_PREFIX);
-        ImmutableMap<String, String> serverConfig = configuration.getSubProperties(Configurations.SERVER_PREFIX + "." + serverName + ".");
-        host = serverConfig.getOrDefault(Configurations.TCP_BIND_HOST, Configurations.DEFAULT_TCP_BIND_HOST);
-        port = Integer.parseInt(serverConfig.getOrDefault(Configurations.TCP_BIND_PORT, Configurations.DEFAULT_TCP_BIND_PORT));
-        int bossCore = Integer.parseInt(serverConfig.getOrDefault(Configurations.TCP_BOSS_CORE, Configurations.DEFAULT_TCP_BOSS_CORE));
-        int workerCore = Integer.parseInt(serverConfig.getOrDefault(Configurations.TCP_WORKER_CORE, Configurations.DEFAULT_TCP_WORKER_CORE));
+        Configuration selfConfig = configuration.getSubConfig(serverName);
+        host = selfConfig.getString(Configurations.TCP_BIND_HOST, Configurations.DEFAULT_TCP_BIND_HOST);
+        port = selfConfig.getInteger(Configurations.TCP_BIND_PORT, Configurations.DEFAULT_TCP_BIND_PORT);
+        int bossCore = selfConfig.getInteger(Configurations.TCP_BOSS_CORE, Configurations.DEFAULT_TCP_BOSS_CORE);
+        int workerCore = selfConfig.getInteger(Configurations.TCP_WORKER_CORE, Configurations.DEFAULT_TCP_WORKER_CORE);
         boss = new NioEventLoopGroup(bossCore);
         worker = new NioEventLoopGroup(workerCore);
         businessGroup = new DefaultEventExecutorGroup(16);
     }
 
+
     /**
      * Created by pixyonly on 8/24/16.
      */
-    public static class MessageReportRouter extends SimpleChannelInboundHandler<Message> {
+    public static class Dispatcher extends SimpleChannelInboundHandler<Packet> {
 
-        private MessageReportServer owner;
+        private ServerEntry ref;
 
-        MessageReportRouter(MessageReportServer owner) {
-            this.owner = owner;
+        Dispatcher(ServerEntry ref) {
+            this.ref = ref;
         }
 
         @Override
-        public void channelRead0(ChannelHandlerContext ctx, Message message)
+        public void channelRead0(ChannelHandlerContext ctx, Packet packet)
                 throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
-            PluginHandler handler = owner.plugins.getPluginHandler(message.getKey());
-            logger.debug(new String(message.body()));
-            Message ret = handler.handle(message, address);
-            if (ret == null) {
-                logger.debug("plugin method returns void.");
-            } else {
-                ctx.writeAndFlush(ret);
+            try {
+                ref.repoLock.readLock().lock();
+                Repository handler = ref.repos.holder.get(Byte.toUnsignedInt(packet.key()));
+                if (handler == null) {
+                    //TODO
+                    return;
+                }
+                Packet response = handler.confirm(packet, address);
+                if (response != null) {
+                    ctx.writeAndFlush(response);
+                }
+            } finally {
+                ref.repoLock.readLock().unlock();
             }
         }
 

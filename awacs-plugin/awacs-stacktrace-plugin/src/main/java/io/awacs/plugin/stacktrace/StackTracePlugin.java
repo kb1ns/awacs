@@ -16,23 +16,19 @@
 
 package io.awacs.plugin.stacktrace;
 
-import com.alibaba.fastjson.JSONObject;
-import io.awacs.agent.net.MessageHub;
-import io.awacs.core.NoSuchKeyTypeException;
-import io.awacs.core.Plugin;
-import io.awacs.core.PluginDescriptor;
-import io.awacs.core.transport.Key;
-import io.awacs.core.util.LoggerPlus;
-import io.awacs.core.util.LoggerPlusFactory;
-import io.awacs.protocol.binary.BinaryMessage;
-import io.awacs.protocol.binary.ByteKey;
+
+import io.awacs.agent.AWACS;
+import io.awacs.agent.Plugin;
+import io.awacs.agent.Sender;
+import io.awacs.common.Configuration;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
-import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 
 /**
@@ -41,29 +37,15 @@ import java.security.ProtectionDomain;
  */
 public class StackTracePlugin implements Plugin {
 
-    private static LoggerPlus logger = LoggerPlusFactory.getLogger(StackTracePlugin.class);
+    private static Logger log = LoggerFactory.getLogger(StackTracePlugin.class);
 
-    private static PluginDescriptor descriptor;
-
-    private static Key<?> key;
-
-    private static ClassFilter classFilter;
-
-    private Instrumentation inst;
-
-    public PluginDescriptor getDescriptor() {
-        return descriptor;
-    }
+    private ClassFilter classFilter;
 
     //发送线程的堆栈信息
     public static void incrAccess() {
-        logger.debug("Request complete, event fired.");
+        log.debug("Request complete, event fired.");
         String report = buildAccessReport(CallStack.reset());
-        MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
-                .setKey(key)
-                .setVersion(BinaryMessage.C_VERSION)
-                .setBody(report.getBytes())
-                .build());
+        Sender.I.send((byte) 0x01, report, null);
     }
 
     private static String buildAccessReport(CallElement root) {
@@ -77,46 +59,40 @@ public class StackTracePlugin implements Plugin {
 
     //发送异常信息
     public static void incrFailure(Throwable e) {
-        logger.info("Exception occur, event fired.");
+        log.info("Exception occur, event fired.");
         CallStack.reset();
-        JSONObject report = new JSONObject();
-        report.put("thread", Thread.currentThread().getName());
-        report.put("stack", e.getStackTrace());
-        report.put("exception", e.getClass().getCanonicalName());
-        report.put("message", e.getMessage());
-        MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
-                .setKey(key)
-                .setVersion(BinaryMessage.C_VERSION)
-                .setBody(report.toJSONString().getBytes())
-                .build());
+//        JSONObject report = new JSONObject();
+//        report.put("thread", Thread.currentThread().getName());
+//        report.put("stack", e.getStackTrace());
+//        report.put("exception", e.getClass().getCanonicalName());
+//        report.put("message", e.getMessage());
+//        MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
+//                .setKey(key)
+//                .setVersion(BinaryMessage.C_VERSION)
+//                .setBody(report.toJSONString().getBytes())
+//                .build());
+    }
+
+    private static String buildErrReport(Throwable e) {
+        StackTraceElement[] stack = e.getStackTrace();
+
+        return "{\"thread\":\""
+                + Thread.currentThread().getName()
+                + "\",\"stack\":"
+                + stack
+                + "\",\"exception\":"
+                + e.getCause()
+                + "}";
     }
 
     @Override
-    public void setDescriptor(PluginDescriptor descriptor) {
-        StackTracePlugin.descriptor = descriptor;
-        try {
-            key = ByteKey.getKey(descriptor.getKeyClass(), descriptor.getKeyValue());
-            String prefixes = descriptor.getProperties().get("packagePrefix");
-            String[] filters = prefixes == null ? null : prefixes.split(",");
-            classFilter = new ClassFilter(filters);
-        } catch (NoSuchKeyTypeException e) {
-            e.printStackTrace();
-        }
+    public void init(Configuration properties) {
+        classFilter = new ClassFilter(properties.getArray("filter_package_prefix"));
     }
 
     @Override
-    public Instrumentation getInstrumentation() {
-        return inst;
-    }
-
-    @Override
-    public void setInstrumentation(Instrumentation inst) {
-        this.inst = inst;
-    }
-
-    @Override
-    public void boot() {
-        inst.addTransformer(new ClassFileTransformer() {
+    public void rock() {
+        AWACS.M.getInstrumentation().addTransformer(new ClassFileTransformer() {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
                 try {
@@ -134,5 +110,10 @@ public class StackTracePlugin implements Plugin {
                 }
             }
         });
+    }
+
+    @Override
+    public void over() {
+        //DO NOTHING
     }
 }

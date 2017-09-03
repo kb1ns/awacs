@@ -30,23 +30,12 @@
         <dependency>
             <groupId>io.awacs</groupId>
             <artifactId>awacs-agent</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-all</artifactId>
             <version>5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-email-repository</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-mongo-repository</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-influx-repository</artifactId>
         </dependency>
     </dependencies>
 
