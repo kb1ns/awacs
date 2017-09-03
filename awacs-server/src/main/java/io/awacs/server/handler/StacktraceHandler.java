@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by pixyonly on 03/09/2017.
  */
-public class StackTraceHandler implements Handler {
+public class StacktraceHandler implements Handler {
 
-    private static final Logger log = LoggerFactory.getLogger(StackTraceHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(StacktraceHandler.class);
 
 //    @Inject("email")
 //    private EmailComponent emailComponent;
