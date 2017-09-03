@@ -19,9 +19,6 @@ package io.awacs.server;
 
 import io.awacs.common.Configuration;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,22 +31,6 @@ import java.util.ResourceBundle;
 public class Configurations {
 
     public static final String SERVER_PREFIX = "awacs.servers";
-
-    public static final String HTTP_BIND_HOST = "http_bind_host";
-
-    public static final String DEFAULT_HTTP_BIND_HOST = "0.0.0.0";
-
-    public static final String HTTP_BIND_PORT = "http_bind_port";
-
-    public static final String DEFAULT_HTTP_BIND_PORT = "7100";
-
-    public static final String HTTP_BOSS_CORE = "http_boss_core";
-
-    public static final String DEFAULT_HTTP_BOSS_CORE = "1";
-
-    public static final String HTTP_WORKER_CORE = "http_worker_core";
-
-    public static final String DEFAULT_HTTP_WORKER_CORE = String.valueOf(Runtime.getRuntime().availableProcessors() * 2);
 
     public static final String TCP_BIND_HOST = "tcp_bind_host";
 
@@ -67,25 +48,26 @@ public class Configurations {
 
     public static final int DEFAULT_TCP_WORKER_CORE = Runtime.getRuntime().availableProcessors() * 2;
 
-    public static final String PLUGIN_PREFIX = "awacs.plugins";
+//    public static final String PLUGIN_PREFIX = "awacs.plugins";
+//
+//    public static final String PLUGIN_CLASS = "pluginClass";
+//
+//    public static final String PLUGIN_PROPERTIES = "pluginProperties";
+//
+//    public static final String HANDLER_PROPERTIES = "handlerProperties";
+//
+//    public static final String HANDLER_CLASS = "handlerClass";
+//
+//    public static final String KEY_CLASS = "keyClass";
+//
+//    public static final String KEY_VALUE = "keyValue";
 
-    public static final String PLUGIN_CLASS = "pluginClass";
+    public static final String COMPONENT_PREFIX = "awacs.components";
 
-    public static final String PLUGIN_PROPERTIES = "pluginProperties";
-
-    public static final String HANDLER_PROPERTIES = "handlerProperties";
-
-    public static final String HANDLER_CLASS = "handlerClass";
-
-    public static final String KEY_CLASS = "keyClass";
-
-    public static final String KEY_VALUE = "keyValue";
-
-    public static final String REPOSITORY_PREFIX = "awacs.repositories";
-
-    public static final String REPOSITORY_CLASS = "class";
+    public static final String COMPONENT_CLASS = "class";
 
     public static Configuration loadConfigurations() {
+        //TODO
         ResourceBundle bundle = ResourceBundle.getBundle("awacs");
         Enumeration<String> keys = bundle.getKeys();
         Map<String, String> map = new HashMap<>();
@@ -104,15 +86,15 @@ public class Configurations {
 //                map.getOrDefault(serverName + "." + TCP_BIND_PORT, DEFAULT_TCP_BIND_PORT)).collect(Collectors.toList()));
 //        return addrs;
 //    }
-
-    public static String getPluginPath() {
-        return System.getProperty("awacs.home", System.getProperty("user.dir")) + "/plugins/";
-    }
-
-    public static void dump(String conf) throws IOException {
-        FileWriter fw = new FileWriter(new File(getPluginPath() + "/config.json"));
-        fw.write(conf);
-        fw.flush();
-        fw.close();
-    }
+//
+//    public static String getPluginPath() {
+//        return System.getProperty("awacs.home", System.getProperty("user.dir")) + "/plugins/";
+//    }
+//
+//    public static void dump(String conf) throws IOException {
+//        FileWriter fw = new FileWriter(new File(getPluginPath() + "/config.json"));
+//        fw.write(conf);
+//        fw.flush();
+//        fw.close();
+//    }
 }

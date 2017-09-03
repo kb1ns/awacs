@@ -1,4 +1,4 @@
-package io.awacs.repository.influx;
+package io.awacs.component.influxdb;
 
 import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;
@@ -9,10 +9,9 @@ import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 
 /**
- *
- * Created by pixyonly on 31/08/2017.
+ * Created by pixyonly on 03/09/2017.
  */
-public class InfluxRepository implements Configurable {
+public class InfluxdbComponent implements Configurable {
 
     @Override
     public void init(Configuration configuration) throws InitializationException {

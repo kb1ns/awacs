@@ -23,7 +23,7 @@ package io.awacs.server;
  */
 public interface Server {
 
-    void load(Repositories repositories);
+    void load(Components components);
 
     void start();
 

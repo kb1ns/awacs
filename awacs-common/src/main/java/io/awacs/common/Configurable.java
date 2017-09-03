@@ -23,5 +23,5 @@ package io.awacs.common;
  */
 public interface Configurable {
 
-    void init(Configuration configuration) throws InitializationException;
+    void init(Configuration configuration);
 }

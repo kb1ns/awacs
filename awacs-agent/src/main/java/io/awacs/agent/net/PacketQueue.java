@@ -2,6 +2,7 @@ package io.awacs.agent.net;
 
 import io.awacs.common.Packet;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,7 +17,7 @@ public final class PacketQueue {
 
     private AgentClient client;
 
-    private List<Remote> remotes;
+    private List<InetSocketAddress> remotes;
 
     private final Object arbitrator = new Object();
 

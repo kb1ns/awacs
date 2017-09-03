@@ -25,8 +25,8 @@
     <modules>
         <module>awacs-agent</module>
         <module>awacs-common</module>
+        <module>awacs-component</module>
         <module>awacs-plugin</module>
-        <module>awacs-repository</module>
         <module>awacs-server</module>
     </modules>
     <scm>
@@ -126,12 +126,7 @@
             </dependency>
             <dependency>
                 <groupId>io.awacs</groupId>
-                <artifactId>awacs-mongo-repository</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.awacs</groupId>
-                <artifactId>awacs-influx-repository</artifactId>
+                <artifactId>awacs-influx-component</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

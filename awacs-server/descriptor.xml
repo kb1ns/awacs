@@ -42,11 +42,11 @@
             <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/main/plugins</directory>
+            <directory>${project.build.directory}/plugins</directory>
             <outputDirectory>plugins</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/main/lib</directory>
+            <directory>${project.build.directory}/lib</directory>
             <outputDirectory>lib</outputDirectory>
         </fileSet>
     </fileSets>

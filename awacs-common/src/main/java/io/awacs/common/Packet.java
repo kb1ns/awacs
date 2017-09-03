@@ -28,6 +28,14 @@ public class Packet {
         this.body = body;
     }
 
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     public int size() {
         return body.getBytes().length + namespace.getBytes().length + 16;
     }
