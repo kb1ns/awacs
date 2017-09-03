@@ -54,12 +54,7 @@
         </dependency>
         <dependency>
             <groupId>io.awacs</groupId>
-            <artifactId>awacs-mongo-repository</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.awacs</groupId>
-            <artifactId>awacs-email-repository</artifactId>
+            <artifactId>awacs-influx-repository</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

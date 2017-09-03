@@ -17,41 +17,30 @@
 
 package io.awacs.plugin.mxbean;
 
-import io.awacs.core.Configuration;
-import io.awacs.core.EnableInjection;
-import io.awacs.core.InitializationException;
-import io.awacs.core.PluginHandler;
-import io.awacs.core.transport.Message;
-import io.awacs.repository.MongoRepository;
-import org.bson.Document;
-
-import javax.annotation.Resource;
-import java.net.InetSocketAddress;
 
 /**
  * Created by antong on 16/9/20.
  */
-@EnableInjection
-public class MXBeanHandler implements PluginHandler {
+public class MXBeanHandler {
 
-    @Resource
-    private MongoRepository mongoRepository;
-
-    @Override
-    public Message handle(Message message, InetSocketAddress address) {
-        try {
-            Document doc = Document.parse(new String(message.body()));
-            doc.put("host", address.getAddress().getHostAddress());
-            doc.put("port", address.getPort());
-            mongoRepository.save("mxbean", doc);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public void init(Configuration configuration) throws InitializationException {
-
-    }
+//    @Resource
+//    private MongoRepository mongoRepository;
+//
+//    @Override
+//    public Message handle(Message message, InetSocketAddress address) {
+//        try {
+//            Document doc = Document.parse(new String(message.body()));
+//            doc.put("host", address.getAddress().getHostAddress());
+//            doc.put("port", address.getPort());
+//            mongoRepository.save("mxbean", doc);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+//
+//    @Override
+//    public void init(Configuration configuration) throws InitializationException {
+//
+//    }
 }

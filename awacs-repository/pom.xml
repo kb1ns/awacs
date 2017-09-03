@@ -34,7 +34,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.awacs</groupId>
-                <artifactId>awacs-core</artifactId>
+                <artifactId>awacs-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

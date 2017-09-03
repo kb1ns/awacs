@@ -17,8 +17,6 @@
 
 package io.awacs.plugin.mxbean;
 
-import com.alibaba.fastjson.JSON;
-
 import java.lang.management.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -616,12 +614,12 @@ public class MXBeanReport {
         this.memoryPools = memoryPools;
     }
 
-    public static void main(String[] args) {
-        System.out.println(JSON.toJSONString(new MXBeanReport()));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(JSON.toJSONString(new MXBeanReport()));
+//    }
 
-    @Override
-    public String toString() {
-        return JSON.toJSONString(this);
-    }
+//    @Override
+//    public String toString() {
+//        return JSON.toJSONString(this);
+//    }
 }

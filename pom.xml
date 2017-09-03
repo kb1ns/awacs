@@ -25,9 +25,7 @@
     <modules>
         <module>awacs-agent</module>
         <module>awacs-common</module>
-        <module>awacs-core</module>
         <module>awacs-plugin</module>
-        <module>awacs-protocol</module>
         <module>awacs-repository</module>
         <module>awacs-server</module>
     </modules>
@@ -133,7 +131,7 @@
             </dependency>
             <dependency>
                 <groupId>io.awacs</groupId>
-                <artifactId>awacs-email-repository</artifactId>
+                <artifactId>awacs-influx-repository</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
