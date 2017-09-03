@@ -144,11 +144,10 @@ public final class ServerEntry implements Server, Configurable {
                 throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
             Handler handler = ref.handlerHolder.get(Byte.toUnsignedInt(packet.key()));
-            System.out.println(packet.getNamespace());
-            System.out.println(packet.getBody());
-
-            if (handler != null) {
+            if (handler == null) {
                 //TODO default handler
+                System.out.println(packet.getNamespace());
+                System.out.println(packet.getBody());
                 return;
             }
             Packet response = handler.onReceive(packet, address);
