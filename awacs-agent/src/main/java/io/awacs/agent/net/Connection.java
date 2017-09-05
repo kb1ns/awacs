@@ -34,6 +34,8 @@ class Connection {
         ready();
     }
 
+//    void sendDirect
+
     boolean ready() {
         try {
             if (channel == null) {

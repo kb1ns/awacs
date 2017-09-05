@@ -94,11 +94,10 @@ public final class PacketQueue {
     public void enqueue(final Packet packet) {
         if (closed)
             return;
-//        try {
-//            queue.offer(packet, 10, TimeUnit.MILLISECONDS);
-        queue.offer(packet);
-//        } catch (InterruptedException ignored) {
-//        }
+        try {
+            queue.offer(packet, 10, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignored) {
+        }
     }
 
     private void shift() {
