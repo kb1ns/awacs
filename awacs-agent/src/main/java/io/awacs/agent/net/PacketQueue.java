@@ -31,6 +31,8 @@ public final class PacketQueue {
 
     private List<Remote> remotes;
 
+    private int maxBatchMemory = 1 << 10;
+
     public PacketQueue(List<Remote> remotes) {
         if (remotes.size() <= 2) {
             this.remotes = new ArrayList<>(remotes.size() * 2);
@@ -52,7 +54,7 @@ public final class PacketQueue {
         //TODO config
         this.queue = new ArrayBlockingQueue<>(50);
         for (Remote r : remotes) {
-            this.batches.add(new Connection(selector, r, 1 << 10));
+            this.batches.add(new Connection(selector, r, maxBatchMemory));
         }
         this.boss = Executors.newFixedThreadPool(remotes.size(), new ThreadFactory() {
             @Override
@@ -68,6 +70,10 @@ public final class PacketQueue {
                 while (!closed) {
                     try {
                         Packet packet = queue.take();
+                        if (packet.size() > maxBatchMemory) {
+                            //TODO
+                            continue;
+                        }
                         if (batches.isEmpty()) {
                             //wait until a connection becomes avaliable
                             synchronized (batches) {

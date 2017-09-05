@@ -24,7 +24,7 @@ class Connection {
 
     Selector selector;
 
-    int bufSize;
+    final int bufSize;
 
     Connection(Selector selector, Remote remote, int bufSize) {
         this.selector = selector;
@@ -34,7 +34,21 @@ class Connection {
         ready();
     }
 
-//    void sendDirect
+    void sendDirectly(byte[] data, Callback cb, int retry) {
+        try {
+            channel.write(ByteBuffer.wrap(data));
+            if (cb != null) {
+                cb.onComplete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (retry > 0) {
+                sendDirectly(data, cb, retry - 1);
+            } else {
+                cb.onException(e);
+            }
+        }
+    }
 
     boolean ready() {
         try {
