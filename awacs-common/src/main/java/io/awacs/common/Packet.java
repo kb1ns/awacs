@@ -71,12 +71,12 @@ public class Packet {
             throw new IllegalPacketException();
         }
         byte k = header[3];
+        int namespaceLen = (Byte.toUnsignedInt(header[12]) << 8) |
+                (Byte.toUnsignedInt(header[13]));
         int bodyLen = (Byte.toUnsignedInt(header[8]) << 24) |
                 (Byte.toUnsignedInt(header[9]) << 16) |
                 (Byte.toUnsignedInt(header[10]) << 8) |
                 Byte.toUnsignedInt(header[11]);
-        int namespaceLen = (Byte.toUnsignedInt(header[12]) << 8) |
-                (Byte.toUnsignedInt(header[13]));
         String namespace = new String(next, 0, namespaceLen);
         String body = new String(next, namespaceLen, bodyLen);
         return new Packet(namespace, k, body);
@@ -88,7 +88,7 @@ public class Packet {
 
     public static int bodyLength(byte[] payload) {
         return (Byte.toUnsignedInt(payload[8]) << 24) | (Byte.toUnsignedInt(payload[9]) << 16) |
-                (Byte.toUnsignedInt(payload[12]) << 8) | Byte.toUnsignedInt(payload[11]);
+                (Byte.toUnsignedInt(payload[10]) << 8) | Byte.toUnsignedInt(payload[11]);
     }
 
     @Override

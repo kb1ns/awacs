@@ -76,9 +76,10 @@ public final class ServerEntry implements Server, Configurable {
                     String name = i.value();
                     Object component = components.lookup(name, f.getType());
                     f.set(handler, component);
-                    log.info("Inject component {} to handler {}", name, handler);
+                    log.info("Component {} injected into handler {}", name, handler);
                 }
                 handlerHolder.put(Byte.toUnsignedInt(handler.key()), handler);
+                log.info("Handler {} registered with key {}", clazz.getCanonicalName(), handler.key());
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -140,8 +141,7 @@ public final class ServerEntry implements Server, Configurable {
         }
 
         @Override
-        public void channelRead0(ChannelHandlerContext ctx, Packet packet)
-                throws Exception {
+        public void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
             Handler handler = ref.handlerHolder.get(Byte.toUnsignedInt(packet.key()));
             if (handler == null) {

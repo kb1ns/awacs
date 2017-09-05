@@ -17,6 +17,7 @@
 package io.awacs.agent;
 
 import io.awacs.agent.net.PacketQueue;
+import io.awacs.agent.net.Remote;
 import io.awacs.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,17 @@ public enum AWACS {
             map.put(key.trim(), bundle.getString(key).trim());
         }
         Configuration config = new Configuration(map);
-        String[] pluginList = config.getArray("plugins");
+        String[] addr = config.getArray("server");
+        List<Remote> hosts = new ArrayList<>(addr.length);
+        for (String a : addr) {
+            hosts.add(new Remote(a));
+        }
+//        client = new AgentClient(hosts);
+//        client.start();
+        queue = new PacketQueue(hosts);
+        Sender.I.init(config.getString("namespace", "defaultapp"), queue);
         //TODO
+        String[] pluginList = config.getArray("plugins");
         classLoader = new PluginClassLoader("/tmp/", pluginList);
         for (String p : pluginList) {
             descriptors.add(new PluginDescriptor(p)
@@ -68,9 +78,6 @@ public enum AWACS {
     }
 
     public void run() {
-        //TODO
-        queue = new PacketQueue();
-        Sender.I.init("", queue);
         for (PluginDescriptor descriptor : descriptors) {
             try {
                 Class<?> clazz = classLoader.findClass(descriptor.getClassName());

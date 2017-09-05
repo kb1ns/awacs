@@ -4,6 +4,8 @@
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/ArcherFeel/awacs/blob/master/LICENSE)
 [![Version](https://img.shields.io/badge/AWACS-0.1.11-orange.svg)](https://github.com/ArcherFeel/awacs/tree/0.1.11)
 
+v0.2 is under development.
+
 ## Overview
 
 AWACS is a non-intrusive Java APM.
@@ -97,6 +99,7 @@ AWACS is a non-intrusive Java APM.
 * An Tong [@antong530](https://github.com/antong530)
 * Chen Lei [@dalvikchen](https://github.com/dalvikchen)
 * Wang Li [@waally](https://github.com/waally)
+* Zhang Zun [@jcbay](https://github.com/jcbay)
 
 ## License
 

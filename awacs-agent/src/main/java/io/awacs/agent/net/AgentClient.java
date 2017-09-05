@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class AgentClient {
 
-    private List<InetSocketAddress> addresses;
+    private List<Remote> addresses;
 
     private Map<Integer, SocketChannel> channels;
 
@@ -30,7 +30,7 @@ public class AgentClient {
 
     private Random random;
 
-    public AgentClient(List<InetSocketAddress> addresses) {
+    public AgentClient(List<Remote> addresses) {
         this.addresses = addresses;
         this.channels = new TreeMap<>();
         this.random = new Random();
@@ -51,7 +51,7 @@ public class AgentClient {
             e.printStackTrace();
         }
         for (int i = 0; i < addresses.size(); i++) {
-            channels.put(i, ready(addresses.get(i)));
+            channels.put(i, ready(addresses.get(i).getAddress()));
         }
     }
 
@@ -68,7 +68,7 @@ public class AgentClient {
         }
     }
 
-    private void send(final byte[] msg, final int retry, final Callback cb, final int remoteIndex) {
+    private void send(final ByteBuffer buf, final int retry, final Callback cb, final int remoteIndex) {
         if (closed) {
             throw new IllegalStateException("Cannot send data after closed.");
         }
@@ -76,18 +76,18 @@ public class AgentClient {
             @Override
             public void run() {
                 try {
-                    channels.get(remoteIndex).write(ByteBuffer.wrap(msg));
+                    channels.get(remoteIndex).write(buf);
                 } catch (Exception e) {
                     if (e instanceof NotYetConnectedException) {
                         try {
-                            channels.get(remoteIndex).connect(addresses.get(remoteIndex));
+                            channels.get(remoteIndex).connect(addresses.get(remoteIndex).getAddress());
                         } catch (Exception ignore) {
                         }
                     } else if (e instanceof NullPointerException) {
-                        channels.put(remoteIndex, ready(addresses.get(remoteIndex)));
+                        channels.put(remoteIndex, ready(addresses.get(remoteIndex).getAddress()));
                     }
                     if (retry > 0) {
-                        send(msg, retry - 1, cb);
+                        send(buf, retry - 1, cb);
                     } else if (cb != null) {
                         cb.onException(e);
                     }
@@ -96,12 +96,12 @@ public class AgentClient {
         });
     }
 
-    public void send(byte[] msg, Callback cb) {
-        send(msg, 2, cb, random.nextInt(addresses.size()));
+    public void send(ByteBuffer buf, Callback cb) {
+        send(buf, 2, cb, random.nextInt(addresses.size()));
     }
 
-    public void send(byte[] msg, int retry, Callback cb) {
-        send(msg, retry, cb, random.nextInt(addresses.size()));
+    public void send(ByteBuffer buf, int retry, Callback cb) {
+        send(buf, retry, cb, random.nextInt(addresses.size()));
     }
 
     public void stop() {

@@ -63,21 +63,26 @@
         </developer>
         <developer>
             <name>Lei Chen</name>
-            <email></email>
             <roles>
                 <role>manager</role>
             </roles>
         </developer>
         <developer>
             <name>Li Wang</name>
-            <email></email>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+        <developer>
+            <name>Zun Zhang</name>
+            <email>jcbay@163.com</email>
             <roles>
                 <role>developer</role>
             </roles>
         </developer>
     </developers>
     <issueManagement>
-        <url>https://github.com/ArcherFeel/awacs/issues</url>
+        <url>https://github.com/Archerfeel/awacs/issues</url>
     </issueManagement>
     <dependencies>
         <dependency>

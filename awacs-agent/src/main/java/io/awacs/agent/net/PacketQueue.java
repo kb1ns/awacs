@@ -1,99 +1,138 @@
 package io.awacs.agent.net;
 
 import io.awacs.common.Packet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
+import java.io.IOException;
+import java.nio.channels.Selector;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.*;
 
 /**
  * Created by pixyonly on 03/09/2017.
  */
 public final class PacketQueue {
 
+    private static Logger log = LoggerFactory.getLogger(PacketQueue.class);
+
     private volatile boolean closed;
 
-    private AgentClient client;
+    private final Deque<Connection> batches;
 
-    private List<InetSocketAddress> remotes;
+    private Selector selector;
 
-    private final Object arbitrator = new Object();
+    private ExecutorService boss;
 
-    public void enqueue(Packet packet, Callback cb) {
-        if (closed) {
-            throw new IllegalStateException("AWACS is closed.");
+    private ArrayBlockingQueue<Packet> queue;
+
+    private List<Remote> remotes;
+
+    public PacketQueue(List<Remote> remotes) {
+        if (remotes.size() <= 2) {
+            this.remotes = new ArrayList<>(remotes.size() * 2);
+            this.remotes.addAll(remotes);
+            this.remotes.addAll(remotes);
+        } else {
+            this.remotes = remotes;
         }
-        synchronized (arbitrator) {
-            if (Batch.FIRST.progressed.get()) {
-                if (Batch.SECOND.progressed.get()) {
-                    return;
-                }
-                if (!Batch.SECOND.append(packet)) {
-                    Batch.SECOND.flush();
-                    enqueue(packet, cb);
-                }
-            } else {
-                if (!Batch.FIRST.append(packet)) {
-                    Batch.FIRST.flush();
-                    enqueue(packet, cb);
-                }
+        this.batches = new ArrayDeque<>(this.remotes.size());
+        init();
+    }
+
+    private void init() {
+        try {
+            selector = Selector.open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //TODO config
+        this.queue = new ArrayBlockingQueue<>(50);
+        for (Remote r : remotes) {
+            this.batches.add(new Connection(selector, r, 1 << 10));
+        }
+        this.boss = Executors.newFixedThreadPool(remotes.size(), new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                return t;
             }
-        }
-    }
-
-    //TODO
-    public void close() {
-        closed = true;
-        Batch.FIRST.flush();
-        Batch.SECOND.flush();
-    }
-
-    enum Batch {
-
-        FIRST, SECOND;
-
-        private AtomicBoolean progressed = new AtomicBoolean(false);
-
-        private final ByteBuffer buffer = ByteBuffer.allocate(1 << 22);
-
-        private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
-        private void flush() {
-            progressed.set(true);
-            //TODO awake Client
-            new Thread() {
-                public void run() {
+        });
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                while (!closed) {
                     try {
-                        lock.writeLock().lock();
-                        buffer.flip();
-                        buffer.array();
-                        System.out.println("consumed");
-                        buffer.clear();
-                    } finally {
-                        done();
-                        lock.writeLock().unlock();
+                        Packet packet = queue.take();
+                        if (batches.isEmpty()) {
+                            //wait until a connection becomes avaliable
+                            synchronized (batches) {
+                                if (batches.isEmpty()) {
+                                    batches.wait();
+                                }
+                            }
+                        }
+                        if (!batches.peek().append(packet)) {
+                            shift();
+                        }
+                    } catch (Exception e) {
+                        //protect our consumer
+                        log.error("", e);
                     }
                 }
-            };
-        }
-
-        boolean append(Packet packet) {
-            try {
-                lock.readLock().lock();
-                if (packet.size() + buffer.remaining() > buffer.capacity()) {
-                    return false;
-                }
-                buffer.put(packet.serialize());
-                return true;
-            } finally {
-                lock.readLock().unlock();
             }
-        }
+        };
+        Thread consumer = new Thread(task);
+        consumer.setDaemon(true);
+        consumer.start();
+    }
 
-        void done() {
-            progressed.set(false);
+    public void enqueue(final Packet packet) {
+        if (closed)
+            return;
+//        try {
+//            queue.offer(packet, 10, TimeUnit.MILLISECONDS);
+        queue.offer(packet);
+//        } catch (InterruptedException ignored) {
+//        }
+    }
+
+    private void shift() {
+        final Connection c = batches.poll();
+        boss.submit(new Runnable() {
+            @Override
+            public void run() {
+                c.flush(new Callback() {
+                    @Override
+                    public void onComplete() {
+                        synchronized (batches) {
+                            batches.add(c);
+                            batches.notifyAll();
+                        }
+                    }
+
+                    @Override
+                    public void onException(Throwable t) {
+                        batches.add(c);
+                        batches.notifyAll();
+                    }
+                });
+            }
+        });
+    }
+
+    public void close() {
+        closed = true;
+        //TODO drainTo channel
+        try {
+            selector.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        boss.shutdownNow();
     }
 }
