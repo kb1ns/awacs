@@ -24,11 +24,11 @@ public enum Sender {
         doSend(new Packet(namespace, key, body));
     }
 
-    private void doSend(Packet packet) {
+    void doSend(Packet packet) {
         queue.enqueue(packet);
     }
 
-    public void close() {
+    void close() {
         queue.close();
     }
 }

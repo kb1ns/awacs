@@ -71,12 +71,6 @@ public class CallElement {
 
     @Override
     public String toString() {
-        return '{' +
-                "\"caller\":\"" + id() + "\"," +
-                "\"timestamp\":" + timestamp + "," +
-                "\"elapsedTime\":" + elapsedTime + "," +
-                "\"callCount\":" + callCounter + "," +
-                "\"subMethods\":" + subElements.values().toString() +
-                '}';
+        return String.format("%s:%s@%s%s", id(), elapsedTime, callCounter, subElements.values().toString());
     }
 }

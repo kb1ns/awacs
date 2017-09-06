@@ -23,14 +23,13 @@ import io.awacs.common.Configuration;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by pixyonly on 16/10/25.
@@ -46,30 +45,26 @@ public class StackTracePlugin implements Plugin {
 
     private final static String EXCEPTION_TRACE_LEVEL = "exception_trace_level";
 
-    private static Logger log = LoggerFactory.getLogger(StackTracePlugin.class);
+    private static Logger log = Logger.getAnonymousLogger();
 
     private ClassFilter classFilter;
 
     //发送线程的堆栈信息
     public static void incrAccess() {
-        log.debug("Request complete, event fired.");
-
-        String report = buildAccessReport(CallStack.reset());
-//        Sender.I.send();
-    }
-
-    private static String buildAccessReport(CallElement root) {
-        String stack = root != null ? root.toString() : "{}";
-        return "{\"thread\":\""
-                + Thread.currentThread().getName()
-                + "\",\"stack\":"
-                + stack
-                + "}";
+        log.fine("Request complete.");
+        CallElement root = CallStack.reset();
+        if (root != null) {
+            System.out.println(String.format("-|%s|%s|%s|%s",
+                    Thread.currentThread().getName(),
+                    System.currentTimeMillis(),
+                    root.toString(),
+                    root.id()));
+        }
     }
 
     //发送异常信息
     public static void incrFailure(Throwable e) {
-        log.info("Exception occur, event fired.");
+        log.fine("Exception catched.");
         CallStack.reset();
         if (Config.F.isValid(e.getClass())) {
             System.out.println(buildErrReport(e));
@@ -79,17 +74,10 @@ public class StackTracePlugin implements Plugin {
     private static String buildErrReport(Throwable e) {
         StackTraceElement[] stack = e.getStackTrace();
         int level = Config.F.maxExceptionLevel;
-        int terminate = 0;
         List<StackTraceElement> reducedStack = new ArrayList<>(level);
         for (StackTraceElement element : stack) {
-            if (level <= 1 || terminate >= 2) {
+            if (level-- < 1) {
                 break;
-            }
-            boolean r = Config.F.isFocus(element);
-            if (r) {
-                terminate = 1;
-            } else if (terminate == 1) {
-                terminate++;
             }
             reducedStack.add(element);
         }

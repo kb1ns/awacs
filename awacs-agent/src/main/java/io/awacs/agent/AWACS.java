@@ -48,8 +48,6 @@ public enum AWACS {
 
     List<Plugin> plugins;
 
-    PacketQueue queue;
-
     String home;
 
     public void prepare(Instrumentation inst) {
@@ -75,7 +73,7 @@ public enum AWACS {
         for (String a : addr) {
             hosts.add(new Remote(a));
         }
-        queue = new PacketQueue(hosts);
+        PacketQueue queue = new PacketQueue(hosts);
         Sender.I.init(config.getString("namespace", "defaultapp"), queue);
         String[] pluginList = config.getArray("plugins");
         plugins = new ArrayList<>(pluginList.length);
@@ -123,7 +121,7 @@ public enum AWACS {
                 for (Plugin plugin : plugins) {
                     plugin.over();
                 }
-                queue.close();
+                Sender.I.close();
             }
         });
     }
