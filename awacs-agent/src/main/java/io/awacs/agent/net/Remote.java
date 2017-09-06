@@ -17,4 +17,9 @@ public class Remote {
     public InetSocketAddress getAddress() {
         return address;
     }
+
+    @Override
+    public String toString() {
+        return address.toString();
+    }
 }

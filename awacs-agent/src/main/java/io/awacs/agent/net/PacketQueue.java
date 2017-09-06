@@ -1,8 +1,6 @@
 package io.awacs.agent.net;
 
 import io.awacs.common.Packet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.Selector;
@@ -11,13 +9,15 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by pixyonly on 03/09/2017.
  */
 public final class PacketQueue {
 
-    private static Logger log = LoggerFactory.getLogger(PacketQueue.class);
+    private static Logger log = Logger.getGlobal();
 
     private volatile boolean closed;
 
@@ -91,8 +91,7 @@ public final class PacketQueue {
                             shift();
                         }
                     } catch (Exception e) {
-                        //protect our consumer
-                        log.error("", e);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -113,6 +112,7 @@ public final class PacketQueue {
 
     private void shift() {
         final Connection c = batches.poll();
+        log.log(Level.FINE, "{0} ready to flush.", c.remote);
         boss.submit(new Runnable() {
             @Override
             public void run() {

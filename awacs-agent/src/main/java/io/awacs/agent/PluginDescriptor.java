@@ -2,6 +2,8 @@ package io.awacs.agent;
 
 import io.awacs.common.Configuration;
 
+import java.util.jar.JarFile;
+
 /**
  * Plugins' simple descriptor
  * Created by pixyonly on 02/09/2017.
@@ -11,6 +13,8 @@ final class PluginDescriptor {
     private String pluginName;
 
     private String className;
+
+    private JarFile jarFile;
 
     private Configuration pluginProperties;
 
@@ -38,5 +42,14 @@ final class PluginDescriptor {
 
     public Configuration getPluginProperties() {
         return pluginProperties;
+    }
+
+    public PluginDescriptor setJarFile(JarFile jarFile) {
+        this.jarFile = jarFile;
+        return this;
+    }
+
+    public JarFile getJarFile() {
+        return jarFile;
     }
 }

@@ -45,7 +45,7 @@ public class TestController {
     @RequestMapping(value = "/test/{id}", produces = "application/json")
     public String test2(@PathVariable("id") String id) {
         if (id.compareTo("hello") >= 0)
-            return bis1("test for throw exception");
+            throw new RuntimeException("test for throw exception");
         return new JSONObject().fluentPut("hello", bis1(id)).toJSONString();
     }
 

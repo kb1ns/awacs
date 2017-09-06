@@ -19,13 +19,14 @@ package io.awacs.agent;
 import io.awacs.agent.net.PacketQueue;
 import io.awacs.agent.net.Remote;
 import io.awacs.common.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
+import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * AWACS primary class
@@ -35,7 +36,9 @@ public enum AWACS {
 
     M;
 
-    private final static Logger log = LoggerFactory.getLogger(AWACS.class);
+    final Logger log = Logger.getGlobal();
+
+    final String PLUGIN_NAME_PATTERN = "awacs-%s-plugin.jar";
 
     Instrumentation inst;
 
@@ -52,24 +55,20 @@ public enum AWACS {
     public void prepare(Instrumentation inst) {
         M.inst = inst;
         log.info("AWACS attached.");
-
         home = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
         home = home.substring(0, home.lastIndexOf('/')) + "/";
         Properties properties = new Properties();
-
         try {
             properties.load(new FileInputStream(home + "awacs.properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         Enumeration<Object> keys = properties.keys();
         Map<String, String> map = new HashMap<>();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement().toString();
             map.put(key.trim(), properties.getProperty(key).trim());
         }
-
         Configuration config = new Configuration(map);
         String[] addr = config.getArray("server");
         List<Remote> hosts = new ArrayList<>(addr.length);
@@ -79,28 +78,37 @@ public enum AWACS {
         queue = new PacketQueue(hosts);
         Sender.I.init(config.getString("namespace", "defaultapp"), queue);
         String[] pluginList = config.getArray("plugins");
-
-        classLoader = new PluginClassLoader(home + "plugin", pluginList);
+        plugins = new ArrayList<>(pluginList.length);
+        descriptors = new ArrayList<>(pluginList.length);
         for (String p : pluginList) {
-            descriptors.add(new PluginDescriptor(p)
-                    .setClassName(config.getString("plugins." + p + ".class"))
-                    .setPluginProperties(new Configuration(config.getSubProperties("plugins." + p + ".conf."))));
-            log.info("Load plugin {}", p);
+            try {
+                descriptors.add(new PluginDescriptor(p)
+                        .setPluginProperties(new Configuration(config.getSubProperties("plugins." + p + ".conf.")))
+                        .setClassName(config.getString("plugins." + p + ".class"))
+                        .setJarFile(new JarFile(home + String.format("plugins/" + PLUGIN_NAME_PATTERN, p))));
+            } catch (IOException e) {
+                log.log(Level.SEVERE, "Cannot read jar file: awacs-{0}-plugin.jar", p);
+            }
+            log.log(Level.INFO, "Load plugin {0}.", p);
         }
+        classLoader = new PluginClassLoader(descriptors);
         log.info("AWACS prepared.");
     }
 
     public void run() {
         for (PluginDescriptor descriptor : descriptors) {
             try {
-                Class<?> clazz = classLoader.findClass(descriptor.getClassName());
+                inst.appendToSystemClassLoaderSearch(descriptor.getJarFile());
+//                Class<?> clazz = classLoader.findClass(descriptor.getClassName());
+                Class<?> clazz = Class.forName(descriptor.getClassName());
                 Plugin plugin = (Plugin) clazz.newInstance();
                 plugin.init(descriptor.getPluginProperties());
                 plugin.rock();
                 plugins.add(plugin);
-                log.info("AWACS plugin {} initialized.", descriptor.getClassName());
+                log.log(Level.INFO, "AWACS plugin {0} initialized.", descriptor.getClassName());
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                log.error("Cannot start " + descriptor.getPluginName(), e);
+                log.log(Level.SEVERE, "Cannot launch plugin {0}.", descriptor.getPluginName());
+                e.printStackTrace();
             }
         }
     }

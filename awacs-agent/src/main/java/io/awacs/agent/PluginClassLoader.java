@@ -3,6 +3,7 @@ package io.awacs.agent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.List;
 
 /**
  * We don't use root classloader to load plugin
@@ -10,12 +11,10 @@ import java.net.URLClassLoader;
  */
 class PluginClassLoader extends URLClassLoader {
 
-    final String PLUGIN_NAME_PATTERN = "awacs-%s-plugin.jar";
-
-    public PluginClassLoader(String baseDir, String[] pluginNames) {
+    public PluginClassLoader(List<PluginDescriptor> descriptors) {
         this(new URL[]{});
-        for(String name : pluginNames) {
-            addJar(baseDir + String.format(PLUGIN_NAME_PATTERN, name));
+        for (PluginDescriptor descriptor : descriptors) {
+            addJar(descriptor.getJarFile().getName());
         }
     }
 
@@ -29,7 +28,7 @@ class PluginClassLoader extends URLClassLoader {
 
     private void addJar(String jar) {
         try {
-            URL url = new URL(jar);
+            URL url = new URL("file://" + jar);
             super.addURL(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();

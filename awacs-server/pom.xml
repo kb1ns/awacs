@@ -104,6 +104,24 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>copy-plugin</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/plugins</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../awacs-plugin/target</directory>
+                                    <includes>
+                                        <include>*.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>copy-component</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -114,24 +132,6 @@
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/../awacs-component/target</directory>
-                                    <includes>
-                                        <include>*.jar</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-plugin</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/plugin</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.basedir}/../awacs-plugin/target</directory>
                                     <includes>
                                         <include>*.jar</include>
                                     </includes>

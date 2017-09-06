@@ -79,7 +79,7 @@ public final class Configuration {
         if (!prefix.endsWith(".")) {
             throw new RuntimeException("The given prefix does not end with a period (" + prefix + ")");
         }
-        Map<String, String> result = Collections.emptyMap();
+        Map<String, String> result = new HashMap<>();
         synchronized (parameters) {
             for (String key : parameters.keySet()) {
                 if (key.startsWith(prefix)) {

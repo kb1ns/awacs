@@ -41,8 +41,8 @@
             <outputDirectory>lib</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/plugin</directory>
-            <outputDirectory>plugin</outputDirectory>
+            <directory>${project.build.directory}/plugins</directory>
+            <outputDirectory>agent/plugins</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/agent</directory>

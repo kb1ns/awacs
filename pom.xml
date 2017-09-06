@@ -28,6 +28,7 @@
         <module>awacs-component</module>
         <module>awacs-plugin</module>
         <module>awacs-server</module>
+        <module>demo-with-spring</module>
     </modules>
     <scm>
         <connection>scm:git:https://github.com/archerfeel/awacs.git</connection>
