@@ -19,7 +19,6 @@ package io.awacs.plugin.stacktrace;
 
 import io.awacs.agent.AWACS;
 import io.awacs.agent.Plugin;
-import io.awacs.agent.Sender;
 import io.awacs.common.Configuration;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -30,12 +29,22 @@ import org.slf4j.LoggerFactory;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by pixyonly on 16/10/25.
  * 方法调用堆栈的追踪插件
  */
 public class StackTracePlugin implements Plugin {
+
+    private final static String FILTER_PACKAGE_PREFIXES = "filter_package_prefixes";
+
+    private final static String EXCLUDE_EXCEPTION_PREFIXES = "exclude_exception_prefixes";
+
+    private final static String INCLUDE_EXCEPTION_PREFIXES = "include_exception_prefixes";
+
+    private final static String EXCEPTION_TRACE_LEVEL = "exception_trace_level";
 
     private static Logger log = LoggerFactory.getLogger(StackTracePlugin.class);
 
@@ -44,8 +53,9 @@ public class StackTracePlugin implements Plugin {
     //发送线程的堆栈信息
     public static void incrAccess() {
         log.debug("Request complete, event fired.");
+
         String report = buildAccessReport(CallStack.reset());
-        Sender.I.send((byte) 0x01, report, null);
+//        Sender.I.send();
     }
 
     private static String buildAccessReport(CallElement root) {
@@ -61,33 +71,40 @@ public class StackTracePlugin implements Plugin {
     public static void incrFailure(Throwable e) {
         log.info("Exception occur, event fired.");
         CallStack.reset();
-//        JSONObject report = new JSONObject();
-//        report.put("thread", Thread.currentThread().getName());
-//        report.put("stack", e.getStackTrace());
-//        report.put("exception", e.getClass().getCanonicalName());
-//        report.put("message", e.getMessage());
-//        MessageHub.instance.publish(new BinaryMessage.BinaryMessageBuilder()
-//                .setKey(key)
-//                .setVersion(BinaryMessage.C_VERSION)
-//                .setBody(report.toJSONString().getBytes())
-//                .build());
+        if (Config.F.isValid(e.getClass())) {
+            System.out.println(buildErrReport(e));
+        }
     }
 
     private static String buildErrReport(Throwable e) {
         StackTraceElement[] stack = e.getStackTrace();
-
-        return "{\"thread\":\""
-                + Thread.currentThread().getName()
-                + "\",\"stack\":"
-                + stack
-                + "\",\"exception\":"
-                + e.getCause()
-                + "}";
+        int level = Config.F.maxExceptionLevel;
+        int terminate = 0;
+        List<StackTraceElement> reducedStack = new ArrayList<>(level);
+        for (StackTraceElement element : stack) {
+            if (level <= 1 || terminate >= 2) {
+                break;
+            }
+            boolean r = Config.F.isFocus(element);
+            if (r) {
+                terminate = 1;
+            } else if (terminate == 1) {
+                terminate++;
+            }
+            reducedStack.add(element);
+        }
+        return String.format("%s|%s|%s|%s|%s",
+                e.getClass().getCanonicalName(),
+                Thread.currentThread().getName(),
+                System.currentTimeMillis(),
+                reducedStack.toString(),
+                e.getMessage());
     }
 
     @Override
-    public void init(Configuration properties) {
-        classFilter = new ClassFilter(properties.getArray("filter_package_prefix"));
+    public void init(Configuration configuration) {
+        classFilter = new ClassFilter(configuration.getArray(FILTER_PACKAGE_PREFIXES));
+        Config.F.init(configuration);
     }
 
     @Override
@@ -115,5 +132,46 @@ public class StackTracePlugin implements Plugin {
     @Override
     public void over() {
         //DO NOTHING
+    }
+
+    private enum Config {
+
+        F;
+
+        String[] excludes;
+
+        String[] includes;
+
+        String[] packges;
+
+        int maxExceptionLevel;
+
+        void init(Configuration config) {
+            excludes = config.getArray(EXCLUDE_EXCEPTION_PREFIXES);
+            includes = config.getArray(INCLUDE_EXCEPTION_PREFIXES);
+            packges = config.getArray(FILTER_PACKAGE_PREFIXES);
+            maxExceptionLevel = config.getInteger(EXCEPTION_TRACE_LEVEL, 20);
+        }
+
+        boolean isValid(Class<?> clazz) {
+            String name = clazz.getCanonicalName();
+            boolean r = true;
+            for (String n : excludes) {
+                r = r && !n.startsWith(name);
+            }
+            for (String n : includes) {
+                r = r || n.startsWith(name);
+            }
+            return r;
+        }
+
+        boolean isFocus(StackTraceElement element) {
+            for (String n : packges) {
+                if (element.getClassName().startsWith(n)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

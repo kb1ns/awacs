@@ -71,7 +71,12 @@ public final class PacketQueue {
                     try {
                         Packet packet = queue.take();
                         if (packet.size() > maxBatchMemory) {
-                            //TODO
+                            boss.submit(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                }
+                            });
                             continue;
                         }
                         if (batches.isEmpty()) {
@@ -101,7 +106,7 @@ public final class PacketQueue {
         if (closed)
             return;
         try {
-            queue.offer(packet, 10, TimeUnit.MILLISECONDS);
+            queue.offer(packet, 50, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignored) {
         }
     }

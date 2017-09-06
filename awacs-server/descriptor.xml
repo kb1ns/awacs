@@ -35,19 +35,18 @@
         <fileSet>
             <directory>${project.basedir}/src/main/shell</directory>
             <outputDirectory>bin</outputDirectory>
-            <fileMode>755</fileMode>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/conf</directory>
-            <outputDirectory>conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/plugins</directory>
-            <outputDirectory>plugins</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/lib</directory>
             <outputDirectory>lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/plugin</directory>
+            <outputDirectory>plugin</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/agent</directory>
+            <outputDirectory>agent</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>

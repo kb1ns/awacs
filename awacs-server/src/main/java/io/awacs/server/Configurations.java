@@ -68,7 +68,7 @@ public class Configurations {
 
     public static Configuration loadConfigurations() {
         //TODO
-        ResourceBundle bundle = ResourceBundle.getBundle("awacs");
+        ResourceBundle bundle = ResourceBundle.getBundle("server");
         Enumeration<String> keys = bundle.getKeys();
         Map<String, String> map = new HashMap<>();
         while (keys.hasMoreElements()) {

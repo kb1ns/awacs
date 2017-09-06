@@ -26,6 +26,7 @@ public class AgentClientTest {
 //        Packet p4 = new Packet("myapp", (byte) 1, "good boy");
 //        Packet p5 = new Packet("myapp", (byte) 1, "good boy");
         ExecutorService es = Executors.newCachedThreadPool();
+        long t = System.currentTimeMillis();
         for (int i = 0; i < 100; i++) {
             es.submit(new Runnable() {
                 @Override
@@ -33,7 +34,13 @@ public class AgentClientTest {
                     queue.enqueue(p1);
                 }
             });
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+        System.out.println(System.currentTimeMillis() - t);
 
         queue.enqueue(p1);
         queue.enqueue(p1);

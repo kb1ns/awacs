@@ -4,7 +4,7 @@ import io.awacs.agent.net.PacketQueue;
 import io.awacs.common.Packet;
 
 /**
- *
+ * Shared by all plugins
  * Created by pixyonly on 02/09/2017.
  */
 public enum Sender {

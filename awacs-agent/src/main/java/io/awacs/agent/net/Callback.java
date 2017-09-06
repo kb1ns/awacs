@@ -5,7 +5,6 @@ package io.awacs.agent.net;
  */
 public interface Callback {
 
-    //TODO
     void onComplete();
 
     void onException(Throwable t);

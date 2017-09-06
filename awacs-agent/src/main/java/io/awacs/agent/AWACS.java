@@ -22,10 +22,13 @@ import io.awacs.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.*;
 
 /**
+ * AWACS primary class
  * Created by pixyonly on 16/9/3.
  */
 public enum AWACS {
@@ -44,30 +47,40 @@ public enum AWACS {
 
     PacketQueue queue;
 
+    String home;
+
     public void prepare(Instrumentation inst) {
         M.inst = inst;
         log.info("AWACS attached.");
-        //TODO
-        ResourceBundle bundle = ResourceBundle.getBundle("awacs");
-        Enumeration<String> keys = bundle.getKeys();
+
+        home = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        home = home.substring(0, home.lastIndexOf('/')) + "/";
+        Properties properties = new Properties();
+
+        try {
+            properties.load(new FileInputStream(home + "awacs.properties"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Enumeration<Object> keys = properties.keys();
         Map<String, String> map = new HashMap<>();
         while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            map.put(key.trim(), bundle.getString(key).trim());
+            String key = keys.nextElement().toString();
+            map.put(key.trim(), properties.getProperty(key).trim());
         }
+
         Configuration config = new Configuration(map);
         String[] addr = config.getArray("server");
         List<Remote> hosts = new ArrayList<>(addr.length);
         for (String a : addr) {
             hosts.add(new Remote(a));
         }
-//        client = new AgentClient(hosts);
-//        client.start();
         queue = new PacketQueue(hosts);
         Sender.I.init(config.getString("namespace", "defaultapp"), queue);
-        //TODO
         String[] pluginList = config.getArray("plugins");
-        classLoader = new PluginClassLoader("/tmp/", pluginList);
+
+        classLoader = new PluginClassLoader(home + "plugin", pluginList);
         for (String p : pluginList) {
             descriptors.add(new PluginDescriptor(p)
                     .setClassName(config.getString("plugins." + p + ".class"))

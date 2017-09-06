@@ -28,7 +28,7 @@
     </dependencies>
 
     <build>
-        <finalName>awacs-influx-repository</finalName>
+        <finalName>awacs-influx-component</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -56,7 +56,7 @@
                                     <type>jar</type>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>../../awacs-server/src/main/lib</outputDirectory>
+                            <outputDirectory>${project.basedir}/../target</outputDirectory>
                             <overWriteReleases>true</overWriteReleases>
                             <overWriteIfNewer>true</overWriteIfNewer>
                         </configuration>

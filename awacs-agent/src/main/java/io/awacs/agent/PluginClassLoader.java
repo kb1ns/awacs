@@ -5,7 +5,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 /**
- *
+ * We don't use root classloader to load plugin
  * Created by pixyonly on 02/09/2017.
  */
 class PluginClassLoader extends URLClassLoader {

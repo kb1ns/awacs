@@ -32,30 +32,60 @@
             <groupId>io.awacs</groupId>
             <artifactId>awacs-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>copy-properties</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <includes>
+                                        <include>awacs.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>descriptor.xml</descriptor>
-                    </descriptors>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <archive>
-                        <manifestEntries>
-                            <premain-class>io.awacs.agent.Bootstrap</premain-class>
-                        </manifestEntries>
-                    </archive>
-                    <finalName>awacs-agent</finalName>
-                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <id>jar-with-dependencies</id>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>decriptor.xml</descriptor>
+                            </descriptors>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <archive>
+                                <manifestEntries>
+                                    <premain-class>io.awacs.agent.Bootstrap</premain-class>
+                                </manifestEntries>
+                            </archive>
+                            <finalName>awacs-agent</finalName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

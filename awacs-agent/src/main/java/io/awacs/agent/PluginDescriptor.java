@@ -3,7 +3,7 @@ package io.awacs.agent;
 import io.awacs.common.Configuration;
 
 /**
- *
+ * Plugins' simple descriptor
  * Created by pixyonly on 02/09/2017.
  */
 final class PluginDescriptor {
