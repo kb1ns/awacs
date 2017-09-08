@@ -1,10 +1,15 @@
 package io.awacs.server.handler;
 
+import io.awacs.common.Packet;
+import io.awacs.server.Handler;
+
+import java.net.InetSocketAddress;
+
 /**
  *
  * Created by pixyonly on 03/09/2017.
  */
-public class StacktraceHandler {
+public class StacktraceHandler implements Handler {
 
 //    private static final Logger log = LoggerFactory.getLogger(StacktraceHandler.class);
 //
@@ -14,13 +19,11 @@ public class StacktraceHandler {
 ////    @Inject("influxdb")
 //    private InfluxdbComponent influxdbComponent;
 //
-//    @Override
-//    public Packet onReceive(Packet packet, InetSocketAddress address) {
-//        String content = packet.getBody();
-//        String namespace = packet.getNamespace();
-//        JSONObject json = JSONObject.parseObject(content);
-//
-//        JSONObject stack = json.getJSONObject("stack");
+    @Override
+    public Packet onReceive(Packet packet, InetSocketAddress address) {
+        String content = packet.getBody();
+        String namespace = packet.getNamespace();
+
 //        //TODO config measurement
 //        Point p = Point.measurement(namespace).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
 //                .tag("ip", address.getAddress().getHostAddress())
@@ -30,13 +33,13 @@ public class StacktraceHandler {
 //                .addField("execution_time", stack.getIntValue("elapsedTime"))
 //                .build();
 //        influxdbComponent.write(p);
-//        return null;
-//    }
+        return null;
+    }
 //
-//    @Override
-//    public byte key() {
-//        return 0x01;
-//    }
+    @Override
+    public byte key() {
+        return 0x01;
+    }
 //
 //    String prettify(JSONObject json) {
 //        return tabLevel(json, 0).toString();

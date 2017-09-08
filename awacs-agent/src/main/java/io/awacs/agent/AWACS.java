@@ -36,9 +36,25 @@ public enum AWACS {
 
     M;
 
-    final Logger log = Logger.getGlobal();
+    static final Logger log = Logger.getLogger("AWACS");
 
-    final String PLUGIN_NAME_PATTERN = "awacs-%s-plugin.jar";
+    static final String CONFIG_FILE_NAME = "awacs.properties";
+
+    static final String CONFIG_SERVER_KEY = "server";
+
+    static final String CONFIG_NAMESPACE_KEY = "namespace";
+
+    static final String CONFIG_PLUGINS_KEY = "plugins";
+
+    static final String CONFIG_PLUGINS_CONFIG_PATTERN = "plugins.%s.conf.";
+
+    static final String CONFIG_PLUGIN_CLASS_PATTERN = "plugins.%s.class";
+
+    static final String CONFIG_LOGLEVEL_KEY = "log_level";
+
+    static final String DEFAULT_LOGLEVEL_VALUE = "info";
+
+    static final String DEFAULT_NAMESPACE_VALUE = "defaultapp";
 
     Instrumentation inst;
 
@@ -52,12 +68,11 @@ public enum AWACS {
 
     public void prepare(Instrumentation inst) {
         M.inst = inst;
-        log.info("AWACS attached.");
         home = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
         home = home.substring(0, home.lastIndexOf('/')) + "/";
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(home + "awacs.properties"));
+            properties.load(new FileInputStream(home + CONFIG_FILE_NAME));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -68,22 +83,24 @@ public enum AWACS {
             map.put(key.trim(), properties.getProperty(key).trim());
         }
         Configuration config = new Configuration(map);
-        String[] addr = config.getArray("server");
+        String loglevel = config.getString(CONFIG_LOGLEVEL_KEY, DEFAULT_LOGLEVEL_VALUE);
+        log.setLevel(Level.parse(loglevel));
+        String[] addr = config.getArray(CONFIG_SERVER_KEY);
         List<Remote> hosts = new ArrayList<>(addr.length);
         for (String a : addr) {
             hosts.add(new Remote(a));
         }
         PacketQueue queue = new PacketQueue(hosts);
-        Sender.I.init(config.getString("namespace", "defaultapp"), queue);
-        String[] pluginList = config.getArray("plugins");
+        Sender.I.init(config.getString(CONFIG_NAMESPACE_KEY, DEFAULT_NAMESPACE_VALUE), queue);
+        String[] pluginList = config.getArray(CONFIG_PLUGINS_KEY);
         plugins = new ArrayList<>(pluginList.length);
         descriptors = new ArrayList<>(pluginList.length);
         for (String p : pluginList) {
             try {
                 descriptors.add(new PluginDescriptor(p)
-                        .setPluginProperties(new Configuration(config.getSubProperties("plugins." + p + ".conf.")))
-                        .setClassName(config.getString("plugins." + p + ".class"))
-                        .setJarFile(new JarFile(home + String.format("plugins/" + PLUGIN_NAME_PATTERN, p))));
+                        .setPluginProperties(config.getSubConfig(String.format(CONFIG_PLUGINS_CONFIG_PATTERN, p)))
+                        .setClassName(config.getString(String.format(CONFIG_PLUGIN_CLASS_PATTERN, p)))
+                        .setJarFile(new JarFile(home + String.format("plugins/awacs-%s-plugin.jar", p))));
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Cannot read jar file: awacs-{0}-plugin.jar", p);
             }

@@ -29,6 +29,7 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -45,7 +46,7 @@ public class StackTracePlugin implements Plugin {
 
     private final static String EXCEPTION_TRACE_LEVEL = "exception_trace_level";
 
-    private static Logger log = Logger.getAnonymousLogger();
+    private static Logger log = Logger.getLogger("AWACS");
 
     private ClassFilter classFilter;
 
@@ -54,7 +55,8 @@ public class StackTracePlugin implements Plugin {
         log.fine("Request complete.");
         CallElement root = CallStack.reset();
         if (root != null) {
-            System.out.println(String.format("-|%s|%s|%s|%s",
+//            Sender.I.send((byte) 1,
+            log.info(String.format("-|%s|%s|%s|%s",
                     Thread.currentThread().getName(),
                     System.currentTimeMillis(),
                     root.toString(),
@@ -67,7 +69,7 @@ public class StackTracePlugin implements Plugin {
         log.fine("Exception catched.");
         CallStack.reset();
         if (Config.F.isValid(e.getClass())) {
-            System.out.println(buildErrReport(e));
+            log.info(buildErrReport(e));
         }
     }
 
@@ -108,10 +110,11 @@ public class StackTracePlugin implements Plugin {
                     ClassVisitor cv = new StackTraceClassAdaptor(cw);
                     ClassReader cr = new ClassReader(classfileBuffer);
                     cr.accept(cv, 0);
+                    log.log(Level.FINE, "{0} transformed.", className);
                     return cw.toByteArray();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    throw e;
+                    return classfileBuffer;
                 }
             }
         });

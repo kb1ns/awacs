@@ -18,8 +18,6 @@ package io.awacs.plugin.mxbean;
 
 import io.awacs.agent.Plugin;
 import io.awacs.common.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,7 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 public class MXBeanPlugin implements Plugin {
 
-    private static Logger log = LoggerFactory.getLogger("agent");
+//    private static Logger log = LoggerFactory.getLogger("agent");
 
     private static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 

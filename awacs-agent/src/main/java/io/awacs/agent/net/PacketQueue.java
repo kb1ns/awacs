@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public final class PacketQueue {
 
-    private static Logger log = Logger.getGlobal();
+    private static Logger log = Logger.getLogger("AWACS");
 
     private volatile boolean closed;
 

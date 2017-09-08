@@ -25,6 +25,7 @@ import java.lang.instrument.Instrumentation;
 public class Bootstrap {
 
     public static void premain(String preArgs, Instrumentation inst) {
+        System.out.println("AWACS attached.");
         AWACS.M.prepare(inst);
         AWACS.M.run();
         AWACS.M.registerShutdownHook();
