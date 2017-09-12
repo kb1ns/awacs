@@ -1,6 +1,6 @@
 package io.awacs.server.handler;
 
-import io.awacs.common.Packet;
+import io.awacs.common.net.Packet;
 import io.awacs.server.Handler;
 
 import java.net.InetSocketAddress;
@@ -24,6 +24,7 @@ public class StacktraceHandler implements Handler {
         String content = packet.getBody();
         String namespace = packet.getNamespace();
 
+        System.out.println(content);
 //        //TODO config measurement
 //        Point p = Point.measurement(namespace).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
 //                .tag("ip", address.getAddress().getHostAddress())

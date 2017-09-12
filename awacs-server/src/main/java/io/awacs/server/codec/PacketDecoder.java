@@ -1,6 +1,6 @@
 package io.awacs.server.codec;
 
-import io.awacs.common.Packet;
+import io.awacs.common.net.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

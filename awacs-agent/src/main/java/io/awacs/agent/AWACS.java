@@ -16,8 +16,6 @@
 
 package io.awacs.agent;
 
-import io.awacs.agent.net.PacketQueue;
-import io.awacs.agent.net.Remote;
 import io.awacs.common.Configuration;
 
 import java.io.FileInputStream;
@@ -36,25 +34,41 @@ public enum AWACS {
 
     M;
 
-    static final Logger log = Logger.getLogger("AWACS");
+    private static final Logger log = Logger.getLogger("AWACS");
 
-    static final String CONFIG_FILE_NAME = "awacs.properties";
+    private static final String CONFIG_FILE = "awacs.properties";
 
-    static final String CONFIG_SERVER_KEY = "server";
+    public static final String CONFIG_SERVER = "server";
 
-    static final String CONFIG_NAMESPACE_KEY = "namespace";
+    public static final String CONFIG_NAMESPACE = "namespace";
 
-    static final String CONFIG_PLUGINS_KEY = "plugins";
+    public static final String DEFAULT_NAMESPACE = "default_jvm";
 
-    static final String CONFIG_PLUGINS_CONFIG_PATTERN = "plugins.%s.conf.";
+    public static final String CONFIG_LOGLEVEL = "log_level";
 
-    static final String CONFIG_PLUGIN_CLASS_PATTERN = "plugins.%s.class";
+    public static final String DEFAULT_LOGLEVEL = "INFO";
 
-    static final String CONFIG_LOGLEVEL_KEY = "log_level";
+    public static final String CONFIG_MAX_BATCH_BYTES = "max_batch_bytes";
 
-    static final String DEFAULT_LOGLEVEL_VALUE = "info";
+    public static final int DEFAULT_MAX_BATCH_BYTES = 1048576;
 
-    static final String DEFAULT_NAMESPACE_VALUE = "defaultapp";
+    public static final String CONFIG_MAX_WAITING_REQUESTS = "max_waiting_requests";
+
+    public static final int DEFAULT_MAX_WAITING_REQUESTS = 100;
+
+    public static final String CONFIG_MAX_APPEND_MS = "max_append_ms";
+
+    public static final int DEFAULT_MAX_APPEND_MS = 50;
+
+    public static final String CONFIG_BATCH_LINGER_MS = "batch_linger_ms";
+
+    public static final int DEFAULT_BATCH_LINGER_MS = 3000;
+
+    public static final String CONFIG_PLUGINS = "plugins";
+
+    public static final String CONFIG_PLUGINS_CONFIG_PATTERN = "plugins.%s.conf.";
+
+    public static final String CONFIG_PLUGIN_CLASS_PATTERN = "plugins.%s.class";
 
     Instrumentation inst;
 
@@ -72,7 +86,7 @@ public enum AWACS {
         home = home.substring(0, home.lastIndexOf('/')) + "/";
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream(home + CONFIG_FILE_NAME));
+            properties.load(new FileInputStream(home + CONFIG_FILE));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -83,16 +97,15 @@ public enum AWACS {
             map.put(key.trim(), properties.getProperty(key).trim());
         }
         Configuration config = new Configuration(map);
-        String loglevel = config.getString(CONFIG_LOGLEVEL_KEY, DEFAULT_LOGLEVEL_VALUE);
-        log.setLevel(Level.parse(loglevel));
-        String[] addr = config.getArray(CONFIG_SERVER_KEY);
-        List<Remote> hosts = new ArrayList<>(addr.length);
-        for (String a : addr) {
-            hosts.add(new Remote(a));
+        String loglevel = config.getString(CONFIG_LOGLEVEL, DEFAULT_LOGLEVEL);
+        try {
+            log.setLevel(Level.parse(loglevel));
+        } catch (Exception e) {
+            log.setLevel(Level.parse(DEFAULT_LOGLEVEL));
         }
-        PacketQueue queue = new PacketQueue(hosts);
-        Sender.I.init(config.getString(CONFIG_NAMESPACE_KEY, DEFAULT_NAMESPACE_VALUE), queue);
-        String[] pluginList = config.getArray(CONFIG_PLUGINS_KEY);
+        log.log(Level.INFO, "Setting log level {0}", loglevel);
+        Sender.I.init(config);
+        String[] pluginList = config.getArray(CONFIG_PLUGINS);
         plugins = new ArrayList<>(pluginList.length);
         descriptors = new ArrayList<>(pluginList.length);
         for (String p : pluginList) {

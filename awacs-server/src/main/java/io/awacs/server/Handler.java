@@ -1,6 +1,6 @@
 package io.awacs.server;
 
-import io.awacs.common.Packet;
+import io.awacs.common.net.Packet;
 
 import java.net.InetSocketAddress;
 

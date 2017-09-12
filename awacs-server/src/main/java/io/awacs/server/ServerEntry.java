@@ -18,7 +18,7 @@ package io.awacs.server;
 
 import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;
-import io.awacs.common.Packet;
+import io.awacs.common.net.Packet;
 import io.awacs.server.codec.PacketDecoder;
 import io.awacs.server.codec.PacketEncoder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -36,7 +36,10 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -136,6 +139,8 @@ public final class ServerEntry implements Server, Configurable {
 
         private ServerEntry ref;
 
+        private int i = 0;
+
         Dispatcher(ServerEntry ref) {
             this.ref = ref;
         }
@@ -144,6 +149,7 @@ public final class ServerEntry implements Server, Configurable {
         public void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
             Handler handler = ref.handlerHolder.get(Byte.toUnsignedInt(packet.key()));
+            System.out.print((i++) + " ");
             if (handler == null) {
                 //TODO default handler
                 System.out.println(packet.getNamespace());

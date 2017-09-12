@@ -1,6 +1,6 @@
 package io.awacs.agent.net;
 
-import io.awacs.common.Packet;
+import io.awacs.common.net.Packet;
 
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
@@ -34,22 +34,6 @@ class Connection {
         ready();
     }
 
-    void sendDirectly(byte[] data, Callback cb, int retry) {
-        try {
-            channel.write(ByteBuffer.wrap(data));
-            if (cb != null) {
-                cb.onComplete();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (retry > 0) {
-                sendDirectly(data, cb, retry - 1);
-            } else {
-                cb.onException(e);
-            }
-        }
-    }
-
     boolean ready() {
         try {
             if (channel == null) {
@@ -76,6 +60,9 @@ class Connection {
     void flush(Callback cb, int retry) {
         try {
             lock.writeLock().lock();
+            if (buffer.remaining() == buffer.capacity()) {
+                return;
+            }
             buffer.flip();
             channel.write(buffer);
             if (cb != null) {

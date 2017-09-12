@@ -1,23 +1,33 @@
 package io.awacs.agent;
 
-import io.awacs.agent.net.PacketQueue;
-import io.awacs.common.Packet;
+import io.awacs.agent.net.PacketAccumulator;
+import io.awacs.common.Configurable;
+import io.awacs.common.Configuration;
+import io.awacs.common.net.Packet;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Shared by all plugins
  * Created by pixyonly on 02/09/2017.
  */
-public enum Sender {
+public enum Sender implements Configurable {
 
     I;
 
     private String namespace;
 
-    private PacketQueue queue;
+    private PacketAccumulator queue;
 
-    void init(String namespace, PacketQueue queue) {
-        this.namespace = namespace;
-        this.queue = queue;
+    private static final Logger log = Logger.getLogger("AWACS");
+
+    @Override
+    public void init(Configuration configuration) {
+        namespace = configuration.getString(AWACS.CONFIG_NAMESPACE, AWACS.DEFAULT_NAMESPACE);
+        log.log(Level.INFO, "Using namespace: {0}", namespace);
+        queue = new PacketAccumulator();
+        queue.init(configuration);
     }
 
     public void send(byte key, String body) {
@@ -30,5 +40,6 @@ public enum Sender {
 
     void close() {
         queue.close();
+        log.log(Level.INFO, "Sender closed.");
     }
 }
