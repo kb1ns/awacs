@@ -1,51 +1,45 @@
 package io.awacs.agent.net;
 
-import io.awacs.common.net.Packet;
-
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
-import java.nio.channels.NotYetConnectedException;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by pixyonly on 04/09/2017.
  */
 class Connection {
 
+    private final static Logger log = Logger.getLogger("AWACS");
+
     Remote remote;
 
-    SocketChannel channel;
+    AsynchronousSocketChannel channel;
 
-    ByteBuffer buffer;
+    int timeout;
 
-    ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
-    Selector selector;
-
-    final int bufSize;
-
-    Connection(Selector selector, Remote remote, int bufSize) {
-        this.selector = selector;
+    Connection(Remote remote, int timeout) {
         this.remote = remote;
-        this.bufSize = bufSize;
-        this.buffer = ByteBuffer.allocate(bufSize);
+        this.timeout = timeout;
         ready();
     }
 
     boolean ready() {
         try {
             if (channel == null) {
-                channel = SocketChannel.open(remote.getAddress());
-                channel.configureBlocking(false);
-                channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
-//            channel.register(selector, SelectionKey.OP_READ);
-                return channel.finishConnect();
-            } else if (!channel.isConnected()) {
-                channel.connect(remote.getAddress());
-                return channel.finishConnect();
+                channel = AsynchronousSocketChannel.open();
             }
+            Future<Void> future = channel.connect(remote.getAddress());
+            channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+            if (future.get(timeout, TimeUnit.MILLISECONDS) != null) {
+                log.log(Level.WARNING, "Cannot connect to remote {0}", remote);
+                return false;
+            }
+            log.log(Level.INFO, "Connected to server {0}", remote);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,46 +47,24 @@ class Connection {
         }
     }
 
-    void flush(Callback cb) {
-        flush(cb, 2);
-    }
+    void flush(ByteBuffer batch, final Callback cb) {
+        batch.flip();
+        channel.write(batch, batch, new CompletionHandler<Integer, ByteBuffer>() {
+            @Override
+            public void completed(Integer result, ByteBuffer attachment) {
+                if (!attachment.hasRemaining()) {
+                    log.finest("Batch flushed.");
+                    cb.onComplete();
+                } else {
+                    channel.write(attachment, attachment, this);
+                }
+            }
 
-    void flush(Callback cb, int retry) {
-        try {
-            lock.writeLock().lock();
-            if (buffer.remaining() == buffer.capacity()) {
-                return;
+            @Override
+            public void failed(Throwable exc, ByteBuffer attachment) {
+                exc.printStackTrace();
+                cb.onException(exc);
             }
-            buffer.flip();
-            channel.write(buffer);
-            if (cb != null) {
-                cb.onComplete();
-            }
-        } catch (Exception e) {
-            if (e instanceof NotYetConnectedException) {
-                ready();
-            }
-            if (retry > 0) {
-                flush(cb, retry - 1);
-            } else if (cb != null) {
-                cb.onException(e);
-            }
-        } finally {
-            buffer.clear();
-            lock.writeLock().unlock();
-        }
-    }
-
-    boolean append(Packet packet) {
-        try {
-            lock.writeLock().lock();
-            if (buffer.remaining() < packet.size()) {
-                return false;
-            }
-            buffer.put(packet.serialize());
-            return true;
-        } finally {
-            lock.writeLock().unlock();
-        }
+        });
     }
 }

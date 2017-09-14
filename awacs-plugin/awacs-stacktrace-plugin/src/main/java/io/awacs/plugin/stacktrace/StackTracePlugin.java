@@ -19,6 +19,7 @@ package io.awacs.plugin.stacktrace;
 
 import io.awacs.agent.AWACS;
 import io.awacs.agent.Plugin;
+import io.awacs.agent.Sender;
 import io.awacs.common.Configuration;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -52,15 +53,15 @@ public class StackTracePlugin implements Plugin {
 
     //发送线程的堆栈信息
     public static void incrAccess() {
-        log.fine("Request complete.");
+        log.fine("Request completed.");
         CallElement root = CallStack.reset();
         if (root != null) {
-//            Sender.I.send((byte) 1,
-            log.info(String.format("-|%s|%s|%s|%s",
+            String s = String.format("-|%s|%s|%s|%s",
                     Thread.currentThread().getName(),
                     System.currentTimeMillis(),
                     root.toString(),
-                    root.id()));
+                    root.id());
+            Sender.I.send((byte) 1, s);
         }
     }
 
@@ -69,7 +70,7 @@ public class StackTracePlugin implements Plugin {
         log.fine("Exception catched.");
         CallStack.reset();
         if (Config.F.isValid(e.getClass())) {
-            log.info(buildErrReport(e));
+            Sender.I.send((byte) 1, buildErrReport(e));
         }
     }
 

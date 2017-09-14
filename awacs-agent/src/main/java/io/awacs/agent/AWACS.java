@@ -52,9 +52,17 @@ public enum AWACS {
 
     public static final int DEFAULT_MAX_BATCH_BYTES = 1048576;
 
-    public static final String CONFIG_MAX_WAITING_REQUESTS = "max_waiting_requests";
+    public static final String CONFIG_MAX_WAITING_MESSAGE = "max_waiting_message";
 
-    public static final int DEFAULT_MAX_WAITING_REQUESTS = 100;
+    public static final int DEFAULT_MAX_WAITING_MESSAGE = 100;
+
+    public static final String CONFIG_TIMEOUT_MS = "server_timeout_ms";
+
+    public static final int DEFAULT_TIMEOUT_MS = 1000;
+
+    public static final String CONFIG_MAX_BATCH_NUMBERS = "max_batch_numbers";
+
+    public static final int DEFAULT_MAX_BATCH_NUMBERS = 10;
 
     public static final String CONFIG_MAX_APPEND_MS = "max_append_ms";
 
@@ -97,13 +105,13 @@ public enum AWACS {
             map.put(key.trim(), properties.getProperty(key).trim());
         }
         Configuration config = new Configuration(map);
-        String loglevel = config.getString(CONFIG_LOGLEVEL, DEFAULT_LOGLEVEL);
         try {
+            String loglevel = config.getString(CONFIG_LOGLEVEL, DEFAULT_LOGLEVEL);
             log.setLevel(Level.parse(loglevel));
+            log.log(Level.INFO, "Setting log level {0}", loglevel);
         } catch (Exception e) {
             log.setLevel(Level.parse(DEFAULT_LOGLEVEL));
         }
-        log.log(Level.INFO, "Setting log level {0}", loglevel);
         Sender.I.init(config);
         String[] pluginList = config.getArray(CONFIG_PLUGINS);
         plugins = new ArrayList<>(pluginList.length);
@@ -117,10 +125,10 @@ public enum AWACS {
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Cannot read jar file: awacs-{0}-plugin.jar", p);
             }
-            log.log(Level.INFO, "Load plugin {0}.", p);
+            log.log(Level.INFO, "Plugin {0} loaded.", p);
         }
         classLoader = new PluginClassLoader(descriptors);
-        log.info("AWACS prepared.");
+        log.info("AWACS ready.");
     }
 
     public void run() {

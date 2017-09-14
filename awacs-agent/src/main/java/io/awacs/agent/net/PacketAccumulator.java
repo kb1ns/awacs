@@ -5,14 +5,10 @@ import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;
 import io.awacs.common.net.Packet;
 
-import java.io.IOException;
-import java.nio.channels.Selector;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.logging.Level;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -24,151 +20,111 @@ public final class PacketAccumulator implements Configurable {
 
     private volatile boolean closed;
 
-    private final Deque<Connection> batches = new ArrayDeque<>();
-
-    private Selector selector;
-
-    private ExecutorService boss;
-
-    private ScheduledExecutorService flusher;
+    private Channels channels;
 
     private ArrayBlockingQueue<Packet> queue;
 
-    private List<Remote> remotes;
+    private ConcurrentLinkedDeque<ByteBuffer> buffers;
 
     private int maxBatchBytes;
 
-    private int maxWaitingRequests;
+    private int maxBatchNumbers;
 
     private int maxAppendMs;
 
     private int batchLingerMs;
 
+    private int timeout;
+
     @Override
     public void init(Configuration configuration) {
-        String[] addr = configuration.getArray(AWACS.CONFIG_SERVER);
-        remotes = new ArrayList<>();
-        for (String a : addr) {
-            remotes.add(new Remote(a));
-//            if (addr.length <= 2) {
-//                remotes.add(new Remote(a));
-//            }
-        }
         maxBatchBytes = configuration.getInteger(AWACS.CONFIG_MAX_BATCH_BYTES, AWACS.DEFAULT_MAX_BATCH_BYTES);
-        maxWaitingRequests = configuration.getInteger(AWACS.CONFIG_MAX_WAITING_REQUESTS, AWACS.DEFAULT_MAX_WAITING_REQUESTS);
+        maxBatchNumbers = configuration.getInteger(AWACS.CONFIG_MAX_BATCH_NUMBERS, AWACS.DEFAULT_MAX_BATCH_NUMBERS);
         maxAppendMs = configuration.getInteger(AWACS.CONFIG_MAX_APPEND_MS, AWACS.DEFAULT_MAX_APPEND_MS);
         batchLingerMs = configuration.getInteger(AWACS.CONFIG_BATCH_LINGER_MS, AWACS.DEFAULT_BATCH_LINGER_MS);
+        timeout = configuration.getInteger(AWACS.CONFIG_TIMEOUT_MS, AWACS.DEFAULT_TIMEOUT_MS);
+        queue = new ArrayBlockingQueue<>(configuration.getInteger(AWACS.CONFIG_MAX_WAITING_MESSAGE, AWACS.DEFAULT_MAX_WAITING_MESSAGE));
+        channels = new Channels(configuration.getArray(AWACS.CONFIG_SERVER), timeout);
+        buffers = new ConcurrentLinkedDeque<>();
         start();
     }
 
     private void start() {
-        queue = new ArrayBlockingQueue<>(maxWaitingRequests);
-        try {
-            selector = Selector.open();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        for (Remote r : remotes) {
-            batches.add(new Connection(selector, r, maxBatchBytes));
-            log.log(Level.INFO, "Connected to server {0}", r);
-        }
-        ThreadFactory daemon = new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r);
-                t.setDaemon(true);
-                return t;
-            }
-        };
-        boss = Executors.newFixedThreadPool(remotes.size(), daemon);
-        flusher = Executors.newSingleThreadScheduledExecutor(daemon);
-        Runnable r = new Runnable() {
+        int leastBuffers = 0;
+        do {
+            buffers.add(ByteBuffer.allocate(maxBatchBytes));
+        } while (leastBuffers++ < maxBatchNumbers / 2);
+        //make sure only this thread can access ByteBuffer
+        Thread t = new Thread(new Runnable() {
+            long newBatchCreated = 0l;
+
             @Override
             public void run() {
                 while (!closed) {
                     try {
-                        Packet packet = queue.take();
-                        //wait until a connection becomes avaliable
-                        synchronized (batches) {
-                            if (batches.isEmpty()) {
-                                log.info("All connection are flush in progress, wait...");
-                                batches.wait();
+                        Packet p = queue.take();
+                        ByteBuffer batch = buffers.peek();
+                        boolean readyToFlush = false;
+                        if (batch != null) {
+                            if (batch.remaining() == batch.capacity() && batch.capacity() >= p.size()) {
+                                batch.put(p.serialize());
+                                newBatchCreated = System.currentTimeMillis();
+                            } else if (batch.remaining() >= p.size()) {
+                                batch.put(p.serialize());
+                                if (System.currentTimeMillis() - newBatchCreated > batchLingerMs) {
+                                    readyToFlush = true;
+                                }
+                            } else {
+                                //TODO
+                                readyToFlush = true;
                             }
-                            if (!batches.peek().append(packet)) {
-                                shift();
-                                queue.offer(packet);
+                            if (readyToFlush) {
+                                final ByteBuffer buf = buffers.poll();
+                                channels.flush(buf, new Callback() {
+                                    @Override
+                                    public void onComplete() {
+                                        buf.clear();
+                                        buffers.add(buf);
+                                    }
+
+                                    @Override
+                                    public void onException(Throwable t) {
+                                        buf.clear();
+                                        buffers.add(buf);
+                                    }
+                                });
                             }
+                        } else {
+                            //TODO allocating new buffer
+                            log.warning("All buffers are full, allocating a new buffer.");
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
-        };
-        Thread t = new Thread(r);
+        });
         t.setDaemon(true);
         t.start();
-        flusher.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (batches) {
-                    shift();
-                }
-            }
-        }, batchLingerMs, batchLingerMs, TimeUnit.MILLISECONDS);
     }
 
-    public boolean enqueue(final Packet packet) {
-        if (closed || packet.size() > maxBatchBytes) {
-            log.warning("Out of buffer limit, packet abandoned.");
-            return false;
-        }
-        try {
-            return queue.offer(packet, maxAppendMs, TimeUnit.MILLISECONDS);
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    private void shift() {
-        final Connection c = batches.poll();
-        if (c == null) {
+    public void enqueue(final Packet packet) {
+        if (closed) {
+            log.warning("Sender has been closed.");
             return;
         }
-        log.log(Level.FINE, "{0} ready to flush.", c.remote);
-        boss.submit(new Runnable() {
-            @Override
-            public void run() {
-                c.flush(new Callback() {
-                    @Override
-                    public void onComplete() {
-                        synchronized (batches) {
-                            batches.add(c);
-                            batches.notifyAll();
-                        }
-                    }
-
-                    @Override
-                    public void onException(Throwable t) {
-                        synchronized (batches) {
-                            batches.add(c);
-                            batches.notifyAll();
-                        }
-                    }
-                });
-            }
-        });
+        if (packet.size() > maxBatchBytes) {
+            log.warning("Out of buffer limit, message abandoned.");
+            return;
+        }
+        try {
+            queue.offer(packet, maxAppendMs, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
     }
 
     public void close() {
         closed = true;
         //TODO drainTo channel
-        try {
-            selector.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        boss.shutdownNow();
-        flusher.shutdown();
     }
 }
