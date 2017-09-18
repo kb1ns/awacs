@@ -16,22 +16,18 @@ public enum Sender implements Configurable {
 
     I;
 
-    private String namespace;
-
     private PacketAccumulator queue;
 
     private static final Logger log = Logger.getLogger("AWACS");
 
     @Override
     public void init(Configuration configuration) {
-        namespace = configuration.getString(AWACS.CONFIG_NAMESPACE, AWACS.DEFAULT_NAMESPACE);
-        log.log(Level.INFO, "Using namespace: {0}", namespace);
         queue = new PacketAccumulator();
         queue.init(configuration);
     }
 
     public void send(byte key, String body) {
-        doSend(new Packet(namespace, key, body));
+        doSend(new Packet(AWACS.M.namespace(), key, body));
     }
 
     void doSend(Packet packet) {

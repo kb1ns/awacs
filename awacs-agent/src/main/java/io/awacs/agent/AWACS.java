@@ -88,6 +88,8 @@ public enum AWACS {
 
     String home;
 
+    String namespace;
+
     public void prepare(Instrumentation inst) {
         M.inst = inst;
         home = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -112,6 +114,8 @@ public enum AWACS {
         } catch (Exception e) {
             log.setLevel(Level.parse(DEFAULT_LOGLEVEL));
         }
+        namespace = config.getString(AWACS.CONFIG_NAMESPACE, AWACS.DEFAULT_NAMESPACE);
+        log.log(Level.INFO, "Using namespace: {0}", namespace);
         Sender.I.init(config);
         String[] pluginList = config.getArray(CONFIG_PLUGINS);
         plugins = new ArrayList<>(pluginList.length);
@@ -151,6 +155,10 @@ public enum AWACS {
 
     public Instrumentation getInstrumentation() {
         return inst;
+    }
+
+    public String namespace() {
+        return namespace;
     }
 
     public void registerShutdownHook() {

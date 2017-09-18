@@ -21,6 +21,7 @@ import io.awacs.agent.AWACS;
 import io.awacs.agent.Plugin;
 import io.awacs.agent.Sender;
 import io.awacs.common.Configuration;
+import io.awacs.common.format.Influx;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -30,6 +31,7 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,11 +58,13 @@ public class StackTracePlugin implements Plugin {
         log.fine("Request completed.");
         CallElement root = CallStack.reset();
         if (root != null) {
-            String s = String.format("-|%s|%s|%s|%s",
-                    Thread.currentThread().getName(),
-                    System.currentTimeMillis(),
-                    root.toString(),
-                    root.id());
+            String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
+                    .addField("thread", Thread.currentThread().getName())
+                    .addField("stack", root.toString())
+                    .tag("entry", root.id())
+                    .build()
+                    .lineProtocol();
+            log.fine(s);
             Sender.I.send((byte) 1, s);
         }
     }
@@ -70,7 +74,9 @@ public class StackTracePlugin implements Plugin {
         log.fine("Exception catched.");
         CallStack.reset();
         if (Config.F.isValid(e.getClass())) {
-            Sender.I.send((byte) 1, buildErrReport(e));
+            String s = buildErrReport(e);
+            log.fine(s);
+            Sender.I.send((byte) 1, s);
         }
     }
 
@@ -84,12 +90,13 @@ public class StackTracePlugin implements Plugin {
             }
             reducedStack.add(element);
         }
-        return String.format("%s|%s|%s|%s|%s",
-                e.getClass().getCanonicalName(),
-                Thread.currentThread().getName(),
-                System.currentTimeMillis(),
-                reducedStack.toString(),
-                e.getMessage());
+        return Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
+                .addField("thread", Thread.currentThread().getName())
+                .addField("stack", reducedStack.toString())
+                .addField("message", e.getMessage())
+                .tag("entry", e.getClass().getCanonicalName())
+                .build()
+                .lineProtocol();
     }
 
     @Override

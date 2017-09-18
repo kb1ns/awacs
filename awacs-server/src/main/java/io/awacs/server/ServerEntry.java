@@ -63,8 +63,11 @@ public final class ServerEntry implements Server, Configurable {
 
     private Map<Integer, Handler> handlerHolder = new HashMap<>();
 
+    private Components components;
+
     @Override
     public void load(Components components) {
+        this.components = components;
         Reflections ref = new Reflections("io.awacs.server.handler");
         Set<Class<? extends Handler>> classes = ref.getSubTypesOf(Handler.class);
         for (Class<? extends Handler> clazz : classes) {
@@ -116,6 +119,7 @@ public final class ServerEntry implements Server, Configurable {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
         businessGroup.shutdownGracefully();
+        components.release();
     }
 
     @Override
@@ -139,8 +143,6 @@ public final class ServerEntry implements Server, Configurable {
 
         private ServerEntry ref;
 
-        private int i = 0;
-
         Dispatcher(ServerEntry ref) {
             this.ref = ref;
         }
@@ -149,7 +151,6 @@ public final class ServerEntry implements Server, Configurable {
         public void channelRead0(ChannelHandlerContext ctx, Packet packet) throws Exception {
             InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
             Handler handler = ref.handlerHolder.get(Byte.toUnsignedInt(packet.key()));
-            System.out.print((i++) + " ");
             if (handler == null) {
                 //TODO default handler
                 System.out.println(packet.getNamespace());

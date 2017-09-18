@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;
 import io.awacs.common.InitializationException;
+import io.awacs.common.Releasable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 /**
  * Created by pixyonly on 03/09/2017.
  */
-public class Components implements Configurable {
+public class Components implements Configurable, Releasable {
 
     private static final Logger log = LoggerFactory.getLogger(Components.class);
 
@@ -49,5 +50,10 @@ public class Components implements Configurable {
             return r;
         }
         return holder.values().stream().filter(clazz::isInstance).findAny().orElseThrow(ComponentException::new);
+    }
+
+    @Override
+    public void release() {
+        holder.values().stream().filter(c -> c instanceof Releasable).map(c -> (Releasable) c).forEach(Releasable::release);
     }
 }
