@@ -21,6 +21,8 @@ import io.awacs.common.Configuration;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
@@ -47,6 +49,8 @@ public enum AWACS {
     public static final String CONFIG_LOGLEVEL = "log_level";
 
     public static final String DEFAULT_LOGLEVEL = "INFO";
+
+    public static final String CONFIG_HOSTNAME = "hostname";
 
     public static final String CONFIG_MAX_BATCH_BYTES = "max_batch_bytes";
 
@@ -90,6 +94,8 @@ public enum AWACS {
 
     String namespace;
 
+    String hostname;
+
     public void prepare(Instrumentation inst) {
         M.inst = inst;
         home = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -114,7 +120,13 @@ public enum AWACS {
         } catch (Exception e) {
             log.setLevel(Level.parse(DEFAULT_LOGLEVEL));
         }
-        namespace = config.getString(AWACS.CONFIG_NAMESPACE, AWACS.DEFAULT_NAMESPACE);
+        try {
+            hostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException ignore) {
+            hostname = "";
+        }
+        hostname = config.getString(CONFIG_HOSTNAME, hostname);
+        namespace = config.getString(CONFIG_NAMESPACE, DEFAULT_NAMESPACE);
         log.log(Level.INFO, "Using namespace: {0}", namespace);
         Sender.I.init(config);
         String[] pluginList = config.getArray(CONFIG_PLUGINS);
@@ -159,6 +171,10 @@ public enum AWACS {
 
     public String namespace() {
         return namespace;
+    }
+
+    public String hostname() {
+        return hostname;
     }
 
     public void registerShutdownHook() {

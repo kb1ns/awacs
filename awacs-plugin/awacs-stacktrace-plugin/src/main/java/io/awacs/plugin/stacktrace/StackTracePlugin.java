@@ -62,6 +62,8 @@ public class StackTracePlugin implements Plugin {
                     .addField("thread", Thread.currentThread().getName())
                     .addField("stack", root.toString())
                     .tag("entry", root.id())
+                    .tag("namespace", AWACS.M.namespace())
+                    .tag("hostname", AWACS.M.hostname())
                     .build()
                     .lineProtocol();
             log.fine(s);
@@ -95,6 +97,8 @@ public class StackTracePlugin implements Plugin {
                 .addField("stack", reducedStack.toString())
                 .addField("message", e.getMessage())
                 .tag("entry", e.getClass().getCanonicalName())
+                .tag("namespace", AWACS.M.namespace())
+                .tag("hostname", AWACS.M.hostname())
                 .build()
                 .lineProtocol();
     }

@@ -48,20 +48,6 @@ public class Configurations {
 
     public static final int DEFAULT_TCP_WORKER_CORE = Runtime.getRuntime().availableProcessors() * 2;
 
-//    public static final String PLUGIN_PREFIX = "awacs.plugins";
-//
-//    public static final String PLUGIN_CLASS = "pluginClass";
-//
-//    public static final String PLUGIN_PROPERTIES = "pluginProperties";
-//
-//    public static final String HANDLER_PROPERTIES = "handlerProperties";
-//
-//    public static final String HANDLER_CLASS = "handlerClass";
-//
-//    public static final String KEY_CLASS = "keyClass";
-//
-//    public static final String KEY_VALUE = "keyValue";
-
     public static final String COMPONENT_PREFIX = "awacs.components";
 
     public static final String COMPONENT_CLASS = "class";
