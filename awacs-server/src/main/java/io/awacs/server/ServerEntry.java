@@ -124,15 +124,13 @@ public final class ServerEntry implements Server, Configurable {
 
     @Override
     public void init(Configuration configuration) {
-        String serverName = configuration.getString(Configurations.SERVER_PREFIX);
-        Configuration selfConfig = configuration.getSubConfig(serverName + ".");
-        host = selfConfig.getString(Configurations.TCP_BIND_HOST, Configurations.DEFAULT_TCP_BIND_HOST);
-        port = selfConfig.getInteger(Configurations.TCP_BIND_PORT, Configurations.DEFAULT_TCP_BIND_PORT);
-        int bossCore = selfConfig.getInteger(Configurations.TCP_BOSS_CORE, Configurations.DEFAULT_TCP_BOSS_CORE);
-        int workerCore = selfConfig.getInteger(Configurations.TCP_WORKER_CORE, Configurations.DEFAULT_TCP_WORKER_CORE);
+        host = configuration.getString(Configurations.CFG_BIND_HOST, Configurations.DEFAULT_BIND_HOST);
+        port = configuration.getInteger(Configurations.CFG_BIND_PORT, Configurations.DEFAULT_BIND_PORT);
+        int bossCore = configuration.getInteger(Configurations.CFG_BOSS_CORE, Configurations.DEFAULT_BOSS_CORE);
+        int workerCore = configuration.getInteger(Configurations.CFG_WORKER_CORE, Configurations.DEFAULT_WORKER_CORE);
         boss = new NioEventLoopGroup(bossCore);
         worker = new NioEventLoopGroup(workerCore);
-        businessGroup = new DefaultEventExecutorGroup(16);
+        businessGroup = new DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors());
     }
 
 

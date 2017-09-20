@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 AWACS Project.
+ * Copyright 2016-2017 AWACS Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,23 @@ import java.util.ResourceBundle;
  */
 public class Configurations {
 
-    public static final String SERVER_PREFIX = "awacs.servers";
+    public static final String CFG_BIND_HOST = "bind_host";
 
-    public static final String TCP_BIND_HOST = "tcp_bind_host";
+    public static final String DEFAULT_BIND_HOST = "0.0.0.0";
 
-    public static final String DEFAULT_TCP_BIND_HOST = "0.0.0.0";
+    public static final String CFG_BIND_PORT = "bind_port";
 
-    public static final String TCP_BIND_PORT = "tcp_bind_port";
+    public static final int DEFAULT_BIND_PORT = 7200;
 
-    public static final int DEFAULT_TCP_BIND_PORT = 7200;
+    public static final String CFG_BOSS_CORE = "boss_core";
 
-    public static final String TCP_BOSS_CORE = "tcp_boss_core";
+    public static final int DEFAULT_BOSS_CORE = 1;
 
-    public static final int DEFAULT_TCP_BOSS_CORE = 1;
+    public static final String CFG_WORKER_CORE = "worker_core";
 
-    public static final String TCP_WORKER_CORE = "tcp_worker_core";
+    public static final int DEFAULT_WORKER_CORE = Runtime.getRuntime().availableProcessors() * 2;
 
-    public static final int DEFAULT_TCP_WORKER_CORE = Runtime.getRuntime().availableProcessors() * 2;
-
-    public static final String COMPONENT_PREFIX = "awacs.components";
+    public static final String COMPONENT_PREFIX = "components";
 
     public static final String COMPONENT_CLASS = "class";
 
@@ -63,24 +61,4 @@ public class Configurations {
         }
         return new Configuration(map);
     }
-
-//    public static List<String> exportServerAddr(Configuration configuration) {
-//        ImmutableMap<String, String> map = configuration.getSubProperties(SERVER_PREFIX + ".");
-//        Set<String> serverNames = map.keySet().stream().map(key -> key.substring(0, key.indexOf("."))).collect(Collectors.toSet());
-//        List<String> addrs = new ArrayList<>(serverNames.size());
-//        addrs.addAll(serverNames.stream().map(serverName -> map.getOrDefault(serverName + "." + TCP_BIND_HOST, DEFAULT_TCP_BIND_HOST) + ":" +
-//                map.getOrDefault(serverName + "." + TCP_BIND_PORT, DEFAULT_TCP_BIND_PORT)).collect(Collectors.toList()));
-//        return addrs;
-//    }
-//
-//    public static String getPluginPath() {
-//        return System.getProperty("awacs.home", System.getProperty("user.dir")) + "/plugins/";
-//    }
-//
-//    public static void dump(String conf) throws IOException {
-//        FileWriter fw = new FileWriter(new File(getPluginPath() + "/config.json"));
-//        fw.write(conf);
-//        fw.flush();
-//        fw.close();
-//    }
 }
