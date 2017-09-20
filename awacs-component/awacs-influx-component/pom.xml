@@ -32,8 +32,31 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
+                    <execution>
+                        <id>copy-dep</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${project.basedir}/../target</outputDirectory>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>copy-artifact</id>
                         <phase>package</phase>
@@ -41,7 +64,6 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <stripVersion>true</stripVersion>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>${project.groupId}</groupId>
@@ -49,13 +71,8 @@
                                     <version>${project.version}</version>
                                     <type>${project.packaging}</type>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.influxdb</groupId>
-                                    <artifactId>influxdb-java</artifactId>
-                                    <version>2.7</version>
-                                    <type>jar</type>
-                                </artifactItem>
                             </artifactItems>
+                            <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/../target</outputDirectory>
                             <overWriteReleases>true</overWriteReleases>
                             <overWriteIfNewer>true</overWriteIfNewer>

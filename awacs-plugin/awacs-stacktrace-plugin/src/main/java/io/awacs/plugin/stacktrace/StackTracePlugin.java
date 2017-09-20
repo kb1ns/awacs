@@ -61,6 +61,7 @@ public class StackTracePlugin implements Plugin {
             String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
                     .addField("thread", Thread.currentThread().getName())
                     .addField("stack", root.toString())
+                    .addField("elapsed_time", root.getElapsedTime())
                     .tag("entry", root.id())
                     .tag("namespace", AWACS.M.namespace())
                     .tag("hostname", AWACS.M.hostname())

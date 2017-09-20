@@ -69,6 +69,10 @@ public class CallElement {
         subElements.remove(id);
     }
 
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
+
     @Override
     public String toString() {
         return String.format("%s:%s@%s%s", id(), elapsedTime, callCounter, subElements.values().toString());

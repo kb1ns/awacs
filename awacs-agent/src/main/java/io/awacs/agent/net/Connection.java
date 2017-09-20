@@ -34,11 +34,11 @@ class Connection {
                 channel = AsynchronousSocketChannel.open();
             }
             Future<Void> future = channel.connect(remote.getAddress());
-            channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
             if (future.get(timeout, TimeUnit.MILLISECONDS) != null) {
                 log.log(Level.WARNING, "Cannot connect to remote {0}", remote);
                 return false;
             }
+            channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
             log.log(Level.INFO, "Connected to server {0}", remote);
             return true;
         } catch (Exception e) {

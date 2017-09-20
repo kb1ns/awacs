@@ -28,7 +28,7 @@ public class Components implements Configurable, Releasable {
             Configuration selfConfig = configuration.getSubConfig(Configurations.COMPONENT_PREFIX + "." + name + ".");
             String className = selfConfig.getString(Configurations.COMPONENT_CLASS);
             if (Strings.isNullOrEmpty(className))
-                throw new InitializationException();
+                throw new InitializationException("Config `class` is necessary for components. e.g. awacs.components." + name + ".class = ?");
             try {
                 Class<?> clazz = Class.forName(className);
                 Configurable component = (Configurable) clazz.newInstance();

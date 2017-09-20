@@ -162,5 +162,4 @@
         </plugins>
         <finalName>awacs-server</finalName>
     </build>
-
 </project>
