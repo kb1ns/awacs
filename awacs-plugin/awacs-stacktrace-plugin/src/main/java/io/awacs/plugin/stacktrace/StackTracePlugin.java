@@ -26,6 +26,8 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
@@ -49,6 +51,20 @@ public class StackTracePlugin implements Plugin {
 
     private final static String EXCEPTION_TRACE_LEVEL = "exception_trace_level";
 
+    private final static int DEFAULT_EXCEPTION_TRACE_LEVEL = 20;
+
+    private final static String RESPONSE_TIME_MS_THRESHOLD = "response_time_ms_threshold";
+
+    private final static int DEFAULT_RESPONSE_TIME_MS_THRESHOLD = 0;
+
+    private final static String CFG_ENABLE_OUTPUT_TRANSFORMED_CLASS = "enable_output_transformed_class";
+
+    private final static boolean DEFAULT_ENABLE_OUTPUT_TRANSFORMED_CLASS = false;
+
+    private final static String CFG_CLASSFILE_OUTPUT_PATH = "classfile_output_path";
+
+    private final static String DEFAULT_CLASSFILE_OUTPUT_PATH = "/tmp/awacs";
+
     private static Logger log = Logger.getLogger("AWACS");
 
     private ClassFilter classFilter;
@@ -57,7 +73,7 @@ public class StackTracePlugin implements Plugin {
     public static void incrAccess() {
         log.fine("Request completed.");
         CallElement root = CallStack.reset();
-        if (root != null) {
+        if (root != null && root.getElapsedTime() > Config.F.responseTimeThreshold) {
             String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
                     .addField("thread", Thread.currentThread().getName())
                     .addField("stack", root.toString())
@@ -123,8 +139,12 @@ public class StackTracePlugin implements Plugin {
                     ClassVisitor cv = new StackTraceClassAdaptor(cw);
                     ClassReader cr = new ClassReader(classfileBuffer);
                     cr.accept(cv, 0);
+                    byte[] bytecode = cw.toByteArray();
                     log.log(Level.FINE, "{0} transformed.", className);
-                    return cw.toByteArray();
+                    if (Config.F.enableDebug) {
+                        outputClass(className, bytecode);
+                    }
+                    return bytecode;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return classfileBuffer;
@@ -136,6 +156,15 @@ public class StackTracePlugin implements Plugin {
     @Override
     public void over() {
         //DO NOTHING
+    }
+
+    private void outputClass(String className, byte[] bytecode) {
+        try (FileOutputStream os = new FileOutputStream(Config.F.outputPath + className.replaceAll("/", ".") + ".class")) {
+            os.write(bytecode);
+            os.flush();
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Cannot output class file to {0}", Config.F.outputPath);
+        }
     }
 
     private enum Config {
@@ -150,11 +179,33 @@ public class StackTracePlugin implements Plugin {
 
         int maxExceptionLevel;
 
+        int responseTimeThreshold;
+
+        boolean enableDebug;
+
+        String outputPath;
+
         void init(Configuration config) {
             excludes = config.getArray(EXCLUDE_EXCEPTION_PREFIXES);
             includes = config.getArray(INCLUDE_EXCEPTION_PREFIXES);
             packges = config.getArray(FILTER_PACKAGE_PREFIXES);
-            maxExceptionLevel = config.getInteger(EXCEPTION_TRACE_LEVEL, 20);
+            maxExceptionLevel = config.getInteger(EXCEPTION_TRACE_LEVEL, DEFAULT_EXCEPTION_TRACE_LEVEL);
+            responseTimeThreshold = config.getInteger(RESPONSE_TIME_MS_THRESHOLD, DEFAULT_RESPONSE_TIME_MS_THRESHOLD);
+            enableDebug = config.getBoolean(CFG_ENABLE_OUTPUT_TRANSFORMED_CLASS, DEFAULT_ENABLE_OUTPUT_TRANSFORMED_CLASS);
+            outputPath = config.getString(CFG_CLASSFILE_OUTPUT_PATH, DEFAULT_CLASSFILE_OUTPUT_PATH);
+            if (enableDebug) {
+                if (!outputPath.endsWith("/")) {
+                    outputPath = outputPath + "/";
+                }
+                File f = new File(outputPath);
+                if (!f.exists()) {
+                    if (!f.mkdir()) {
+                        log.log(Level.WARNING, "cannot create directory at {0}", outputPath);
+                    }
+                } else if (f.isFile()) {
+                    log.log(Level.WARNING, "{0} already exists.", outputPath);
+                }
+            }
         }
 
         boolean isValid(Class<?> clazz) {
