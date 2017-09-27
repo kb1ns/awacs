@@ -41,8 +41,8 @@ abstract class ClassTransformer {
         InsnList body = new InsnList();
         body.add(mn.instructions);
 
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
         InsnList enter = new InsnList();
+        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
         enter.add(new LdcInsnNode(mn.name.replaceAll("/", ".")));
         enter.add(new LdcInsnNode(mn.name));
         enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
