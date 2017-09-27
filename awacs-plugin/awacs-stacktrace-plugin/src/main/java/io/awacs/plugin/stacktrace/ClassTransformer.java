@@ -36,14 +36,14 @@ abstract class ClassTransformer {
     //判断是否为起始代理方法
     protected abstract boolean isPointcut(MethodNode mn);
 
-    private void addTryCatchBlock(MethodNode mn) {
+    private void addTryCatchBlock(MethodNode mn, ClassNode cn) {
         //清空instructions
         InsnList body = new InsnList();
         body.add(mn.instructions);
 
         InsnList enter = new InsnList();
         enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
-        enter.add(new LdcInsnNode(mn.name.replaceAll("/", ".")));
+        enter.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
         enter.add(new LdcInsnNode(mn.name));
         enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
         mn.instructions.insert(enter);
@@ -97,8 +97,7 @@ abstract class ClassTransformer {
             MethodNode src = (MethodNode) mn;
             if (filterMethod(cn, src)) {
                 if (isPointcut(src)) {
-//                    addInterceptor(src, cn);
-                    addTryCatchBlock(src);
+                    addTryCatchBlock(src, cn);
                 } else if (!isTinyMethod(src)) {
                     addInterceptor(src, cn);
                 }
