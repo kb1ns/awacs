@@ -47,7 +47,7 @@ class FilteredClassTransformer extends ClassTransformer {
      * 判断是否堆栈追踪的开始方法
      */
     @Override
-    protected boolean isTerminatedMethod(MethodNode mn) {
+    protected boolean isPointcut(MethodNode mn) {
         boolean terminated = false;
         List<AnnotationNode> annotationNodes = mn.visibleAnnotations;
         if (annotationNodes != null) {

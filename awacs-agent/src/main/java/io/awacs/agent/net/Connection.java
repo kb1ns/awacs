@@ -16,6 +16,7 @@
 
 package io.awacs.agent.net;
 
+import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -41,25 +42,22 @@ class Connection {
     Connection(Remote remote, int timeout) {
         this.remote = remote;
         this.timeout = timeout;
+        try {
+            channel = AsynchronousSocketChannel.open();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         ready();
     }
 
-    boolean ready() {
+    void ready() {
         try {
-            if (channel == null) {
-                channel = AsynchronousSocketChannel.open();
-            }
             Future<Void> future = channel.connect(remote.getAddress());
-            if (future.get(timeout, TimeUnit.MILLISECONDS) != null) {
-                log.log(Level.WARNING, "Cannot connect to remote {0}", remote);
-                return false;
-            }
+            future.get(timeout, TimeUnit.MILLISECONDS);
             channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
             log.log(Level.INFO, "Connected to server {0}", remote);
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -80,6 +78,7 @@ class Connection {
             public void failed(Throwable exc, ByteBuffer attachment) {
                 exc.printStackTrace();
                 cb.onException(exc);
+                ready();
             }
         });
     }

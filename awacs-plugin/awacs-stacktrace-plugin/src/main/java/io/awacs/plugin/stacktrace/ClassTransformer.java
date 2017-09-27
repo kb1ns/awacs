@@ -19,7 +19,6 @@ package io.awacs.plugin.stacktrace;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,61 +34,76 @@ abstract class ClassTransformer {
     protected abstract boolean filterMethod(ClassNode cn, MethodNode mn);
 
     //判断是否为起始代理方法
-    protected abstract boolean isTerminatedMethod(MethodNode mn);
+    protected abstract boolean isPointcut(MethodNode mn);
 
-    //对类进行处理
+    private void addTryCatchBlock(MethodNode mn) {
+        //清空instructions
+        InsnList body = new InsnList();
+        body.add(mn.instructions);
+
+        InsnList enter = new InsnList();
+        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
+        enter.add(new LdcInsnNode(mn.name.replaceAll("/", ".")));
+        enter.add(new LdcInsnNode(mn.name));
+        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
+        mn.instructions.insert(enter);
+
+        LabelNode excHandler = new LabelNode();
+
+        LabelNode exc0 = new LabelNode();
+        body.insert(exc0);
+        AbstractInsnNode node = body.getFirst();
+        while (node != null) {
+            int opcode = node.getOpcode();
+            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
+                InsnList quit = new InsnList();
+                quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit", "()V", false));
+                quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess", "()V", false));
+                LabelNode exc1 = new LabelNode();
+                quit.add(exc1);
+                mn.tryCatchBlocks.add(new TryCatchBlockNode(exc0, exc1, excHandler, "java/lang/Exception"));
+                body.insertBefore(node, quit);
+                exc0 = new LabelNode();
+                body.insert(node, exc0);
+            }
+            node = node.getNext();
+        }
+        mn.instructions.add(body);
+
+        //进行异常捕获并抛出
+        int varSlotIndex = (mn.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC ? 1 : 0;
+        List<String> parameters = resolveParameters(mn.desc);
+        for (String param : parameters) {
+            if (param.equals("J") || param.equals("D"))
+                varSlotIndex += 2;
+            else
+                varSlotIndex++;
+        }
+
+        mn.instructions.add(excHandler);
+        mn.instructions.add(new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"}));
+        mn.instructions.add(new VarInsnNode(Opcodes.ASTORE, varSlotIndex));
+        mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varSlotIndex));
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrFailure", "(Ljava/lang/Throwable;)V", false));
+        mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varSlotIndex));
+        mn.instructions.add(new InsnNode(Opcodes.ATHROW));
+        mn.maxStack += 2;
+        mn.maxLocals += 1;
+    }
+
     public void visit(ClassNode cn) {
         cn.check(Opcodes.ASM5);
-        //定义需要添加的类的集合
-        List<MethodNode> appended = new ArrayList<>(cn.methods.size());
-        //对每个类进行处理
         for (Object mn : cn.methods) {
             MethodNode src = (MethodNode) mn;
-            //对方法进行过滤
-            if (!filterMethod(cn, src)) {
-                continue;
-            }
-            boolean terminated = isTerminatedMethod(src);
-
-            if (terminated) {
-                //copy exceptions
-                String[] exceptions = null;
-                if (src.exceptions != null) {
-                    exceptions = new String[src.exceptions.size()];
-                    for (int i = 0; i < src.exceptions.size(); i++) {
-                        exceptions[i] = src.exceptions.get(i).toString();
-                    }
+            if (filterMethod(cn, src)) {
+                if (isPointcut(src)) {
+//                    addInterceptor(src, cn);
+                    addTryCatchBlock(src);
+                } else if (!isTinyMethod(src)) {
+                    addInterceptor(src, cn);
                 }
-                //declare method
-                MethodNode proxy = new MethodNode(src.access, src.name, src.desc, src.signature, exceptions);
-                appended.add(proxy);
-                //copy method annotations
-                List<AnnotationNode> methodAnns = null;
-                if (src.visibleAnnotations != null) {
-                    methodAnns = new ArrayList<>(src.visibleAnnotations.size());
-                    methodAnns.addAll(src.visibleAnnotations);
-                }
-                proxy.visibleAnnotations = methodAnns;
-                //copy parameter annotations
-                List[] parameterAnns = null;
-                if (src.visibleParameterAnnotations != null) {
-                    parameterAnns = new List[src.visibleParameterAnnotations.length];
-                    System.arraycopy(src.visibleParameterAnnotations, 0, parameterAnns, 0, src.visibleParameterAnnotations.length);
-                }
-                proxy.visibleParameterAnnotations = parameterAnns;
-                //clear origin method's annotation and change name
-                int _slash = cn.name.lastIndexOf('/');
-                //修改原始方法名，删除原始方法的注解
-                src.name = src.name + "_origin_" + cn.name.substring(_slash + 1);
-                src.access = src.access & ~Opcodes.ACC_PUBLIC | Opcodes.ACC_PRIVATE;
-                src.visibleAnnotations = null;
-                src.visibleLocalVariableAnnotations = null;
-                transformTerminatedMethod(src, proxy, cn);
-            } else if (!isTinyMethod(src)) {
-                transformPlainMethod(src, cn);
             }
         }
-        cn.methods.addAll(appended);
     }
 
     private static boolean isTinyMethod(MethodNode method) {
@@ -154,146 +168,12 @@ abstract class ClassTransformer {
         return mn.name.equals("<init>") || mn.name.equals("<clinit>");
     }
 
-    /**
-     * 修改起始代理方法，步骤：
-     * 1、添加try catch语句                 try{
-     * 2、初始化当前线程的线程栈信息列表        io.awacs.plugin.stacktrace.CallStack.initStack();
-     * 3、保存当前线程的开始信息                io.awacs.plugin.stacktrace.StackFrames.methodEnter(className,methodName);
-     * 4、调用原始方法                          Object val = methodName_origin_className(args);
-     * 5、保存当前线程的结束信息                io.awacs.plugin.stacktrace.StackFrames.methodQuit();
-     * 7、发送当前线程的线程栈信息列表          io.awacs.plugin.stacktrace.StackTracePlugin.incrAccess(list);
-     * 8、调用返回方法                          return val;
-     * }catch(java.lang.Exception e){
-     * 9、异常部分执行：处理异常                io.awacs.plugin.stacktrace.StackTracePlugin.incrFailure(e);
-     * 10、异常部分执行：抛出异常               throw e;
-     * }
-     */
-    private void transformTerminatedMethod(MethodNode origin, MethodNode proxy, ClassNode owner) {
-        LabelNode l0 = new LabelNode();
-        LabelNode l1 = new LabelNode();
-        LabelNode l2 = new LabelNode();
-        //添加try catch语句
-        proxy.tryCatchBlocks.add(new TryCatchBlockNode(l0, l1, l2, "java/lang/Exception"));
-        proxy.instructions.add(l0);
-        //其实方法初始化方法调用
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
-        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
-        proxy.instructions.add(new LdcInsnNode(proxy.name));
-//        proxy.instructions.add(new LdcInsnNode(0));
-        //方法开始调用
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
-                "(Ljava/lang/String;Ljava/lang/String;)V", false));
-        //本地变量区的游标，用于计算最终大小
-        int varIndex = 0;
-        //判断是否为静态方法,如果不是静态方法还需要加载this到操作数区
-        if ((proxy.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
-            proxy.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            varIndex = 1;
-        }
-        List<String> parameters = resolveParameters(proxy.desc);
-        //从本地变量去加载到栈的操作数中
-        for (String param : parameters) {
-            VarInsnNode insnNode;
-            switch (param) {
-                case "J":
-                    insnNode = new VarInsnNode(Opcodes.LLOAD, varIndex);
-                    varIndex += 2;
-                    break;
-                case "D":
-                    insnNode = new VarInsnNode(Opcodes.DLOAD, varIndex);
-                    varIndex += 2;
-                    break;
-                case "F":
-                    insnNode = new VarInsnNode(Opcodes.FLOAD, varIndex++);
-                    break;
-                case "I":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "S":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "Z":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "B":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                case "C":
-                    insnNode = new VarInsnNode(Opcodes.ILOAD, varIndex++);
-                    break;
-                default:
-                    insnNode = new VarInsnNode(Opcodes.ALOAD, varIndex++);
-                    break;
-            }
-            proxy.instructions.add(insnNode);
-        }
-        //调用原始方法
-        if ((origin.access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC)
-            proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, owner.name, origin.name, origin.desc, false));
-        else
-            proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, owner.name, origin.name, origin.desc, false));
-        //方法结束调用
-        proxy.instructions.add(new LdcInsnNode(owner.name.replaceAll("/", ".")));
-        proxy.instructions.add(new LdcInsnNode(proxy.name));
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
-                "(Ljava/lang/String;Ljava/lang/String;)V", false));
-        //发送调用栈信息
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess",
-                "()V", false));
-        proxy.instructions.add(l1);
-        //判断返回值类型
-        String returnType = origin.desc.substring(origin.desc.indexOf(')') + 1);
-        switch (returnType) {
-            case "J":
-                proxy.instructions.add(new InsnNode(Opcodes.LRETURN));
-                break;
-            case "D":
-                proxy.instructions.add(new InsnNode(Opcodes.DRETURN));
-                break;
-            case "F":
-                proxy.instructions.add(new InsnNode(Opcodes.FRETURN));
-                break;
-            case "I":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "S":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "C":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "B":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "Z":
-                proxy.instructions.add(new InsnNode(Opcodes.IRETURN));
-                break;
-            case "V":
-                proxy.instructions.add(new InsnNode(Opcodes.RETURN));
-                break;
-            default:
-                proxy.instructions.add(new InsnNode(Opcodes.ARETURN));
-                break;
-        }
-        proxy.instructions.add(l2);
-        //进行异常捕获并抛出
-        proxy.instructions.add(new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"}));
-        proxy.instructions.add(new VarInsnNode(Opcodes.ASTORE, varIndex));
-        proxy.instructions.add(new VarInsnNode(Opcodes.ALOAD, varIndex));
-        proxy.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrFailure", "(Ljava/lang/Throwable;)V", false));
-        proxy.instructions.add(new VarInsnNode(Opcodes.ALOAD, varIndex));
-        proxy.instructions.add(new InsnNode(Opcodes.ATHROW));
-        proxy.maxLocals = varIndex + 1;
-        proxy.maxStack = Math.max(varIndex, 4);
-    }
-
-
-    private void transformPlainMethod(MethodNode mn, ClassNode cn) {
+    private void addInterceptor(MethodNode mn, ClassNode cn) {
         InsnList enter = new InsnList();
         enter.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
         enter.add(new LdcInsnNode(mn.name));
-        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter",
-                "(Ljava/lang/String;Ljava/lang/String;)V", false));
+        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
+        mn.instructions.insert(enter);
 
         List<AbstractInsnNode> returnLocations = new LinkedList<>();
         for (int i = 0; i < mn.instructions.size(); i++) {
@@ -302,16 +182,14 @@ abstract class ClassTransformer {
                 returnLocations.add(mn.instructions.get(i));
             }
         }
-        mn.instructions.insert(enter);
         for (AbstractInsnNode ret : returnLocations) {
             InsnList quit = new InsnList();
-            quit.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-            quit.add(new LdcInsnNode(mn.name));
-            quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit",
-                    "(Ljava/lang/String;Ljava/lang/String;)V", false));
+//            quit.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+//            quit.add(new LdcInsnNode(mn.name));
+            quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit", "()V", false));
             mn.instructions.insertBefore(ret, quit);
         }
-        mn.maxStack = mn.maxStack + 2;
+        mn.maxStack += 2;
     }
 
 }

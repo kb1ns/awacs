@@ -49,6 +49,30 @@ public class TestController {
         return new JSONObject().fluentPut("hello", bis1(id)).toJSONString();
     }
 
+    @RequestMapping(value = "/hello")
+    public String hello(String s) {
+        try {
+            System.out.println(s);
+            Random r = new Random();
+            if (r.nextInt() % 2 == 0)
+                return "hello, world";
+            return "hoho";
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @RequestMapping(value = "/hello1")
+    public String hello1(String s) {
+        System.out.println(s);
+        Random r = new Random();
+        if (r.nextInt() % 2 == 0)
+            return "hello, world";
+        return "hoho";
+    }
+
+
     @RequestMapping("/img")
     public void img(HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
