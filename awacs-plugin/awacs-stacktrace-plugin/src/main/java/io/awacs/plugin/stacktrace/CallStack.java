@@ -42,7 +42,7 @@ public class CallStack {
         }
     }
 
-    public static void methodQuit(String clazz, String method) {
+    public static void methodQuit() {
         Deque<CallElement> stack = roots.get(Thread.currentThread().getId());
         if (stack != null && !stack.isEmpty()) {
             if (stack.size() > 1) {
