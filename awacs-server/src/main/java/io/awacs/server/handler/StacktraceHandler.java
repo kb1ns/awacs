@@ -47,6 +47,7 @@ public class StacktraceHandler implements Handler {
     public Packet onReceive(Packet packet, InetSocketAddress address) {
         String namespace = packet.getNamespace();
         String content = packet.getBody();
+        log.debug(content);
         if (!ms.containsKey(namespace)) {
             ms.putIfAbsent(namespace, new LinkedList<>());
             log.info("New batch allocated.");

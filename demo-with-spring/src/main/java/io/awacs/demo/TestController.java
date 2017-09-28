@@ -28,6 +28,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Random;
 
 
@@ -46,6 +47,8 @@ public class TestController {
     public String test2(@PathVariable("id") String id) {
         if (id.compareTo("hello") >= 0)
             throw new RuntimeException("test for throw exception");
+        bis2();
+        bis2();
         return new JSONObject().fluentPut("hello", bis1(id)).toJSONString();
     }
 
@@ -70,6 +73,11 @@ public class TestController {
         if (r.nextInt() % 2 == 0)
             return "hello, world";
         return "hoho";
+    }
+
+    public List generic(List l) {
+
+        return l;
     }
 
 

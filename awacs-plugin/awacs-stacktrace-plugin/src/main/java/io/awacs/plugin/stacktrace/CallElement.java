@@ -34,13 +34,13 @@ public class CallElement {
 
     private long timestamp;
 
-    private long elapsedTime;
+    private int elapsedTime;
 
     CallElement(String clazz, String method) {
         this.clazz = clazz;
         this.method = method;
         this.timestamp = System.currentTimeMillis();
-        subElements = new LinkedHashMap<>();
+        this.subElements = new LinkedHashMap<>();
     }
 
     public String id() {
@@ -48,7 +48,7 @@ public class CallElement {
     }
 
     public CallElement end() {
-        this.elapsedTime = System.currentTimeMillis() - this.timestamp;
+        this.elapsedTime = (int) (System.currentTimeMillis() - this.timestamp);
         return this;
     }
 
@@ -69,12 +69,34 @@ public class CallElement {
         subElements.remove(id);
     }
 
-    public long getElapsedTime() {
+    public int getElapsedTime() {
         return elapsedTime;
     }
 
     @Override
     public String toString() {
-        return String.format("%s:%s@%s%s", id(), elapsedTime, callCounter, subElements.values().toString());
+        StringBuilder sb = new StringBuilder("\n");
+        pretty(sb, 0);
+        return sb.toString();
+    }
+
+    protected void pretty(StringBuilder sb, int level) {
+        StringBuilder align = new StringBuilder();
+        for (int i = 0; i < level; i++)
+            align.append("  ");
+        sb.append(align);
+        sb.append(clazz);
+        sb.append('#');
+        sb.append(method);
+        sb.append(':');
+        sb.append(elapsedTime);
+        sb.append("@");
+        sb.append(callCounter);
+        sb.append(" [\n");
+        for (CallElement callElement : subElements.values()) {
+            callElement.pretty(sb, level + 1);
+        }
+        sb.append(align);
+        sb.append("]\n");
     }
 }

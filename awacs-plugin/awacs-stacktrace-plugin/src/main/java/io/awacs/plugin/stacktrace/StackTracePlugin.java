@@ -67,13 +67,11 @@ public class StackTracePlugin implements Plugin {
 
     private static Logger log = Logger.getLogger("AWACS");
 
-    private ClassFilter classFilter;
-
     //发送线程的堆栈信息
     public static void incrAccess() {
         log.fine("Request completed.");
         CallElement root = CallStack.reset();
-        if (root != null && root.getElapsedTime() > Config.F.responseTimeThreshold) {
+        if (root != null && root.getElapsedTime() >= Config.F.responseTimeThreshold) {
             String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
                     .addField("thread", Thread.currentThread().getName())
                     .addField("stack", root.toString())
@@ -122,7 +120,6 @@ public class StackTracePlugin implements Plugin {
 
     @Override
     public void init(Configuration configuration) {
-        classFilter = new ClassFilter(configuration.getArray(FILTER_PACKAGE_PREFIXES));
         Config.F.init(configuration);
     }
 
@@ -132,9 +129,6 @@ public class StackTracePlugin implements Plugin {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
                 try {
-                    if (!classFilter.doFilter(className)) {
-                        return classfileBuffer;
-                    }
                     ClassWriter cw = new ClassWriter(0);
                     ClassVisitor cv = new StackTraceClassAdaptor(cw);
                     ClassReader cr = new ClassReader(classfileBuffer);
@@ -167,7 +161,7 @@ public class StackTracePlugin implements Plugin {
         }
     }
 
-    private enum Config {
+    enum Config {
 
         F;
 
@@ -218,15 +212,6 @@ public class StackTracePlugin implements Plugin {
                 r = r || n.startsWith(name);
             }
             return r;
-        }
-
-        boolean isFocus(StackTraceElement element) {
-            for (String n : packges) {
-                if (element.getClassName().startsWith(n)) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }

@@ -30,6 +30,8 @@ import java.util.List;
  */
 abstract class ClassTransformer {
 
+    protected abstract boolean filterClass(ClassNode cn);
+
     //对方法进行过滤
     protected abstract boolean filterMethod(ClassNode cn, MethodNode mn);
 
@@ -41,17 +43,17 @@ abstract class ClassTransformer {
         InsnList body = new InsnList();
         body.add(mn.instructions);
 
+        LabelNode excHandler = new LabelNode();
+        LabelNode exc0 = new LabelNode();
+
         InsnList enter = new InsnList();
         enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "initStack", "()V", false));
         enter.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
         enter.add(new LdcInsnNode(mn.name));
         enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
+        enter.add(exc0);
         mn.instructions.insert(enter);
 
-        LabelNode excHandler = new LabelNode();
-
-        LabelNode exc0 = new LabelNode();
-        body.insert(exc0);
         AbstractInsnNode node = body.getFirst();
         while (node != null) {
             int opcode = node.getOpcode();
@@ -69,7 +71,6 @@ abstract class ClassTransformer {
             node = node.getNext();
         }
         mn.instructions.add(body);
-
         //进行异常捕获并抛出
         int varSlotIndex = (mn.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC ? 1 : 0;
         List<String> parameters = resolveParameters(mn.desc);
@@ -93,6 +94,8 @@ abstract class ClassTransformer {
 
     public void visit(ClassNode cn) {
         cn.check(Opcodes.ASM5);
+        if (!filterClass(cn))
+            return;
         for (Object mn : cn.methods) {
             MethodNode src = (MethodNode) mn;
             if (filterMethod(cn, src)) {
