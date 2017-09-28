@@ -16,7 +16,6 @@
 
 package io.awacs.agent.net;
 
-import java.io.IOException;
 import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -42,16 +41,12 @@ class Connection {
     Connection(Remote remote, int timeout) {
         this.remote = remote;
         this.timeout = timeout;
-        try {
-            channel = AsynchronousSocketChannel.open();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         ready();
     }
 
     void ready() {
         try {
+            channel = AsynchronousSocketChannel.open();
             Future<Void> future = channel.connect(remote.getAddress());
             future.get(timeout, TimeUnit.MILLISECONDS);
             channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
