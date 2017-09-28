@@ -51,6 +51,12 @@ public class StackTracePlugin implements Plugin {
 
     private final static String EXCEPTION_TRACE_LEVEL = "exception_trace_level";
 
+    private final static String ENABLE_AUTO_DETECT_POINTCUT = "enable_auto_detect_pointcut";
+
+    private final static String POINTCUT_BY_ANNOTATION = "pointcut_by_annotation";
+
+    private final static String POINTCUT_BY_NAME = "pointcut_by_name";
+
     private final static int DEFAULT_EXCEPTION_TRACE_LEVEL = 20;
 
     private final static String RESPONSE_TIME_MS_THRESHOLD = "response_time_ms_threshold";
@@ -58,8 +64,6 @@ public class StackTracePlugin implements Plugin {
     private final static int DEFAULT_RESPONSE_TIME_MS_THRESHOLD = 0;
 
     private final static String CFG_ENABLE_OUTPUT_TRANSFORMED_CLASS = "enable_output_transformed_class";
-
-    private final static boolean DEFAULT_ENABLE_OUTPUT_TRANSFORMED_CLASS = false;
 
     private final static String CFG_CLASSFILE_OUTPUT_PATH = "classfile_output_path";
 
@@ -171,11 +175,17 @@ public class StackTracePlugin implements Plugin {
 
         String[] packges;
 
+        String[] annotations;
+
+        String[] ids;
+
         int maxExceptionLevel;
 
         int responseTimeThreshold;
 
         boolean enableDebug;
+
+        boolean enableAutoDetect;
 
         String outputPath;
 
@@ -183,10 +193,13 @@ public class StackTracePlugin implements Plugin {
             excludes = config.getArray(EXCLUDE_EXCEPTION_PREFIXES);
             includes = config.getArray(INCLUDE_EXCEPTION_PREFIXES);
             packges = config.getArray(FILTER_PACKAGE_PREFIXES);
+            annotations = config.getArray(POINTCUT_BY_ANNOTATION);
+            ids = config.getArray(POINTCUT_BY_NAME);
             maxExceptionLevel = config.getInteger(EXCEPTION_TRACE_LEVEL, DEFAULT_EXCEPTION_TRACE_LEVEL);
             responseTimeThreshold = config.getInteger(RESPONSE_TIME_MS_THRESHOLD, DEFAULT_RESPONSE_TIME_MS_THRESHOLD);
-            enableDebug = config.getBoolean(CFG_ENABLE_OUTPUT_TRANSFORMED_CLASS, DEFAULT_ENABLE_OUTPUT_TRANSFORMED_CLASS);
+            enableDebug = config.getBoolean(CFG_ENABLE_OUTPUT_TRANSFORMED_CLASS, false);
             outputPath = config.getString(CFG_CLASSFILE_OUTPUT_PATH, DEFAULT_CLASSFILE_OUTPUT_PATH);
+            enableAutoDetect = config.getBoolean(ENABLE_AUTO_DETECT_POINTCUT, true);
             if (enableDebug) {
                 if (!outputPath.endsWith("/")) {
                     outputPath = outputPath + "/";

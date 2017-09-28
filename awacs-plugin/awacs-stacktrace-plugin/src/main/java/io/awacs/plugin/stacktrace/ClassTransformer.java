@@ -30,12 +30,12 @@ import java.util.List;
  */
 abstract class ClassTransformer {
 
+    protected String currentClass;
+
     protected abstract boolean filterClass(ClassNode cn);
 
-    //对方法进行过滤
-    protected abstract boolean filterMethod(ClassNode cn, MethodNode mn);
+    protected abstract boolean filterMethod(MethodNode mn);
 
-    //判断是否为起始代理方法
     protected abstract boolean isPointcut(MethodNode mn);
 
     private void addTryCatchBlock(MethodNode mn, ClassNode cn) {
@@ -94,11 +94,12 @@ abstract class ClassTransformer {
 
     public void visit(ClassNode cn) {
         cn.check(Opcodes.ASM5);
+        currentClass = cn.name == null ? "" : cn.name.replaceAll("/", ".");
         if (!filterClass(cn))
             return;
         for (Object mn : cn.methods) {
             MethodNode src = (MethodNode) mn;
-            if (filterMethod(cn, src)) {
+            if (filterMethod(src)) {
                 if (isPointcut(src)) {
                     addTryCatchBlock(src, cn);
                 } else if (!isTinyMethod(src)) {
