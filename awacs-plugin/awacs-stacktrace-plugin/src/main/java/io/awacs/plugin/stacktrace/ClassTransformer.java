@@ -57,13 +57,13 @@ abstract class ClassTransformer {
         AbstractInsnNode node = body.getFirst();
         while (node != null) {
             int opcode = node.getOpcode();
-            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN || opcode == Opcodes.ATHROW) {
+            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
                 InsnList quit = new InsnList();
                 quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit", "()V", false));
                 quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "incrAccess", "()V", false));
                 LabelNode exc1 = new LabelNode();
                 quit.add(exc1);
-                mn.tryCatchBlocks.add(new TryCatchBlockNode(exc0, exc1, excHandler, "java/lang/RuntimeException"));
+                mn.tryCatchBlocks.add(new TryCatchBlockNode(exc0, exc1, excHandler, "java/lang/Exception"));
                 body.insertBefore(node, quit);
                 exc0 = new LabelNode();
                 body.insert(node, exc0);
@@ -83,7 +83,7 @@ abstract class ClassTransformer {
 
         mn.instructions.add(excHandler);
         //TODO
-        mn.instructions.add(new FrameNode(Opcodes.F_FULL, parameters.size(), parameters.toArray(), 1, new Object[]{"java/lang/RuntimeException"}));
+        mn.instructions.add(new FrameNode(Opcodes.F_FULL, parameters.size(), parameters.toArray(), 1, new Object[]{"java/lang/Exception"}));
         mn.instructions.add(new VarInsnNode(Opcodes.ASTORE, varSlotIndex));
         mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varSlotIndex));
         mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "incrFailure", "(Ljava/lang/Throwable;)V", false));

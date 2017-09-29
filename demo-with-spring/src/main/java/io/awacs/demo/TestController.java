@@ -73,10 +73,14 @@ public class TestController {
 
     @RequestMapping(value = "/hello1")
     public String hello1(String s) {
-        Random r = new Random();
-        if (r.nextInt() % 2 == 0)
-            return "hello, world";
-        throw new RuntimeException();
+        try {
+            Random r = new Random();
+            if (r.nextInt() % 2 == 0)
+                return "hello, world";
+            throw new RuntimeException();
+        } catch (Exception e) {
+            return "exception!";
+        }
     }
 
 
