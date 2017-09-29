@@ -21,6 +21,7 @@ import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,9 +43,7 @@ class FilteredClassTransformer extends ClassTransformer {
         for (String a : StackTracePlugin.Config.F.annotations) {
             annotations.add("L" + a.replaceAll("\\.", "/") + ";");
         }
-        for (String n : StackTracePlugin.Config.F.ids) {
-            methodIds.add(n);
-        }
+        Collections.addAll(methodIds, StackTracePlugin.Config.F.ids);
     }
 
     @Override
@@ -61,7 +60,6 @@ class FilteredClassTransformer extends ClassTransformer {
             return false;
         } else if (filterClassPrefix == null || filterClassPrefix.length == 0) {
             return !(className.startsWith("java") ||
-                    className.startsWith("sun") ||
                     className.startsWith("jdk") ||
                     className.startsWith("com/sun/") ||
                     className.startsWith("com/intellij/") ||

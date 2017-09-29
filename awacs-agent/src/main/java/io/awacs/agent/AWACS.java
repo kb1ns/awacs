@@ -151,8 +151,7 @@ public enum AWACS {
         for (PluginDescriptor descriptor : descriptors) {
             try {
                 inst.appendToSystemClassLoaderSearch(descriptor.getJarFile());
-//                Class<?> clazz = classLoader.findClass(descriptor.getClassName());
-                Class<?> clazz = Class.forName(descriptor.getClassName());
+                Class<?> clazz = Class.forName(descriptor.getClassName(), true, classLoader);
                 Plugin plugin = (Plugin) clazz.newInstance();
                 plugin.init(descriptor.getPluginProperties());
                 plugin.rock();

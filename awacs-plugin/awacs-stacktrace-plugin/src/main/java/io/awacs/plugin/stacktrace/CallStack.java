@@ -16,10 +16,13 @@
 
 package io.awacs.plugin.stacktrace;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import io.awacs.agent.AWACS;
+import io.awacs.agent.Sender;
+import io.awacs.common.format.Influx;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Created by pixyonly on 2/7/17.
@@ -68,5 +71,56 @@ public class CallStack {
                 return stack.pop();
         }
         return null;
+    }
+
+    //发送线程的堆栈信息
+    public static void incrAccess() {
+        Logger.getLogger("AWACS").fine("Request completed.");
+        CallElement root = CallStack.reset();
+        if (root != null && root.getElapsedTime() >= StackTracePlugin.Config.F.responseTimeThreshold) {
+            String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
+                    .addField("thread", Thread.currentThread().getName())
+                    .addField("stack", root.toString())
+                    .addField("elapsed_time", root.getElapsedTime())
+                    .tag("entry", root.id())
+                    .tag("namespace", AWACS.M.namespace())
+                    .tag("hostname", AWACS.M.hostname())
+                    .build()
+                    .lineProtocol();
+            Logger.getLogger("AWACS").fine(s);
+            Sender.I.send((byte) 1, s);
+        }
+    }
+
+    //发送异常信息
+    public static void incrFailure(Throwable e) {
+        Logger.getLogger("AWACS").fine("Exception catched.");
+        CallStack.reset();
+        if (StackTracePlugin.Config.F.isValid(e.getClass())) {
+            String s = buildErrReport(e);
+            Logger.getLogger("AWACS").fine(s);
+            Sender.I.send((byte) 1, s);
+        }
+    }
+
+    private static String buildErrReport(Throwable e) {
+        StackTraceElement[] stack = e.getStackTrace();
+        int level = StackTracePlugin.Config.F.maxExceptionLevel;
+        List<StackTraceElement> reducedStack = new ArrayList<>(level);
+        for (StackTraceElement element : stack) {
+            if (level-- < 1) {
+                break;
+            }
+            reducedStack.add(element);
+        }
+        return Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
+                .addField("thread", Thread.currentThread().getName())
+                .addField("stack", reducedStack.toString())
+                .addField("message", e.getMessage())
+                .tag("entry", e.getClass().getCanonicalName())
+                .tag("namespace", AWACS.M.namespace())
+                .tag("hostname", AWACS.M.hostname())
+                .build()
+                .lineProtocol();
     }
 }

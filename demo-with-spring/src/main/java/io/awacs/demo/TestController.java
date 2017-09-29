@@ -25,10 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.Random;
 
 
@@ -44,22 +42,29 @@ public class TestController {
     private static final Cage cage = new GCage();
 
     @RequestMapping(value = "/test/{id}", produces = "application/json")
-    public String test2(@PathVariable("id") String id) {
-        if (id.compareTo("hello") >= 0)
+    public String test(@PathVariable("id") String id) {
+        Random r1 = new Random();
+        int i = 9;
+        if (id.compareTo("hello") >= 0) {
+            Random r = new Random();
+            r.nextBoolean();
+            System.out.println(i);
             throw new RuntimeException("test for throw exception");
-        bis2();
-        bis2();
-        return new JSONObject().fluentPut("hello", bis1(id)).toJSONString();
+        }
+        r1.nextBoolean();
+        sleep2();
+        sleep2();
+        return new JSONObject().fluentPut("hello", sleep1(id)).toJSONString();
     }
 
     @RequestMapping(value = "/hello")
     public String hello(String s) {
         try {
-            System.out.println(s);
             Random r = new Random();
-            if (r.nextInt() % 2 == 0)
-                return "hello, world";
-            return "hoho";
+            if (r.nextInt() % 2 == 0) {
+                return "hello, world1";
+            }
+            throw new RuntimeException();
         } catch (RuntimeException e) {
             e.printStackTrace();
             throw e;
@@ -68,26 +73,20 @@ public class TestController {
 
     @RequestMapping(value = "/hello1")
     public String hello1(String s) {
-        System.out.println(s);
         Random r = new Random();
         if (r.nextInt() % 2 == 0)
             return "hello, world";
-        return "hoho";
-    }
-
-    public List generic(List l) {
-
-        return l;
+        throw new RuntimeException();
     }
 
 
     @RequestMapping("/img")
-    public void img(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void img(HttpServletResponse response) throws Exception {
         try {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < 4; i++) {
                 int r = random.nextInt(36);
-                bis2();
+                sleep2();
                 if (r < 10) {
                     sb.append((char) ('0' + r));
                 } else {
@@ -106,17 +105,17 @@ public class TestController {
         }
     }
 
-    public String bis1(String id) {
+    public String sleep1(String id) {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        bis2();
+        sleep2();
         return "test " + id;
     }
 
-    public void bis2() {
+    public void sleep2() {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {

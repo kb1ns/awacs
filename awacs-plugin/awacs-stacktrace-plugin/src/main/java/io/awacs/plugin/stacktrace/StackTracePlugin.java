@@ -19,21 +19,17 @@ package io.awacs.plugin.stacktrace;
 
 import io.awacs.agent.AWACS;
 import io.awacs.agent.Plugin;
-import io.awacs.agent.Sender;
 import io.awacs.common.Configuration;
-import io.awacs.common.format.Influx;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,57 +67,6 @@ public class StackTracePlugin implements Plugin {
 
     private static Logger log = Logger.getLogger("AWACS");
 
-    //发送线程的堆栈信息
-    public static void incrAccess() {
-        log.fine("Request completed.");
-        CallElement root = CallStack.reset();
-        if (root != null && root.getElapsedTime() >= Config.F.responseTimeThreshold) {
-            String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
-                    .addField("thread", Thread.currentThread().getName())
-                    .addField("stack", root.toString())
-                    .addField("elapsed_time", root.getElapsedTime())
-                    .tag("entry", root.id())
-                    .tag("namespace", AWACS.M.namespace())
-                    .tag("hostname", AWACS.M.hostname())
-                    .build()
-                    .lineProtocol();
-            log.fine(s);
-            Sender.I.send((byte) 1, s);
-        }
-    }
-
-    //发送异常信息
-    public static void incrFailure(Throwable e) {
-        log.fine("Exception catched.");
-        CallStack.reset();
-        if (Config.F.isValid(e.getClass())) {
-            String s = buildErrReport(e);
-            log.fine(s);
-            Sender.I.send((byte) 1, s);
-        }
-    }
-
-    private static String buildErrReport(Throwable e) {
-        StackTraceElement[] stack = e.getStackTrace();
-        int level = Config.F.maxExceptionLevel;
-        List<StackTraceElement> reducedStack = new ArrayList<>(level);
-        for (StackTraceElement element : stack) {
-            if (level-- < 1) {
-                break;
-            }
-            reducedStack.add(element);
-        }
-        return Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
-                .addField("thread", Thread.currentThread().getName())
-                .addField("stack", reducedStack.toString())
-                .addField("message", e.getMessage())
-                .tag("entry", e.getClass().getCanonicalName())
-                .tag("namespace", AWACS.M.namespace())
-                .tag("hostname", AWACS.M.hostname())
-                .build()
-                .lineProtocol();
-    }
-
     @Override
     public void init(Configuration configuration) {
         Config.F.init(configuration);
@@ -133,13 +78,19 @@ public class StackTracePlugin implements Plugin {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
                 try {
-                    ClassWriter cw = new ClassWriter(0);
-                    ClassVisitor cv = new StackTraceClassAdaptor(cw);
+                    if (loader == null)
+                        return classfileBuffer;
+                    ClassNode cn = new ClassNode(Opcodes.ASM5);
                     ClassReader cr = new ClassReader(classfileBuffer);
-                    cr.accept(cv, 0);
+                    cr.accept(cn, 0);
+
+                    boolean transformed = new FilteredClassTransformer().transform(cn);
+
+                    ClassWriter cw = new ClassWriter(0);
+                    cn.accept(cw);
                     byte[] bytecode = cw.toByteArray();
                     log.log(Level.FINE, "{0} transformed.", className);
-                    if (Config.F.enableDebug) {
+                    if (Config.F.enableDebug && transformed) {
                         outputClass(className, bytecode);
                     }
                     return bytecode;

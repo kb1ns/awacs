@@ -57,13 +57,13 @@ abstract class ClassTransformer {
         AbstractInsnNode node = body.getFirst();
         while (node != null) {
             int opcode = node.getOpcode();
-            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
+            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN || opcode == Opcodes.ATHROW) {
                 InsnList quit = new InsnList();
                 quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit", "()V", false));
-                quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrAccess", "()V", false));
+                quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "incrAccess", "()V", false));
                 LabelNode exc1 = new LabelNode();
                 quit.add(exc1);
-                mn.tryCatchBlocks.add(new TryCatchBlockNode(exc0, exc1, excHandler, "java/lang/Exception"));
+                mn.tryCatchBlocks.add(new TryCatchBlockNode(exc0, exc1, excHandler, "java/lang/RuntimeException"));
                 body.insertBefore(node, quit);
                 exc0 = new LabelNode();
                 body.insert(node, exc0);
@@ -72,31 +72,54 @@ abstract class ClassTransformer {
         }
         mn.instructions.add(body);
         //进行异常捕获并抛出
-        int varSlotIndex = (mn.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC ? 1 : 0;
-        List<String> parameters = resolveParameters(mn.desc);
+        int varSlotIndex = 0;
+        List<String> parameters = resolveParameters(mn, cn);
         for (String param : parameters) {
-            if (param.equals("J") || param.equals("D"))
+            if (param.equals("long") || param.equals("double"))
                 varSlotIndex += 2;
             else
                 varSlotIndex++;
         }
 
         mn.instructions.add(excHandler);
-        mn.instructions.add(new FrameNode(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"}));
+        //TODO
+        mn.instructions.add(new FrameNode(Opcodes.F_FULL, parameters.size(), parameters.toArray(), 1, new Object[]{"java/lang/RuntimeException"}));
         mn.instructions.add(new VarInsnNode(Opcodes.ASTORE, varSlotIndex));
         mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varSlotIndex));
-        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/StackTracePlugin", "incrFailure", "(Ljava/lang/Throwable;)V", false));
+        mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "incrFailure", "(Ljava/lang/Throwable;)V", false));
         mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varSlotIndex));
         mn.instructions.add(new InsnNode(Opcodes.ATHROW));
         mn.maxStack += 2;
         mn.maxLocals += 1;
     }
 
-    public void visit(ClassNode cn) {
+    private void addInterceptor(MethodNode mn, ClassNode cn) {
+        InsnList enter = new InsnList();
+        enter.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
+        enter.add(new LdcInsnNode(mn.name));
+        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
+        mn.instructions.insert(enter);
+
+        List<AbstractInsnNode> returnLocations = new LinkedList<>();
+        for (int i = 0; i < mn.instructions.size(); i++) {
+            int opcode = mn.instructions.get(i).getOpcode();
+            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
+                returnLocations.add(mn.instructions.get(i));
+            }
+        }
+        for (AbstractInsnNode ret : returnLocations) {
+            InsnList quit = new InsnList();
+            quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit", "()V", false));
+            mn.instructions.insertBefore(ret, quit);
+        }
+        mn.maxStack += 2;
+    }
+
+    public boolean transform(ClassNode cn) {
         cn.check(Opcodes.ASM5);
         currentClass = cn.name == null ? "" : cn.name.replaceAll("/", ".");
         if (!filterClass(cn))
-            return;
+            return false;
         for (Object mn : cn.methods) {
             MethodNode src = (MethodNode) mn;
             if (filterMethod(src)) {
@@ -107,6 +130,7 @@ abstract class ClassTransformer {
                 }
             }
         }
+        return true;
     }
 
     private static boolean isTinyMethod(MethodNode method) {
@@ -119,26 +143,44 @@ abstract class ClassTransformer {
     }
 
     //根据方法描述符来获取参数数组
-    private static List<String> resolveParameters(String descriptor) {
-        String desc = descriptor.substring(1, descriptor.indexOf(')'));
+    private static List<String> resolveParameters(MethodNode mn, ClassNode cn) {
         List<String> params = new LinkedList<>();
+        if ((mn.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
+            params.add(cn.name);
+        }
+
+        String desc = mn.desc.substring(1, mn.desc.indexOf(')'));
         for (int i = 0; i < desc.length(); i++) {
-            int tag = 0;
+            int tag;
             switch (desc.charAt(i)) {
                 case 'L':
                     tag = expectType(desc, i);
-                    params.add(tag + 1 == desc.length() ? desc.substring(i) : desc.substring(i, tag + 1));
+                    //Ljava/lang/String; in bytecode
+                    String exp = tag + 1 == desc.length() ? desc.substring(i) : desc.substring(i, tag + 1);
+                    //java/lang/String we need
+                    params.add(exp.substring(1, exp.length() - 1));
                     i = tag;
                     break;
                 case '[':
+                    //[Ljava/lang/String;
                     tag = expectAny(desc, i);
                     params.add(tag + 1 == desc.length() ? desc.substring(i) : desc.substring(i, tag + 1));
                     i = tag;
                     break;
+                case 'J':
+                    params.add("long");
+                    break;
+                case 'D':
+                    params.add("double");
+                    break;
+                case 'F':
+                    params.add("float");
+                    break;
                 default:
                     if (!isPrimitive(desc.charAt(i)))
                         throw new IllegalDescriptorException(desc);
-                    params.add(String.valueOf(desc.charAt(i)));
+//                    params.add(String.valueOf(desc.charAt(i)));
+                    params.add("int");
             }
         }
         return params;
@@ -169,30 +211,6 @@ abstract class ClassTransformer {
 
     protected boolean isConstructor(MethodNode mn) {
         return mn.name.equals("<init>") || mn.name.equals("<clinit>");
-    }
-
-    private void addInterceptor(MethodNode mn, ClassNode cn) {
-        InsnList enter = new InsnList();
-        enter.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-        enter.add(new LdcInsnNode(mn.name));
-        enter.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodEnter", "(Ljava/lang/String;Ljava/lang/String;)V", false));
-        mn.instructions.insert(enter);
-
-        List<AbstractInsnNode> returnLocations = new LinkedList<>();
-        for (int i = 0; i < mn.instructions.size(); i++) {
-            int opcode = mn.instructions.get(i).getOpcode();
-            if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
-                returnLocations.add(mn.instructions.get(i));
-            }
-        }
-        for (AbstractInsnNode ret : returnLocations) {
-            InsnList quit = new InsnList();
-//            quit.add(new LdcInsnNode(cn.name.replaceAll("/", ".")));
-//            quit.add(new LdcInsnNode(mn.name));
-            quit.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "io/awacs/plugin/stacktrace/CallStack", "methodQuit", "()V", false));
-            mn.instructions.insertBefore(ret, quit);
-        }
-        mn.maxStack += 2;
     }
 
 }
