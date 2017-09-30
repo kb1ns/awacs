@@ -21,20 +21,18 @@ import io.awacs.common.IllegalPacketException;
 import java.util.Arrays;
 
 /**
- *
- *
- * 	Byte /      0        |       1       |       2       |       3       |
- *       /               |               |               |               |
- *       +---------------+---------------+---------------+---------------+
- *      0|             Magic             |    Version    |      Key      |
- *       +---------------+---------------+---------------+---------------+
- *      4|                            SEQ-ID                             |
- *       +---------------+---------------+---------------+---------------+
- *      8|    compress   |               |        NAMESPACE_LEN          |
- *       +---------------+---------------+---------------+---------------+
- *     12|                            BODY_LEN                           |
- *       +---------------+---------------+---------------+---------------+
- *       Total 16 bytes
+ * Byte /      0        |       1       |       2       |       3       |
+ * /               |               |               |               |
+ * +---------------+---------------+---------------+---------------+
+ * 0|             Magic             |    Version    |      Key      |
+ * +---------------+---------------+---------------+---------------+
+ * 4|                            SEQ-ID                             |
+ * +---------------+---------------+---------------+---------------+
+ * 8|    compress   |               |        NAMESPACE_LEN          |
+ * +---------------+---------------+---------------+---------------+
+ * 12|                            BODY_LEN                           |
+ * +---------------+---------------+---------------+---------------+
+ * Total 16 bytes
  * Created by pixyonly on 02/09/2017.
  */
 public class Packet {
@@ -99,7 +97,6 @@ public class Packet {
         payload[14] = (byte) (body.length >> 8);
         payload[15] = (byte) (body.length & 0x000000ff);
 
-        //
         System.arraycopy(nb, 0, payload, 16, nb.length);
         System.arraycopy(body, 0, payload, 16 + nb.length, body.length);
         return payload;
@@ -120,7 +117,7 @@ public class Packet {
                 (Byte.toUnsignedInt(header[14]) << 8) |
                 Byte.toUnsignedInt(header[15]);
         String namespace = new String(next, 0, namespaceLen);
-        byte[] body = Arrays.copyOfRange(next, namespaceLen, bodyLen);
+        byte[] body = Arrays.copyOfRange(next, namespaceLen, next.length);
         return new Packet(namespace, k, body);
     }
 

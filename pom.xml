@@ -135,6 +135,11 @@
                 <artifactId>awacs-influx-component</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.awacs</groupId>
+                <artifactId>awacs-fernflower-component</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -66,6 +66,11 @@
             <artifactId>awacs-influx-component</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.awacs</groupId>
+            <artifactId>awacs-fernflower-component</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

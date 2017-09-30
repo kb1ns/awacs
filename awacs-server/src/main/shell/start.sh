@@ -15,10 +15,6 @@
 
 AWACS_HOME=$(cd `dirname $0`/..; pwd)
 
-if [ -d "$AWACS_HOME/plugins" ]; then
-	PLUGIN_DIR="$AWACS_HOME/plugins"
-fi
-
 if [ -d "$AWACS_HOME/lib" ]; then
 	LIB_DIR="$AWACS_HOME/lib"
 fi

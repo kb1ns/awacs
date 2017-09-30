@@ -1,7 +1,9 @@
 package io.awacs.server.handler;
 
 import io.awacs.common.net.Packet;
+import io.awacs.component.fernflow.FernflowerComponent;
 import io.awacs.server.Handler;
+import io.awacs.server.Inject;
 
 import java.net.InetSocketAddress;
 
@@ -10,8 +12,12 @@ import java.net.InetSocketAddress;
  */
 public class BytecodeHandler implements Handler {
 
+    @Inject("fernflower")
+    private FernflowerComponent fernflower;
+
     @Override
     public Packet onReceive(Packet recieve, InetSocketAddress remote) {
+        fernflower.record(recieve.getNamespace(), recieve.getBody());
         return null;
     }
 
