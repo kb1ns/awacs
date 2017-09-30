@@ -83,6 +83,11 @@ public final class PacketAccumulator implements Configurable {
         });
     }
 
+    private void write(Packet packet) {
+        ByteBuffer buf = ByteBuffer.wrap(packet.serialize());
+        channels.flush(buf, null);
+    }
+
     private boolean allocateNewBuffer(Packet init) {
         if (bufferNumbers.get() >= maxBatchNumbers) {
             log.log(Level.WARNING, "Couldn't allocate more buffers.");
@@ -132,6 +137,8 @@ public final class PacketAccumulator implements Configurable {
                             log.warning("All buffers are full, try to allocate a new buffer.");
                             if (allocateNewBuffer(p)) {
                                 newBatchCreated = System.currentTimeMillis();
+                            } else {
+                                write(p);
                             }
                         }
                     } catch (Exception e) {
@@ -150,7 +157,7 @@ public final class PacketAccumulator implements Configurable {
             return;
         }
         if (packet.size() > maxBatchBytes) {
-            log.warning("Out of buffer limit, message abandoned.");
+            write(packet);
             return;
         }
         try {

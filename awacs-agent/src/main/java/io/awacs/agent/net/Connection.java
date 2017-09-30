@@ -63,7 +63,9 @@ class Connection {
             public void completed(Integer result, ByteBuffer attachment) {
                 if (!attachment.hasRemaining()) {
                     log.finest("Batch flushed.");
-                    cb.onComplete();
+                    if (cb != null) {
+                        cb.onComplete();
+                    }
                 } else {
                     channel.write(attachment, attachment, this);
                 }
@@ -72,7 +74,9 @@ class Connection {
             @Override
             public void failed(Throwable exc, ByteBuffer attachment) {
                 exc.printStackTrace();
-                cb.onException(exc);
+                if (cb != null) {
+                    cb.onException(exc);
+                }
                 ready();
             }
         });
