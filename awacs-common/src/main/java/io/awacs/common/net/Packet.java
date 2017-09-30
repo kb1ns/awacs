@@ -18,6 +18,8 @@ package io.awacs.common.net;
 
 import io.awacs.common.IllegalPacketException;
 
+import java.util.Arrays;
+
 /**
  *
  *
@@ -47,13 +49,13 @@ public class Packet {
 
     private String namespace;
 
-    private String body;
+    private byte[] body;
 
     private byte key;
 
     private long reqId;
 
-    public Packet(String namespace, byte key, String body) {
+    public Packet(String namespace, byte key, byte[] body) {
         this.namespace = namespace;
         this.key = key;
         this.body = body;
@@ -63,12 +65,12 @@ public class Packet {
         return namespace;
     }
 
-    public String getBody() {
+    public byte[] getBody() {
         return body;
     }
 
     public int size() {
-        return body.getBytes().length + namespace.getBytes().length + 16;
+        return body.length + namespace.getBytes().length + 16;
     }
 
     public byte key() {
@@ -77,8 +79,7 @@ public class Packet {
 
     public byte[] serialize() {
         byte[] nb = namespace.getBytes();
-        byte[] bb = body.getBytes();
-        int length = 16 + bb.length + nb.length;
+        int length = 16 + body.length + nb.length;
         byte[] payload = new byte[length];
 
         payload[0] = 0x5c;
@@ -93,14 +94,14 @@ public class Packet {
         payload[11] = (byte) (nb.length & 0x000000ff);
 
         //body len
-        payload[12] = (byte) (bb.length >> 24);
-        payload[13] = (byte) ((bb.length & 0x00ff0000) >> 16);
-        payload[14] = (byte) (bb.length >> 8);
-        payload[15] = (byte) (bb.length & 0x000000ff);
+        payload[12] = (byte) (body.length >> 24);
+        payload[13] = (byte) ((body.length & 0x00ff0000) >> 16);
+        payload[14] = (byte) (body.length >> 8);
+        payload[15] = (byte) (body.length & 0x000000ff);
 
         //
         System.arraycopy(nb, 0, payload, 16, nb.length);
-        System.arraycopy(bb, 0, payload, 16 + nb.length, bb.length);
+        System.arraycopy(body, 0, payload, 16 + nb.length, body.length);
         return payload;
     }
 
@@ -119,7 +120,7 @@ public class Packet {
                 (Byte.toUnsignedInt(header[14]) << 8) |
                 Byte.toUnsignedInt(header[15]);
         String namespace = new String(next, 0, namespaceLen);
-        String body = new String(next, namespaceLen, bodyLen);
+        byte[] body = Arrays.copyOfRange(next, namespaceLen, bodyLen);
         return new Packet(namespace, k, body);
     }
 

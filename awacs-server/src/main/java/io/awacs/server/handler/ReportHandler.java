@@ -31,9 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by pixyonly on 03/09/2017.
  */
-public class StacktraceHandler implements Handler {
+public class ReportHandler implements Handler {
 
-    private static final Logger log = LoggerFactory.getLogger(StacktraceHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ReportHandler.class);
 
 //    @Inject("email")
 //    private EmailComponent emailComponent;
@@ -46,7 +46,7 @@ public class StacktraceHandler implements Handler {
     @Override
     public Packet onReceive(Packet packet, InetSocketAddress address) {
         String namespace = packet.getNamespace();
-        String content = packet.getBody();
+        String content = new String(packet.getBody());
         log.debug(content);
         if (!ms.containsKey(namespace)) {
             ms.putIfAbsent(namespace, new LinkedList<>());

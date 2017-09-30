@@ -88,7 +88,7 @@ public class CallStack {
                     .build()
                     .lineProtocol();
             Logger.getLogger("AWACS").fine(s);
-            Sender.I.send((byte) 1, s);
+            Sender.I.send((byte) 0x01, s);
         }
     }
 
@@ -99,7 +99,7 @@ public class CallStack {
         if (StackTracePlugin.Config.F.isValid(e.getClass())) {
             String s = buildErrReport(e);
             Logger.getLogger("AWACS").fine(s);
-            Sender.I.send((byte) 1, s);
+            Sender.I.send((byte) 0x01, s);
         }
     }
 

@@ -151,8 +151,8 @@ public final class ServerEntry implements Server, Configurable {
             Handler handler = ref.handlerHolder.get(Byte.toUnsignedInt(packet.key()));
             if (handler == null) {
                 //TODO default handler
-                System.out.println(packet.getNamespace());
-                System.out.println(packet.getBody());
+                log.info(packet.getNamespace());
+                log.info(new String(packet.getBody()));
                 return;
             }
             Packet response = handler.onReceive(packet, address);

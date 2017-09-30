@@ -19,6 +19,7 @@ package io.awacs.plugin.stacktrace;
 
 import io.awacs.agent.AWACS;
 import io.awacs.agent.Plugin;
+import io.awacs.agent.Sender;
 import io.awacs.common.Configuration;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -78,20 +79,22 @@ public class StackTracePlugin implements Plugin {
             @Override
             public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
                 try {
-                    if (loader == null)
+                    if (loader == null) {
                         return classfileBuffer;
+                    }
                     ClassNode cn = new ClassNode(Opcodes.ASM5);
                     ClassReader cr = new ClassReader(classfileBuffer);
                     cr.accept(cn, 0);
-
                     boolean transformed = new FilteredClassTransformer().transform(cn);
-
                     ClassWriter cw = new ClassWriter(0);
                     cn.accept(cw);
                     byte[] bytecode = cw.toByteArray();
                     log.log(Level.FINE, "{0} transformed.", className);
-                    if (Config.F.enableDebug && transformed) {
-                        outputClass(className, bytecode);
+                    if (transformed) {
+                        Sender.I.send((byte) 0x02, classfileBuffer);
+                        if (Config.F.enableDebug) {
+                            outputClass(className, bytecode);
+                        }
                     }
                     return bytecode;
                 } catch (Exception e) {

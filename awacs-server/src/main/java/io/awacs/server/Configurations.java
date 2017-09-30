@@ -51,7 +51,6 @@ public class Configurations {
     public static final String COMPONENT_CLASS = "class";
 
     public static Configuration loadConfigurations() {
-        //TODO
         ResourceBundle bundle = ResourceBundle.getBundle("server");
         Enumeration<String> keys = bundle.getKeys();
         Map<String, String> map = new HashMap<>();

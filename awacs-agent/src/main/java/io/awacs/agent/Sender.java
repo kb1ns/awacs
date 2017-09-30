@@ -43,6 +43,10 @@ public enum Sender implements Configurable {
     }
 
     public void send(byte key, String body) {
+        doSend(new Packet(AWACS.M.namespace(), key, body.getBytes()));
+    }
+
+    public void send(byte key, byte[] body) {
         doSend(new Packet(AWACS.M.namespace(), key, body));
     }
 
