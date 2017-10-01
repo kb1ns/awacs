@@ -24,9 +24,13 @@ import io.awacs.component.org.jetbrains.java.decompiler.util.DataInputFullStream
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by pixyonly on 30/09/2017.
@@ -35,30 +39,44 @@ public class FernflowerComponent implements Configurable, Releasable {
 
     private static Logger log = LoggerFactory.getLogger(FernflowerComponent.class);
 
-    private ConcurrentMap<String, Decompiler> decompilerPool;
+    private static int POOL_SIZE = Runtime.getRuntime().availableProcessors();
+
+    private List<Decompiler> decompilerPool;
+
+    private ConcurrentHashMap<String, String> sourceRecord = new ConcurrentHashMap<>();
 
     //TODO
     private String root = "/tmp/";
 
+    private AtomicInteger counter = new AtomicInteger(0);
+
     @Override
     public void init(Configuration configuration) {
-        decompilerPool = new ConcurrentHashMap<>();
+        decompilerPool = new ArrayList<>(POOL_SIZE);
+        for (int i = 0; i < POOL_SIZE; i++) {
+            decompilerPool.add(new Decompiler());
+        }
     }
 
     @Override
     public void release() {
-
+        new File(root).deleteOnExit();
     }
 
-    private void decompile(String namespace, String classname) {
-        Decompiler d = decompilerPool.get(namespace);
+    private String decompile(String namespace, String classname) {
+        int index = counter.intValue() % POOL_SIZE;
+        counter.getAndUpdate(operand -> operand >= POOL_SIZE ? 0 : operand + 1);
+        Decompiler d = decompilerPool.get(index < 0 ? 0 : index);
         if (d != null) {
-            //TODO check file
-            File f = new File(root + namespace, classname + ".class");
-            synchronized (d) {
-                d.decompile(f);
+            File dir = new File(root + namespace);
+            File f = new File(dir, classname + ".class");
+            if (f.exists() && !f.canRead() && f.isDirectory()) {
+                synchronized (d) {
+                    return d.decompile(dir, f);
+                }
             }
         }
+        return null;
     }
 
     private String extractQualifiedName(final byte[] bytecode) throws IOException {
@@ -79,17 +97,14 @@ public class FernflowerComponent implements Configurable, Releasable {
 
     public void record(String namespace, byte[] bytecode) {
         File f = new File(root + namespace);
-        if (!decompilerPool.containsKey(namespace)) {
-            if (f.exists()) {
-                if (!f.isDirectory()) {
-                    log.error("{} exists, but it is not directory.");
-                    return;
-                }
-            } else if (!f.mkdir()) {
-                log.error("Cannot mkdir in {}", root + namespace);
+        if (f.exists()) {
+            if (!f.isDirectory()) {
+                log.error("{} exists, but it is not directory.");
                 return;
             }
-            decompilerPool.putIfAbsent(namespace, new Decompiler(f));
+        } else if (!f.mkdir()) {
+            log.error("Cannot mkdir in {}", root + namespace);
+            return;
         }
         FileOutputStream w = null;
         try {
