@@ -21,11 +21,10 @@ import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;
 import io.awacs.common.net.Packet;
 
-import java.nio.ByteBuffer;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,17 +37,11 @@ public final class PacketAccumulator implements Configurable {
 
     private volatile boolean closed = false;
 
-    private AtomicInteger bufferNumbers = new AtomicInteger(0);
-
-    private Channels channels;
-
     private ArrayBlockingQueue<Packet> queue;
 
-    private ConcurrentLinkedDeque<ByteBuffer> buffers;
+    private ConnectionPool connectionPool;
 
     private int maxBatchBytes;
-
-    private int maxBatchNumbers;
 
     private int maxAppendMs;
 
@@ -57,107 +50,53 @@ public final class PacketAccumulator implements Configurable {
     @Override
     public void init(Configuration configuration) {
         maxBatchBytes = configuration.getInteger(AWACS.CONFIG_MAX_BATCH_BYTES, AWACS.DEFAULT_MAX_BATCH_BYTES);
-        maxBatchNumbers = configuration.getInteger(AWACS.CONFIG_MAX_BATCH_NUMBERS, AWACS.DEFAULT_MAX_BATCH_NUMBERS);
         maxAppendMs = configuration.getInteger(AWACS.CONFIG_MAX_APPEND_MS, AWACS.DEFAULT_MAX_APPEND_MS);
         batchLingerMs = configuration.getInteger(AWACS.CONFIG_BATCH_LINGER_MS, AWACS.DEFAULT_BATCH_LINGER_MS);
         queue = new ArrayBlockingQueue<>(configuration.getInteger(AWACS.CONFIG_MAX_WAITING_MESSAGE, AWACS.DEFAULT_MAX_WAITING_MESSAGE));
-        channels = new Channels(configuration.getArray(AWACS.CONFIG_SERVER), configuration.getInteger(AWACS.CONFIG_TIMEOUT_MS, AWACS.DEFAULT_TIMEOUT_MS));
-        buffers = new ConcurrentLinkedDeque<>();
+        connectionPool = new ConnectionPool(configuration.getArray(AWACS.CONFIG_SERVER),
+                maxBatchBytes,
+                configuration.getInteger(AWACS.CONFIG_TIMEOUT_MS, AWACS.DEFAULT_TIMEOUT_MS));
         start();
     }
 
-    private void writeBatch() {
-        final ByteBuffer buf = buffers.poll();
-        channels.flush(buf, new Callback() {
-            @Override
-            public void onComplete() {
-                buf.clear();
-                buffers.add(buf);
-            }
-
-            @Override
-            public void onException(Throwable t) {
-                buf.clear();
-                buffers.add(buf);
-            }
-        });
-    }
-
-    private void write(Packet packet) {
-        ByteBuffer buf = ByteBuffer.wrap(packet.serialize());
-        channels.flush(buf, null);
-    }
-
-    private boolean allocateNewBuffer(Packet init) {
-        if (bufferNumbers.get() >= maxBatchNumbers) {
-            log.log(Level.WARNING, "Couldn't allocate more buffers.");
-            return false;
-        }
-        ByteBuffer buf = ByteBuffer.allocate(maxBatchBytes);
-        buf.put(init.serialize());
-        buffers.push(buf);
-        return true;
-    }
-
     private void start() {
-        do {
-            buffers.add(ByteBuffer.allocate(maxBatchBytes));
-        } while (bufferNumbers.getAndIncrement() < maxBatchNumbers / 2);
-        log.log(Level.INFO, "{0}x{1} bytes memory allocated.", new Integer[]{maxBatchBytes, bufferNumbers.get()});
-        //make sure only this thread can access buffers
-        Thread t = new Thread(new Runnable() {
-            long newBatchCreated = 0l;
-
+        Thread daemon = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (!closed) {
                     try {
-                        Packet p = queue.take();
-                        if (!buffers.isEmpty()) {
-                            ByteBuffer batch = buffers.peek();
-                            if (batch.remaining() == batch.capacity()) {
-                                batch.put(p.serialize());
-                                newBatchCreated = System.currentTimeMillis();
-                            } else if (batch.remaining() >= p.size()) {
-                                batch.put(p.serialize());
-                                if (System.currentTimeMillis() - newBatchCreated > batchLingerMs) {
-                                    writeBatch();
-                                }
-                            } else {
-                                writeBatch();
-                                ByteBuffer free = buffers.peek();
-                                if (free != null) {
-                                    free.put(p.serialize());
-                                    newBatchCreated = System.currentTimeMillis();
-                                } else if (allocateNewBuffer(p)) {
-                                    newBatchCreated = System.currentTimeMillis();
-                                }
-                            }
+                        Packet packet = queue.take();
+                        log.log(Level.FINE, "Preparing packet: {0}", packet.getNamespace());
+                        if (packet.size() > maxBatchBytes) {
+                            log.log(Level.FINE, "Packet({0} bytes) exceed the maxBatchBytes {1}.",
+                                    new int[]{packet.size(), maxBatchBytes});
+                            connectionPool.send(packet);
                         } else {
-                            log.warning("All buffers are full, try to allocate a new buffer.");
-                            if (allocateNewBuffer(p)) {
-                                newBatchCreated = System.currentTimeMillis();
-                            } else {
-                                write(p);
-                            }
+                            connectionPool.commit(packet);
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception ignored) {
                     }
                 }
             }
         });
-        t.setDaemon(true);
-        t.start();
+        daemon.setDaemon(true);
+        daemon.start();
+        Timer evil = new Timer();
+        evil.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    log.fine("Flush timer triggered, ready to flush.");
+                    connectionPool.commit(null);
+                } catch (Exception ignored) {
+                }
+            }
+        }, 1000, batchLingerMs);
     }
 
     public void enqueue(final Packet packet) {
         if (closed) {
             log.warning("Sender has been closed.");
-            return;
-        }
-        if (packet.size() > maxBatchBytes) {
-            write(packet);
             return;
         }
         try {

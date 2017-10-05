@@ -17,6 +17,7 @@
 package io.awacs.server.handler;
 
 import io.awacs.common.net.Packet;
+import io.awacs.component.fernflow.FernflowerComponent;
 import io.awacs.component.influxdb.InfluxdbComponent;
 import io.awacs.server.Handler;
 import io.awacs.server.Inject;
@@ -41,6 +42,9 @@ public class ReportHandler implements Handler {
     @Inject("influxdb")
     private InfluxdbComponent influxdb;
 
+    @Inject("fernflower")
+    private FernflowerComponent fernflower;
+
     private ConcurrentHashMap<String, List<String>> ms = new ConcurrentHashMap<>();
 
     @Override
@@ -48,9 +52,11 @@ public class ReportHandler implements Handler {
         String namespace = packet.getNamespace();
         String content = new String(packet.getBody());
         log.debug(content);
+        //TODO
+
         if (!ms.containsKey(namespace)) {
+            log.info("Creating a new batch");
             ms.putIfAbsent(namespace, new LinkedList<>());
-            log.info("New batch allocated.");
         }
         List<String> records = ms.get(namespace);
         synchronized (records) {
@@ -59,7 +65,7 @@ public class ReportHandler implements Handler {
             if (records.size() > 1000) {
                 ms.put(namespace, new LinkedList<>());
                 influxdb.write(records);
-                log.info("Records commited.");
+                log.info("Batch commited");
             }
         }
         return null;

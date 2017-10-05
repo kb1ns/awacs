@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,8 +37,11 @@ class Connection {
 
     int timeout;
 
-    Connection(Remote remote, int timeout) {
+    ByteBuffer buffer;
+
+    Connection(Remote remote, int maxBatchBytes, int timeout) {
         this.remote = remote;
+        this.buffer = ByteBuffer.allocateDirect(maxBatchBytes);
         this.timeout = timeout;
         ready();
     }
@@ -47,22 +49,46 @@ class Connection {
     void ready() {
         try {
             channel = AsynchronousSocketChannel.open();
-            Future<Void> future = channel.connect(remote.getAddress());
-            future.get(timeout, TimeUnit.MILLISECONDS);
             channel.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
-            log.log(Level.INFO, "Connected to server {0}", remote);
+            Future<Void> future = channel.connect(remote.getAddress());
+            if (future.get() != null) {
+                log.log(Level.WARNING, "Can't connect to {0}", remote);
+            } else {
+                log.log(Level.INFO, "Connected to server {0}", remote);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    void flush(ByteBuffer batch, final Callback cb) {
-        batch.flip();
-        channel.write(batch, batch, new CompletionHandler<Integer, ByteBuffer>() {
+    boolean put(byte[] data) {
+        if (buffer.remaining() >= data.length) {
+            buffer.put(data);
+            return true;
+        }
+        return false;
+    }
+
+    void writeWrapper(ByteBuffer buffer, Callback cb) {
+        flush(buffer, cb);
+    }
+
+    void writeInner(final Callback cb) {
+        if (buffer.position() != 0) {
+            buffer.flip();
+            flush(this.buffer, cb);
+        } else if (cb != null) {
+            cb.onComplete();
+        }
+    }
+
+    private void flush(final ByteBuffer buffer, final Callback cb) {
+        channel.write(buffer, buffer, new CompletionHandler<Integer, ByteBuffer>() {
             @Override
             public void completed(Integer result, ByteBuffer attachment) {
                 if (!attachment.hasRemaining()) {
                     log.finest("Batch flushed.");
+                    buffer.clear();
                     if (cb != null) {
                         cb.onComplete();
                     }
@@ -74,10 +100,12 @@ class Connection {
             @Override
             public void failed(Throwable exc, ByteBuffer attachment) {
                 exc.printStackTrace();
+                ready();
+                buffer.clear();
+                //TODO
                 if (cb != null) {
                     cb.onException(exc);
                 }
-                ready();
             }
         });
     }

@@ -89,7 +89,7 @@ public final class Decompiler {
             public void saveClassFile(String path, String qualifiedName, String entryName, String content, int[] mapping) {
                 File file = new File(getAbsolutePath(path), entryName);
                 try (Writer out = new OutputStreamWriter(new FileOutputStream(file), "UTF8")) {
-                    source = new String(content);
+                    source = content;
                     out.write(content);
                 } catch (IOException ex) {
                     DecompilerContext.getLogger().writeMessage("Cannot write class file " + file, ex);

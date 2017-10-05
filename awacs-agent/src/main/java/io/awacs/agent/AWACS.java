@@ -18,6 +18,7 @@ package io.awacs.agent;
 
 import io.awacs.common.Configuration;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -92,14 +93,17 @@ public enum AWACS {
 
     String home;
 
+    File homefd;
+
     String namespace;
 
     String hostname;
 
     public void prepare(Instrumentation inst) {
         M.inst = inst;
-        home = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-        home = home.substring(0, home.lastIndexOf('/')) + "/";
+        String filepath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        home = filepath.substring(0, filepath.lastIndexOf('/')) + "/";
+        homefd = new File(home);
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(home + CONFIG_FILE));
@@ -137,6 +141,7 @@ public enum AWACS {
                 descriptors.add(new PluginDescriptor(p)
                         .setPluginProperties(config.getSubConfig(String.format(CONFIG_PLUGINS_CONFIG_PATTERN, p)))
                         .setClassName(config.getString(String.format(CONFIG_PLUGIN_CLASS_PATTERN, p)))
+                                //TODO
                         .setJarFile(new JarFile(home + String.format("plugins/awacs-%s-plugin.jar", p))));
             } catch (IOException e) {
                 log.log(Level.SEVERE, "Cannot read jar file: awacs-{0}-plugin.jar", p);
@@ -170,6 +175,10 @@ public enum AWACS {
 
     public String namespace() {
         return namespace;
+    }
+
+    public File getHome() {
+        return homefd;
     }
 
     public String hostname() {
