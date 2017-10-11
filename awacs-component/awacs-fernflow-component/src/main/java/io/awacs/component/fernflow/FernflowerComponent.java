@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -190,8 +189,6 @@ public class FernflowerComponent implements Configurable, Releasable {
     }
 
     public String findSource(String namespace, String classname) {
-//        sourceRecord.putIfAbsent(String.format("%s-%s", namespace, classname),
-//                l.getAbsolutePath());
         File pri = new File(root, namespace);
         File f = new File(pri, classname);
         if (!f.exists()) {

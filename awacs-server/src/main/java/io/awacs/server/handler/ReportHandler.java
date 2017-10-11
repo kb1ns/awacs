@@ -36,8 +36,8 @@ public class ReportHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(ReportHandler.class);
 
-//    @Inject("email")
-//    private EmailComponent emailComponent;
+//    @Inject("mail")
+//    private MailComponent mail;
 
     @Inject("influxdb")
     private InfluxdbComponent influxdb;

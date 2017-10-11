@@ -22,9 +22,6 @@ final class ConnectionPool {
         connections = new LinkedBlockingDeque<>();
         for (String a : serverAddrs) {
             connections.add(new Connection(new Remote(a), maxBatchBytes, timeout));
-            if (serverAddrs.length <= 2) {
-                connections.add(new Connection(new Remote(a), maxBatchBytes, timeout));
-            }
         }
     }
 
@@ -36,7 +33,7 @@ final class ConnectionPool {
             head.writeWrapper(ByteBuffer.wrap(data), new Callback() {
                 @Override
                 public void onComplete() {
-                    log.log(Level.FINE, "Flushed single. Using {0}", head.remote.getAddress());
+                    log.log(Level.FINE, "Flushing single through {0}", head.remote.getAddress());
                     connections.offer(head);
                 }
 
@@ -62,7 +59,7 @@ final class ConnectionPool {
                         public void onComplete() {
                             head.put(data);
                             connections.offer(head);
-                            log.log(Level.FINE, "Flushed batch. Using {0}", head.remote.getAddress());
+                            log.log(Level.FINE, "Flushing batch through {0}", head.remote.getAddress());
                         }
 
                         @Override
@@ -78,7 +75,7 @@ final class ConnectionPool {
                 head.writeInner(new Callback() {
                     @Override
                     public void onComplete() {
-                        log.log(Level.FINE, "Flushed batch. Using {0}", head.remote.getAddress());
+                        log.log(Level.FINE, "Flushing batch through {0}", head.remote.getAddress());
                         connections.offer(head);
                     }
 
