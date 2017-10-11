@@ -90,14 +90,13 @@ class FilteredClassTransformer extends ClassTransformer {
      */
     @Override
     protected boolean isPointcut(MethodNode mn) {
-        //TODO
+        if (methodIds.contains(super.currentClass + "#*") || methodIds.contains(super.currentClass + "#" + mn.name)) {
+            return true;
+        }
         List<AnnotationNode> annotationNodes = mn.visibleAnnotations;
         if (annotationNodes != null) {
             for (AnnotationNode annotation : annotationNodes) {
                 if (annotations.contains(annotation.desc)) {
-                    return true;
-                }
-                if (methodIds.contains(super.currentClass + "#*") || methodIds.contains(super.currentClass + "#" + mn.name)) {
                     return true;
                 }
             }

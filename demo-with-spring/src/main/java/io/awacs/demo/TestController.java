@@ -54,7 +54,7 @@ public class TestController {
         r1.nextBoolean();
         sleep2();
         sleep2();
-        return new JSONObject().fluentPut("hello", sleep1(id)).toJSONString();
+        return new JSONObject().fluentPut("hello", sleep1(id, 1, 1l, 0.5f, 0.23d, (short) 2, (byte) 0x01, true, new Object(), new String[]{"1", "2"})).toJSONString();
     }
 
     @RequestMapping(value = "/hello")
@@ -109,7 +109,16 @@ public class TestController {
         }
     }
 
-    public String sleep1(String id) {
+    public String sleep1(String id,
+                         int code,
+                         long l,
+                         float f,
+                         double d,
+                         short st,
+                         byte b,
+                         boolean bl,
+                         Object o,
+                         String[] codes) {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {

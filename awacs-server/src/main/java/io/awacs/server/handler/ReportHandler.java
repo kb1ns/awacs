@@ -52,10 +52,10 @@ public class ReportHandler implements Handler {
         String namespace = packet.getNamespace();
         String content = new String(packet.getBody());
         log.debug(content);
-        //TODO
+        //TODO parse content and if it is exception, do
 
         if (!ms.containsKey(namespace)) {
-            log.info("Creating a new batch");
+            log.info("Creating a new batch of {}", namespace);
             ms.putIfAbsent(namespace, new LinkedList<>());
         }
         List<String> records = ms.get(namespace);
@@ -65,7 +65,7 @@ public class ReportHandler implements Handler {
             if (records.size() > 1000) {
                 ms.put(namespace, new LinkedList<>());
                 influxdb.write(records);
-                log.info("Batch commited");
+                log.info("Batch {} commited", namespace);
             }
         }
         return null;

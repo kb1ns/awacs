@@ -73,16 +73,15 @@ abstract class ClassTransformer {
         mn.instructions.add(body);
         //进行异常捕获并抛出
         int varSlotIndex = 0;
-        List<String> parameters = resolveParameters(mn, cn);
-        for (String param : parameters) {
-            if (param.equals("long") || param.equals("double"))
+        List<Object> parameters = resolveParameters(mn, cn);
+        for (Object param : parameters) {
+            if (param.equals(Opcodes.LONG) || param.equals(Opcodes.DOUBLE))
                 varSlotIndex += 2;
             else
                 varSlotIndex++;
         }
 
         mn.instructions.add(excHandler);
-        //TODO
         mn.instructions.add(new FrameNode(Opcodes.F_FULL, parameters.size(), parameters.toArray(), 1, new Object[]{"java/lang/Exception"}));
         mn.instructions.add(new VarInsnNode(Opcodes.ASTORE, varSlotIndex));
         mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, varSlotIndex));
@@ -143,8 +142,8 @@ abstract class ClassTransformer {
     }
 
     //根据方法描述符来获取参数数组
-    private static List<String> resolveParameters(MethodNode mn, ClassNode cn) {
-        List<String> params = new LinkedList<>();
+    private static List<Object> resolveParameters(MethodNode mn, ClassNode cn) {
+        List<Object> params = new LinkedList<>();
         if ((mn.access & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
             params.add(cn.name);
         }
@@ -168,19 +167,19 @@ abstract class ClassTransformer {
                     i = tag;
                     break;
                 case 'J':
-                    params.add("long");
+                    params.add(Opcodes.LONG);
                     break;
                 case 'D':
-                    params.add("double");
+                    params.add(Opcodes.DOUBLE);
                     break;
                 case 'F':
-                    params.add("float");
+                    params.add(Opcodes.FLOAT);
                     break;
                 default:
                     if (!isPrimitive(desc.charAt(i)))
                         throw new IllegalDescriptorException(desc);
 //                    params.add(String.valueOf(desc.charAt(i)));
-                    params.add("int");
+                    params.add(Opcodes.INTEGER);
             }
         }
         return params;

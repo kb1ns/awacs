@@ -22,12 +22,15 @@ import io.awacs.common.format.Influx;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Created by pixyonly on 2/7/17.
  */
 public class CallStack {
+
+    private static final Logger log = Logger.getLogger("AWACS");
 
     private static Map<Long, Deque<CallElement>> roots = new HashMap<>();
 
@@ -75,7 +78,6 @@ public class CallStack {
 
     //发送线程的堆栈信息
     public static void incrAccess() {
-        Logger.getLogger("AWACS").fine("Request completed.");
         CallElement root = CallStack.reset();
         if (root != null && root.getElapsedTime() >= StackTracePlugin.Config.F.responseTimeThreshold) {
             String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
@@ -87,18 +89,17 @@ public class CallStack {
                     .tag("hostname", AWACS.M.hostname())
                     .build()
                     .lineProtocol();
-            Logger.getLogger("AWACS").fine(s);
+            log.log(Level.FINE, "Request completed: {0}", s);
             Sender.I.send((byte) 0x01, s);
         }
     }
 
     //发送异常信息
     public static void incrFailure(Throwable e) {
-        Logger.getLogger("AWACS").fine("Exception catched.");
         CallStack.reset();
         if (StackTracePlugin.Config.F.isValid(e.getClass())) {
             String s = buildErrReport(e);
-            Logger.getLogger("AWACS").fine(s);
+            log.log(Level.FINE, "Exception catched: {0}", s);
             Sender.I.send((byte) 0x01, s);
         }
     }

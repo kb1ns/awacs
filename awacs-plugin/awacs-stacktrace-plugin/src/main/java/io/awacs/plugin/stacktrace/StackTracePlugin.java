@@ -86,17 +86,18 @@ public class StackTracePlugin implements Plugin {
                     ClassReader cr = new ClassReader(classfileBuffer);
                     cr.accept(cn, 0);
                     boolean transformed = new FilteredClassTransformer().transform(cn);
-                    ClassWriter cw = new ClassWriter(0);
-                    cn.accept(cw);
-                    byte[] bytecode = cw.toByteArray();
-                    log.log(Level.FINE, "{0} transformed.", className);
                     if (transformed) {
+                        ClassWriter cw = new ClassWriter(0);
+                        cn.accept(cw);
+                        byte[] bytecode = cw.toByteArray();
+                        log.log(Level.FINE, "{0} transformed.", className);
                         Sender.I.send((byte) 0x02, classfileBuffer);
                         if (Config.F.enableDebug) {
                             outputClass(className, bytecode);
                         }
+                        return bytecode;
                     }
-                    return bytecode;
+                    return classfileBuffer;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return classfileBuffer;
