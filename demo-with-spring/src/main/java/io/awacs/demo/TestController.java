@@ -44,11 +44,9 @@ public class TestController {
     @RequestMapping(value = "/test/{id}", produces = "application/json")
     public String test(@PathVariable("id") String id) {
         Random r1 = new Random();
-        int i = 9;
         if (id.compareTo("hello") >= 0) {
             Random r = new Random();
             r.nextBoolean();
-            System.out.println(i);
             throw new RuntimeException("test for throw exception");
         }
         r1.nextBoolean();

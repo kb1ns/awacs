@@ -17,7 +17,6 @@
 package io.awacs.server.handler;
 
 import io.awacs.common.net.Packet;
-import io.awacs.component.fernflow.FernflowerComponent;
 import io.awacs.component.influxdb.InfluxdbComponent;
 import io.awacs.server.Handler;
 import io.awacs.server.Inject;
@@ -32,18 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by pixyonly on 03/09/2017.
  */
-public class ReportHandler implements Handler {
+public class CallstackHandler implements Handler {
 
-    private static final Logger log = LoggerFactory.getLogger(ReportHandler.class);
-
-//    @Inject("mail")
-//    private MailComponent mail;
+    private static final Logger log = LoggerFactory.getLogger(CallstackHandler.class);
 
     @Inject("influxdb")
     private InfluxdbComponent influxdb;
-
-    @Inject("fernflower")
-    private FernflowerComponent fernflower;
 
     private ConcurrentHashMap<String, List<String>> ms = new ConcurrentHashMap<>();
 
@@ -52,8 +45,6 @@ public class ReportHandler implements Handler {
         String namespace = packet.getNamespace();
         String content = new String(packet.getBody());
         log.debug(content);
-        //TODO parse content and if it is exception, do
-
         if (!ms.containsKey(namespace)) {
             log.info("Creating a new batch of {}", namespace);
             ms.putIfAbsent(namespace, new LinkedList<>());
@@ -73,6 +64,11 @@ public class ReportHandler implements Handler {
 
     @Override
     public byte key() {
-        return 0x01;
+        return 0x00;
+    }
+
+    @Override
+    public void release() {
+        ms.values().forEach(influxdb::write);
     }
 }

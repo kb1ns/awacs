@@ -19,6 +19,7 @@ package io.awacs.plugin.stacktrace;
 import io.awacs.agent.AWACS;
 import io.awacs.agent.Sender;
 import io.awacs.common.format.Influx;
+import io.awacs.common.format.Json;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +81,7 @@ public class CallStack {
     public static void incrAccess() {
         CallElement root = CallStack.reset();
         if (root != null && root.getElapsedTime() >= StackTracePlugin.Config.F.responseTimeThreshold) {
-            String s = Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
+            String s = Influx.measurement(AWACS.M.namespace()).time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
                     .addField("thread", Thread.currentThread().getName())
                     .addField("stack", root.toString())
                     .addField("elapsed_time", root.getElapsedTime())
@@ -90,7 +91,7 @@ public class CallStack {
                     .build()
                     .lineProtocol();
             log.log(Level.FINE, "Request completed: {0}", s);
-            Sender.I.send((byte) 0x01, s);
+            Sender.I.send((byte) 0x00, s);
         }
     }
 
@@ -109,19 +110,26 @@ public class CallStack {
         int level = StackTracePlugin.Config.F.maxExceptionLevel;
         List<StackTraceElement> reducedStack = new ArrayList<>(level);
         for (StackTraceElement element : stack) {
-            if (level-- < 1) {
+            if (level < 1) {
                 break;
             }
+            if (element.isNativeMethod() ||
+                    element.getClassName().startsWith("sun.reflect") ||
+                    element.getClassName().startsWith("java.lang.reflect")) {
+                continue;
+            }
             reducedStack.add(element);
+            level--;
         }
-        return Influx.measurement(AWACS.M.namespace()).time(System.nanoTime(), TimeUnit.NANOSECONDS)
-                .addField("thread", Thread.currentThread().getName())
-                .addField("stack", reducedStack.toString())
-                .addField("message", e.getMessage())
-                .tag("entry", e.getClass().getCanonicalName())
-                .tag("namespace", AWACS.M.namespace())
-                .tag("hostname", AWACS.M.hostname())
-                .build()
-                .lineProtocol();
+        return Json.empty().startObject()
+                .objectValue("timestamp", System.currentTimeMillis())
+                .objectValue("thread", Thread.currentThread().getName())
+                .objectValue("message", e.getMessage())
+                .array("stack", reducedStack)
+                .objectValue("entry", e.getClass().getCanonicalName())
+                .objectValue("namespace", AWACS.M.namespace())
+                .objectValue("hostname", AWACS.M.hostname())
+                .endObject()
+                .toString();
     }
 }

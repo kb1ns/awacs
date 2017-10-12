@@ -18,6 +18,7 @@ package io.awacs.server;
 
 import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;
+import io.awacs.common.Releasable;
 import io.awacs.common.net.Packet;
 import io.awacs.server.codec.PacketDecoder;
 import io.awacs.server.codec.PacketEncoder;
@@ -119,6 +120,7 @@ public final class ServerEntry implements Server, Configurable {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
         businessGroup.shutdownGracefully();
+        handlerHolder.values().forEach(Releasable::release);
         components.release();
     }
 

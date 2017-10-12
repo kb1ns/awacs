@@ -25,4 +25,8 @@ public class BytecodeHandler implements Handler {
     public byte key() {
         return 0x02;
     }
+
+    @Override
+    public void release() {
+    }
 }

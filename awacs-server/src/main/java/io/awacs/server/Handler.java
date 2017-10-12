@@ -16,6 +16,7 @@
 
 package io.awacs.server;
 
+import io.awacs.common.Releasable;
 import io.awacs.common.net.Packet;
 
 import java.net.InetSocketAddress;
@@ -23,7 +24,7 @@ import java.net.InetSocketAddress;
 /**
  * Created by pixyonly on 03/09/2017.
  */
-public interface Handler {
+public interface Handler extends Releasable {
 
     Packet onReceive(Packet recieve, InetSocketAddress remote);
 
