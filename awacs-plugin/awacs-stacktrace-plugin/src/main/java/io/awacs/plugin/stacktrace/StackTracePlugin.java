@@ -56,6 +56,10 @@ public class StackTracePlugin implements Plugin {
 
     private final static int DEFAULT_EXCEPTION_TRACE_LEVEL = 20;
 
+    private final static String CFG_METHOD_EXECUTION_MS_THRESHOLD = "method_execution_ms_threshold";
+
+    private final static int DEFAULT_METHOD_EXECUTION_MS_THRESHOLD = 1;
+
     private final static String RESPONSE_TIME_MS_THRESHOLD = "response_time_ms_threshold";
 
     private final static int DEFAULT_RESPONSE_TIME_MS_THRESHOLD = 0;
@@ -134,6 +138,8 @@ public class StackTracePlugin implements Plugin {
 
         String[] ids;
 
+        int methodExecutionThreshold;
+
         int maxExceptionLevel;
 
         int responseTimeThreshold;
@@ -154,6 +160,7 @@ public class StackTracePlugin implements Plugin {
             responseTimeThreshold = config.getInteger(RESPONSE_TIME_MS_THRESHOLD, DEFAULT_RESPONSE_TIME_MS_THRESHOLD);
             enableDebug = config.getBoolean(CFG_ENABLE_OUTPUT_TRANSFORMED_CLASS, false);
             outputPath = config.getString(CFG_CLASSFILE_OUTPUT_PATH, DEFAULT_CLASSFILE_OUTPUT_PATH);
+            methodExecutionThreshold = config.getInteger(CFG_METHOD_EXECUTION_MS_THRESHOLD, DEFAULT_METHOD_EXECUTION_MS_THRESHOLD);
             enableAutoDetect = config.getBoolean(ENABLE_AUTO_DETECT_POINTCUT, true);
             if (enableDebug) {
                 if (!outputPath.endsWith("/")) {

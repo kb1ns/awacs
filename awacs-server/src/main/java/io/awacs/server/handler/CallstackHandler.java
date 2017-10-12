@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -40,6 +42,26 @@ public class CallstackHandler implements Handler {
 
     private ConcurrentHashMap<String, List<String>> ms = new ConcurrentHashMap<>();
 
+    public CallstackHandler() {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                flush();
+            }
+        }, 10000, 10000);
+    }
+
+    private void flush() {
+        ms.values().forEach(b -> {
+            if (b != null) {
+                synchronized (b) {
+                    influxdb.write(b);
+                    b.clear();
+                }
+            }
+        });
+    }
+
     @Override
     public Packet onReceive(Packet packet, InetSocketAddress address) {
         String namespace = packet.getNamespace();
@@ -53,10 +75,10 @@ public class CallstackHandler implements Handler {
         synchronized (records) {
             records.add(content);
             //TODO config
-            if (records.size() > 1000) {
-                ms.put(namespace, new LinkedList<>());
+            if (records.size() > 10000) {
                 influxdb.write(records);
                 log.info("Batch {} commited", namespace);
+                records.clear();
             }
         }
         return null;
@@ -69,6 +91,6 @@ public class CallstackHandler implements Handler {
 
     @Override
     public void release() {
-        ms.values().forEach(influxdb::write);
+        flush();
     }
 }

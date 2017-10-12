@@ -66,8 +66,12 @@ public class InfluxdbComponent implements Configurable, Releasable {
                 configuration.getString(CFG_PASSWORD));
     }
 
-    public void write(List<String> records) {
-        influx.write(database, retentionPolicy, consistency, records);
+    public void write(List<String> batch) {
+        influx.write(database, retentionPolicy, consistency, batch);
+    }
+
+    public void write(String single) {
+        influx.write(database, retentionPolicy, consistency, single);
     }
 
     @Override

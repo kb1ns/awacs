@@ -83,7 +83,7 @@ public final class ServerEntry implements Server, Configurable {
                     String name = i.value();
                     Object component = components.lookup(name, f.getType());
                     f.set(handler, component);
-                    log.info("Component {} injected into handler {}", name, handler);
+                    log.info("Component {} injected onto handler {}", name, handler);
                 }
                 handlerHolder.put(Byte.toUnsignedInt(handler.key()), handler);
                 log.info("Handler {} registered with key {}", clazz.getCanonicalName(), handler.key());

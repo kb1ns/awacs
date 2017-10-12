@@ -53,7 +53,7 @@ public class CallElement {
     }
 
     public boolean isNoneCost() {
-        return this.elapsedTime <= 5;
+        return this.elapsedTime <= StackTracePlugin.Config.F.methodExecutionThreshold;
     }
 
     public CallElement callSub(CallElement callee) {
@@ -92,11 +92,14 @@ public class CallElement {
         sb.append(elapsedTime);
         sb.append("@");
         sb.append(callCounter);
-        sb.append(" [\n");
-        for (CallElement callElement : subElements.values()) {
-            callElement.pretty(sb, level + 1);
+        if (!subElements.isEmpty()) {
+            sb.append(" [\n");
+            for (CallElement callElement : subElements.values()) {
+                callElement.pretty(sb, level + 1);
+            }
+            sb.append(align);
+            sb.append("]");
         }
-        sb.append(align);
-        sb.append("]\n");
+        sb.append("\n");
     }
 }
