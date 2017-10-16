@@ -61,9 +61,7 @@ class FilteredClassTransformer extends ClassTransformer {
         } else if (filterClassPrefix == null || filterClassPrefix.length == 0) {
             return !(className.startsWith("java") ||
                     className.startsWith("jdk") ||
-                    className.startsWith("com/sun/") ||
-                    className.startsWith("com/intellij/") ||
-                    className.startsWith("org/"));
+                    className.startsWith("com/sun/"));
         } else {
             boolean flag = false;
             for (String prefix : filterClassPrefix) {
