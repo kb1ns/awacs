@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.awacs.component.fernflow;
+package io.awacs.component.fernflower;
 
 import io.awacs.common.Configurable;
 import io.awacs.common.Configuration;

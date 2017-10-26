@@ -19,7 +19,7 @@ package io.awacs.server.handler;
 import com.alibaba.fastjson.JSONObject;
 import io.awacs.common.format.Influx;
 import io.awacs.common.net.Packet;
-import io.awacs.component.fernflow.FernflowerComponent;
+import io.awacs.component.fernflower.FernflowerComponent;
 import io.awacs.component.influxdb.InfluxdbComponent;
 import io.awacs.server.Handler;
 import io.awacs.server.Inject;

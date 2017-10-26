@@ -27,7 +27,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>awacs-influx-component</module>
-        <module>awacs-fernflow-component</module>
+        <module>awacs-fernflower-component</module>
+        <module>awacs-mail-component</module>
     </modules>
 
     <build>

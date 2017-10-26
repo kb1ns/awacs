@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.awacs.component.fernflow;
+package io.awacs.component.fernflower;
 
 import io.awacs.component.org.jetbrains.java.decompiler.main.DecompilerContext;
 import io.awacs.component.org.jetbrains.java.decompiler.main.Fernflower;

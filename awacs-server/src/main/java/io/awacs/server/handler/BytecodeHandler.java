@@ -1,7 +1,7 @@
 package io.awacs.server.handler;
 
 import io.awacs.common.net.Packet;
-import io.awacs.component.fernflow.FernflowerComponent;
+import io.awacs.component.fernflower.FernflowerComponent;
 import io.awacs.server.Handler;
 import io.awacs.server.Inject;
 
