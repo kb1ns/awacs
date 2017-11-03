@@ -28,13 +28,13 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.objectweb.asm.commons;
+package io.awacs.plugin.org.objectweb.asm.commons;
 
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.signature.SignatureReader;
-import org.objectweb.asm.signature.SignatureVisitor;
-import org.objectweb.asm.signature.SignatureWriter;
+import io.awacs.plugin.org.objectweb.asm.Handle;
+import io.awacs.plugin.org.objectweb.asm.Type;
+import io.awacs.plugin.org.objectweb.asm.signature.SignatureReader;
+import io.awacs.plugin.org.objectweb.asm.signature.SignatureVisitor;
+import io.awacs.plugin.org.objectweb.asm.signature.SignatureWriter;
 
 /**
  * A class responsible for remapping types and names. Subclasses can override

@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.commons;
+package io.awacs.plugin.org.objectweb.asm.commons;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
@@ -38,10 +38,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.ClassVisitor;
+import io.awacs.plugin.org.objectweb.asm.FieldVisitor;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
 
 /**
  * A {@link ClassVisitor} that adds a serial version unique identifier to a

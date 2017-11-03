@@ -27,12 +27,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree;
+package io.awacs.plugin.org.objectweb.asm.tree;
 
 import java.util.Map;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.Label;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
 
 /**
  * An {@link AbstractInsnNode} that encapsulates a {@link Label}.

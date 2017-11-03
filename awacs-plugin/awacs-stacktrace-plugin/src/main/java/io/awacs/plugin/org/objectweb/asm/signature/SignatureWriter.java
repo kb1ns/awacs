@@ -27,9 +27,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.signature;
+package io.awacs.plugin.org.objectweb.asm.signature;
 
-import org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
 
 /**
  * A signature visitor that generates signatures in string format.

@@ -27,11 +27,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree;
+package io.awacs.plugin.org.objectweb.asm.tree;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
-import org.objectweb.asm.TypeReference;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.TypeReference;
 
 /**
  * A node that represents a type annotationn.

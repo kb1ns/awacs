@@ -16,8 +16,8 @@
 
 package io.awacs.plugin.stacktrace;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.*;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.tree.*;
 
 import java.util.LinkedList;
 import java.util.List;

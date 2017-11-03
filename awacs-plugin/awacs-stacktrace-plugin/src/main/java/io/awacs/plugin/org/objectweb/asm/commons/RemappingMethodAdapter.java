@@ -28,14 +28,14 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.objectweb.asm.commons;
+package io.awacs.plugin.org.objectweb.asm.commons;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.AnnotationVisitor;
+import io.awacs.plugin.org.objectweb.asm.Handle;
+import io.awacs.plugin.org.objectweb.asm.Label;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
 
 /**
  * A {@link LocalVariablesSorter} for type mapping.

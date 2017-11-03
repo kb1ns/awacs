@@ -27,13 +27,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.optimizer;
+package io.awacs.plugin.org.objectweb.asm.optimizer;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.AnnotationVisitor;
+import io.awacs.plugin.org.objectweb.asm.Attribute;
+import io.awacs.plugin.org.objectweb.asm.FieldVisitor;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
 
 /**
  * A {@link FieldVisitor} that collects the {@link Constant}s of the fields it

@@ -27,9 +27,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree;
+package io.awacs.plugin.org.objectweb.asm.tree;
 
-import org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
 
 /**
  * A node that represents a local variable declaration.

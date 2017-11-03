@@ -27,14 +27,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.util;
+package io.awacs.plugin.org.objectweb.asm.util;
 
 import java.util.Map;
 
-import org.objectweb.asm.Label;
+import io.awacs.plugin.org.objectweb.asm.Label;
 
 /**
- * An {@link org.objectweb.asm.Attribute Attribute} that can print the ASM code
+ * An {@link io.awacs.plugin.org.objectweb.asm.Attribute Attribute} that can print the ASM code
  * to create an equivalent attribute.
  * 
  * @author Eugene Kuleshov

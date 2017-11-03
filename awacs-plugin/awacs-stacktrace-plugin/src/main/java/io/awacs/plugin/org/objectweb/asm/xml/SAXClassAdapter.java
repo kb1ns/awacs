@@ -27,25 +27,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.xml;
+package io.awacs.plugin.org.objectweb.asm.xml;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.AnnotationVisitor;
+import io.awacs.plugin.org.objectweb.asm.ClassVisitor;
+import io.awacs.plugin.org.objectweb.asm.FieldVisitor;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
 
 /**
- * A {@link org.objectweb.asm.ClassVisitor ClassVisitor} that generates SAX 2.0
+ * A {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor ClassVisitor} that generates SAX 2.0
  * events from the visited class. It can feed any kind of
  * {@link org.xml.sax.ContentHandler ContentHandler}, e.g. XML serializer, XSLT
  * or XQuery engines.
  * 
- * @see org.objectweb.asm.xml.Processor
- * @see org.objectweb.asm.xml.ASMContentHandler
+ * @see io.awacs.plugin.org.objectweb.asm.xml.Processor
+ * @see io.awacs.plugin.org.objectweb.asm.xml.ASMContentHandler
  * 
  * @author Eugene Kuleshov
  */

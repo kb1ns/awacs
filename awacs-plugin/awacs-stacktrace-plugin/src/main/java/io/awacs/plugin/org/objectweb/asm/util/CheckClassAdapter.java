@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.util;
+package io.awacs.plugin.org.objectweb.asm.util;
 
 import java.io.FileInputStream;
 import java.io.PrintWriter;
@@ -37,23 +37,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.TypePath;
-import org.objectweb.asm.TypeReference;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.analysis.Analyzer;
-import org.objectweb.asm.tree.analysis.BasicValue;
-import org.objectweb.asm.tree.analysis.Frame;
-import org.objectweb.asm.tree.analysis.SimpleVerifier;
+import io.awacs.plugin.org.objectweb.asm.AnnotationVisitor;
+import io.awacs.plugin.org.objectweb.asm.Attribute;
+import io.awacs.plugin.org.objectweb.asm.ClassReader;
+import io.awacs.plugin.org.objectweb.asm.ClassVisitor;
+import io.awacs.plugin.org.objectweb.asm.FieldVisitor;
+import io.awacs.plugin.org.objectweb.asm.Label;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.Type;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.TypeReference;
+import io.awacs.plugin.org.objectweb.asm.tree.ClassNode;
+import io.awacs.plugin.org.objectweb.asm.tree.MethodNode;
+import io.awacs.plugin.org.objectweb.asm.tree.analysis.Analyzer;
+import io.awacs.plugin.org.objectweb.asm.tree.analysis.BasicValue;
+import io.awacs.plugin.org.objectweb.asm.tree.analysis.Frame;
+import io.awacs.plugin.org.objectweb.asm.tree.analysis.SimpleVerifier;
 
 /**
  * A {@link ClassVisitor} that checks that its methods are properly used. More
@@ -93,9 +93,9 @@ import org.objectweb.asm.tree.analysis.SimpleVerifier;
  * insnNumber locals : stack):
  * 
  * <pre>
- * org.objectweb.asm.tree.analysis.AnalyzerException: Error at instruction 71: Expected I, but found .
- *   at org.objectweb.asm.tree.analysis.Analyzer.analyze(Analyzer.java:289)
- *   at org.objectweb.asm.util.CheckClassAdapter.verify(CheckClassAdapter.java:135)
+ * io.awacs.plugin.org.objectweb.asm.tree.analysis.AnalyzerException: Error at instruction 71: Expected I, but found .
+ *   at io.awacs.plugin.org.objectweb.asm.tree.analysis.Analyzer.analyze(Analyzer.java:289)
+ *   at io.awacs.plugin.org.objectweb.asm.util.CheckClassAdapter.verify(CheckClassAdapter.java:135)
  * ...
  * remove()V
  * 00000 LinkedBlockingQueue$Itr . . . . . . . .  :

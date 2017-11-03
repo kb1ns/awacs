@@ -16,10 +16,10 @@
 
 package io.awacs.plugin.stacktrace;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.tree.AnnotationNode;
+import io.awacs.plugin.org.objectweb.asm.tree.ClassNode;
+import io.awacs.plugin.org.objectweb.asm.tree.MethodNode;
 
 import java.util.Collections;
 import java.util.HashSet;

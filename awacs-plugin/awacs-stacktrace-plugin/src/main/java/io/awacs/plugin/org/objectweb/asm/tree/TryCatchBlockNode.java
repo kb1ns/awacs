@@ -27,11 +27,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree;
+package io.awacs.plugin.org.objectweb.asm.tree;
 
 import java.util.List;
 
-import org.objectweb.asm.MethodVisitor;
+import io.awacs.plugin.org.objectweb.asm.MethodVisitor;
 
 /**
  * A node that represents a try catch block.
@@ -66,7 +66,7 @@ public class TryCatchBlockNode {
      * list is a list of {@link TypeAnnotationNode} objects. May be
      * <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.tree.TypeAnnotationNode
+     * @associates io.awacs.plugin.org.objectweb.asm.tree.TypeAnnotationNode
      * @label visible
      */
     public List<TypeAnnotationNode> visibleTypeAnnotations;
@@ -76,7 +76,7 @@ public class TryCatchBlockNode {
      * This list is a list of {@link TypeAnnotationNode} objects. May be
      * <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.tree.TypeAnnotationNode
+     * @associates io.awacs.plugin.org.objectweb.asm.tree.TypeAnnotationNode
      * @label invisible
      */
     public List<TypeAnnotationNode> invisibleTypeAnnotations;

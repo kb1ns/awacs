@@ -27,11 +27,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree.analysis;
+package io.awacs.plugin.org.objectweb.asm.tree.analysis;
 
 import java.util.Set;
 
-import org.objectweb.asm.tree.AbstractInsnNode;
+import io.awacs.plugin.org.objectweb.asm.tree.AbstractInsnNode;
 
 /**
  * A {@link Value} that is represented by its type in a two types type system.

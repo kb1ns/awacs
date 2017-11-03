@@ -27,19 +27,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree.analysis;
+package io.awacs.plugin.org.objectweb.asm.tree.analysis;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodInsnNode;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.Type;
+import io.awacs.plugin.org.objectweb.asm.tree.AbstractInsnNode;
+import io.awacs.plugin.org.objectweb.asm.tree.FieldInsnNode;
+import io.awacs.plugin.org.objectweb.asm.tree.InvokeDynamicInsnNode;
+import io.awacs.plugin.org.objectweb.asm.tree.LdcInsnNode;
+import io.awacs.plugin.org.objectweb.asm.tree.MethodInsnNode;
 
 /**
  * An {@link Interpreter} for {@link SourceValue} values.

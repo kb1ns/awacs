@@ -27,7 +27,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.optimizer;
+package io.awacs.plugin.org.objectweb.asm.optimizer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,12 +43,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.commons.Remapper;
-import org.objectweb.asm.commons.SimpleRemapper;
+import io.awacs.plugin.org.objectweb.asm.ClassReader;
+import io.awacs.plugin.org.objectweb.asm.ClassWriter;
+import io.awacs.plugin.org.objectweb.asm.Handle;
+import io.awacs.plugin.org.objectweb.asm.Type;
+import io.awacs.plugin.org.objectweb.asm.commons.Remapper;
+import io.awacs.plugin.org.objectweb.asm.commons.SimpleRemapper;
 
 /**
  * A class file shrinker utility.

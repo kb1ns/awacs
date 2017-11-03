@@ -27,20 +27,20 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.util;
+package io.awacs.plugin.org.objectweb.asm.util;
 
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.Attribute;
+import io.awacs.plugin.org.objectweb.asm.ClassReader;
+import io.awacs.plugin.org.objectweb.asm.Handle;
+import io.awacs.plugin.org.objectweb.asm.Label;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.Type;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
 
 /**
  * A {@link Printer} that prints the ASM code to generate the classes if visits.
@@ -176,7 +176,7 @@ public class ASMifier extends Printer {
             simpleName = name.substring(n + 1);
         }
         text.add("import java.util.*;\n");
-        text.add("import org.objectweb.asm.*;\n");
+        text.add("import io.awacs.plugin.org.objectweb.asm.*;\n");
         text.add("public class " + simpleName + "Dump implements Opcodes {\n\n");
         text.add("public static byte[] dump () throws Exception {\n\n");
         text.add("ClassWriter cw = new ClassWriter(0);\n");

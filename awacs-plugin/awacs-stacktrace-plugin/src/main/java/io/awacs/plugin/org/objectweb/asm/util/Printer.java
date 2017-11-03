@@ -27,17 +27,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.util;
+package io.awacs.plugin.org.objectweb.asm.util;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.Attribute;
+import io.awacs.plugin.org.objectweb.asm.Handle;
+import io.awacs.plugin.org.objectweb.asm.Label;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
 
 /**
  * An abstract converter from visit events to text.
@@ -53,14 +53,14 @@ public abstract class Printer {
 
     /**
      * The names of the for <code>operand</code> parameter values of the
-     * {@link org.objectweb.asm.MethodVisitor#visitIntInsn} method when
+     * {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitIntInsn} method when
      * <code>opcode</code> is <code>NEWARRAY</code>.
      */
     public static final String[] TYPES;
 
     /**
      * The names of the <code>tag</code> field values for
-     * {@link org.objectweb.asm.Handle}.
+     * {@link io.awacs.plugin.org.objectweb.asm.Handle}.
      */
     public static final String[] HANDLE_TAG;
 
@@ -155,7 +155,7 @@ public abstract class Printer {
 
     /**
      * Class header.
-     * See {@link org.objectweb.asm.ClassVisitor#visit}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visit}.
      *
      * @param version
      *            the class version.
@@ -164,19 +164,19 @@ public abstract class Printer {
      *            also indicates if the class is deprecated.
      * @param name
      *            the internal name of the class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      * @param signature
      *            the signature of this class. May be <tt>null</tt> if the class
      *            is not a generic one, and does not extend or implement generic
      *            classes or interfaces.
      * @param superName
      *            the internal of name of the super class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      *            For interfaces, the super class is {@link Object}. May be
      *            <tt>null</tt>, but only for the {@link Object} class.
      * @param interfaces
      *            the internal names of the class's interfaces (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      *            May be <tt>null</tt>.
      */
     public abstract void visit(final int version, final int access,
@@ -185,7 +185,7 @@ public abstract class Printer {
 
     /**
      * Class source.
-     * See {@link org.objectweb.asm.ClassVisitor#visitSource}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitSource}.
      *
      * @param source
      *            the name of the source file from which the class was compiled.
@@ -199,7 +199,7 @@ public abstract class Printer {
 
     /**
      * Class outer class.
-     * See {@link org.objectweb.asm.ClassVisitor#visitOuterClass}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitOuterClass}.
      *
      * Visits the enclosing class of the class. This method must be called only
      * if the class has an enclosing class.
@@ -220,7 +220,7 @@ public abstract class Printer {
 
     /**
      * Class annotation.
-     * See {@link org.objectweb.asm.ClassVisitor#visitAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitAnnotation}.
      *
      * @param desc
      *            the class descriptor of the annotation class.
@@ -233,15 +233,15 @@ public abstract class Printer {
 
     /**
      * Class type annotation.
-     * See {@link org.objectweb.asm.ClassVisitor#visitTypeAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitTypeAnnotation}.
      *
      * @param typeRef
      *            a reference to the annotated type. The sort of this type
      *            reference must be
-     *            {@link org.objectweb.asm.TypeReference#CLASS_TYPE_PARAMETER CLASS_TYPE_PARAMETER},
-     *            {@link org.objectweb.asm.TypeReference#CLASS_TYPE_PARAMETER_BOUND CLASS_TYPE_PARAMETER_BOUND}
-     *            or {@link org.objectweb.asm.TypeReference#CLASS_EXTENDS CLASS_EXTENDS}.
-     *            See {@link org.objectweb.asm.TypeReference}.
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CLASS_TYPE_PARAMETER CLASS_TYPE_PARAMETER},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CLASS_TYPE_PARAMETER_BOUND CLASS_TYPE_PARAMETER_BOUND}
+     *            or {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CLASS_EXTENDS CLASS_EXTENDS}.
+     *            See {@link io.awacs.plugin.org.objectweb.asm.TypeReference}.
      * @param typePath
      *            the path to the annotated type argument, wildcard bound, array
      *            element type, or static inner type within 'typeRef'. May be
@@ -259,7 +259,7 @@ public abstract class Printer {
 
     /**
      * Class attribute.
-     * See {@link org.objectweb.asm.ClassVisitor#visitAttribute}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitAttribute}.
      *
      * @param attr
      *            an attribute.
@@ -268,14 +268,14 @@ public abstract class Printer {
 
     /**
      * Class inner name.
-     * See {@link org.objectweb.asm.ClassVisitor#visitInnerClass}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitInnerClass}.
      *
      * @param name
      *            the internal name of an inner class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      * @param outerName
      *            the internal name of the class to which the inner class
-     *            belongs (see {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            belongs (see {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      *            May be <tt>null</tt> for not member classes.
      * @param innerName
      *            the (simple) name of the inner class inside its enclosing
@@ -289,7 +289,7 @@ public abstract class Printer {
 
     /**
      * Class field.
-     * See {@link org.objectweb.asm.ClassVisitor#visitField}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitField}.
      *
      * @param access
      *            the field's access flags (see {@link Opcodes}). This parameter
@@ -297,7 +297,7 @@ public abstract class Printer {
      * @param name
      *            the field's name.
      * @param desc
-     *            the field's descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            the field's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      * @param signature
      *            the field's signature. May be <tt>null</tt> if the field's
      *            type does not use generic types.
@@ -318,7 +318,7 @@ public abstract class Printer {
 
     /**
      * Class method.
-     * See {@link org.objectweb.asm.ClassVisitor#visitMethod}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitMethod}.
      *
      * @param access
      *            the method's access flags (see {@link Opcodes}). This
@@ -327,14 +327,14 @@ public abstract class Printer {
      * @param name
      *            the method's name.
      * @param desc
-     *            the method's descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            the method's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      * @param signature
      *            the method's signature. May be <tt>null</tt> if the method
      *            parameters, return type and exceptions do not use generic
      *            types.
      * @param exceptions
      *            the internal names of the method's exception classes (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}). May be
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}). May be
      *            <tt>null</tt>.
      * @return the printer
      */
@@ -342,7 +342,7 @@ public abstract class Printer {
             final String desc, final String signature, final String[] exceptions);
 
     /**
-     * Class end. See {@link org.objectweb.asm.ClassVisitor#visitEnd}.
+     * Class end. See {@link io.awacs.plugin.org.objectweb.asm.ClassVisitor#visitEnd}.
      */
     public abstract void visitClassEnd();
 
@@ -352,7 +352,7 @@ public abstract class Printer {
 
     /**
      * Annotation value.
-     * See {@link org.objectweb.asm.AnnotationVisitor#visit}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.AnnotationVisitor#visit}.
      *
      * @param name
      *            the value name.
@@ -360,7 +360,7 @@ public abstract class Printer {
      *            the actual value, whose type must be {@link Byte},
      *            {@link Boolean}, {@link Character}, {@link Short},
      *            {@link Integer} , {@link Long}, {@link Float}, {@link Double},
-     *            {@link String} or {@link org.objectweb.asm.Type}
+     *            {@link String} or {@link io.awacs.plugin.org.objectweb.asm.Type}
      *            or OBJECT or ARRAY sort.
      *            This value can also be an array of byte, boolean, short, char, int,
      *            long, float or double values (this is equivalent to using
@@ -371,7 +371,7 @@ public abstract class Printer {
 
     /**
      * Annotation enum value.
-     * See {@link org.objectweb.asm.AnnotationVisitor#visitEnum}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.AnnotationVisitor#visitEnum}.
      *
      * Visits an enumeration value of the annotation.
      *
@@ -387,7 +387,7 @@ public abstract class Printer {
 
     /**
      * Nested annotation value.
-     * See {@link org.objectweb.asm.AnnotationVisitor#visitAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.AnnotationVisitor#visitAnnotation}.
      *
      * @param name
      *            the value name.
@@ -399,12 +399,12 @@ public abstract class Printer {
 
     /**
      * Annotation array value.
-     * See {@link org.objectweb.asm.AnnotationVisitor#visitArray}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.AnnotationVisitor#visitArray}.
      *
      * Visits an array value of the annotation. Note that arrays of primitive
      * types (such as byte, boolean, short, char, int, long, float or double)
      * can be passed as value to {@link #visit visit}. This is what
-     * {@link org.objectweb.asm.ClassReader} does.
+     * {@link io.awacs.plugin.org.objectweb.asm.ClassReader} does.
      *
      * @param name
      *            the value name.
@@ -413,7 +413,7 @@ public abstract class Printer {
     public abstract Printer visitArray(final String name);
 
     /**
-     * Annotation end. See {@link org.objectweb.asm.AnnotationVisitor#visitEnd}.
+     * Annotation end. See {@link io.awacs.plugin.org.objectweb.asm.AnnotationVisitor#visitEnd}.
      */
     public abstract void visitAnnotationEnd();
 
@@ -423,7 +423,7 @@ public abstract class Printer {
 
     /**
      * Field annotation.
-     * See {@link org.objectweb.asm.FieldVisitor#visitAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.FieldVisitor#visitAnnotation}.
      *
      * @param desc
      *            the class descriptor of the annotation class.
@@ -436,12 +436,12 @@ public abstract class Printer {
 
     /**
      * Field type annotation.
-     * See {@link org.objectweb.asm.FieldVisitor#visitTypeAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.FieldVisitor#visitTypeAnnotation}.
      *
      * @param typeRef
      *            a reference to the annotated type. The sort of this type
-     *            reference must be {@link org.objectweb.asm.TypeReference#FIELD FIELD}.
-     *            See {@link org.objectweb.asm.TypeReference}.
+     *            reference must be {@link io.awacs.plugin.org.objectweb.asm.TypeReference#FIELD FIELD}.
+     *            See {@link io.awacs.plugin.org.objectweb.asm.TypeReference}.
      * @param typePath
      *            the path to the annotated type argument, wildcard bound, array
      *            element type, or static inner type within 'typeRef'. May be
@@ -459,7 +459,7 @@ public abstract class Printer {
 
     /**
      * Field attribute.
-     * See {@link org.objectweb.asm.FieldVisitor#visitAttribute}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.FieldVisitor#visitAttribute}.
      *
      * @param attr
      *            an attribute.
@@ -468,7 +468,7 @@ public abstract class Printer {
 
     /**
      * Field end.
-     * See {@link org.objectweb.asm.FieldVisitor#visitEnd}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.FieldVisitor#visitEnd}.
      */
     public abstract void visitFieldEnd();
 
@@ -478,7 +478,7 @@ public abstract class Printer {
 
     /**
      * Method parameter.
-     * See {@link org.objectweb.asm.MethodVisitor#visitParameter(String, int)}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitParameter(String, int)}.
      *
      * @param name
      *            parameter name or null if none is provided.
@@ -493,7 +493,7 @@ public abstract class Printer {
 
     /**
      * Method default annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitAnnotationDefault}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitAnnotationDefault}.
      *
      * @return the printer
      */
@@ -501,7 +501,7 @@ public abstract class Printer {
 
     /**
      * Method annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitAnnotation}.
      *
      * @param desc
      *            the class descriptor of the annotation class.
@@ -514,12 +514,12 @@ public abstract class Printer {
 
     /**
      * Method type annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitTypeAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitTypeAnnotation}.
      *
      * @param typeRef
      *            a reference to the annotated type. The sort of this type
-     *            reference must be {@link org.objectweb.asm.TypeReference#FIELD FIELD}.
-     *            See {@link org.objectweb.asm.TypeReference}.
+     *            reference must be {@link io.awacs.plugin.org.objectweb.asm.TypeReference#FIELD FIELD}.
+     *            See {@link io.awacs.plugin.org.objectweb.asm.TypeReference}.
      * @param typePath
      *            the path to the annotated type argument, wildcard bound, array
      *            element type, or static inner type within 'typeRef'. May be
@@ -537,7 +537,7 @@ public abstract class Printer {
 
     /**
      * Method parameter annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitParameterAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitParameterAnnotation}.
      *
      * @param parameter
      *            the parameter index.
@@ -552,7 +552,7 @@ public abstract class Printer {
 
     /**
      * Method attribute.
-     * See {@link org.objectweb.asm.MethodVisitor#visitAttribute}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitAttribute}.
      *
      * @param attr
      *            an attribute.
@@ -561,13 +561,13 @@ public abstract class Printer {
 
     /**
      * Method start.
-     * See {@link org.objectweb.asm.MethodVisitor#visitCode}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitCode}.
      */
     public abstract void visitCode();
 
     /**
      * Method stack frame.
-     * See {@link org.objectweb.asm.MethodVisitor#visitFrame}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitFrame}.
      *
      * Visits the current state of the local variables and operand stack
      * elements. This method must(*) be called <i>just before</i> any
@@ -648,7 +648,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitInsn}
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitInsn}
      *
      * @param opcode
      *            the opcode of the instruction to be visited. This opcode is
@@ -671,7 +671,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitIntInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitIntInsn}.
      *
      * @param opcode
      *            the opcode of the instruction to be visited. This opcode is
@@ -692,7 +692,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitVarInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitVarInsn}.
      *
      * @param opcode
      *            the opcode of the local variable instruction to be visited.
@@ -706,7 +706,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitTypeInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitTypeInsn}.
      *
     /**
      * Visits a type instruction. A type instruction is an instruction that
@@ -718,31 +718,31 @@ public abstract class Printer {
      * @param type
      *            the operand of the instruction to be visited. This operand
      *            must be the internal name of an object or array class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      */
     public abstract void visitTypeInsn(final int opcode, final String type);
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitFieldInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitFieldInsn}.
      *
      * @param opcode
      *            the opcode of the type instruction to be visited. This opcode
      *            is either GETSTATIC, PUTSTATIC, GETFIELD or PUTFIELD.
      * @param owner
      *            the internal name of the field's owner class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      * @param name
      *            the field's name.
      * @param desc
-     *            the field's descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            the field's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      */
     public abstract void visitFieldInsn(final int opcode, final String owner,
             final String name, final String desc);
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitMethodInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitMethodInsn}.
      *
      * @param opcode
      *            the opcode of the type instruction to be visited. This opcode
@@ -750,11 +750,11 @@ public abstract class Printer {
      *            INVOKEINTERFACE.
      * @param owner
      *            the internal name of the method's owner class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      * @param name
      *            the method's name.
      * @param desc
-     *            the method's descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            the method's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      */
     @Deprecated
     public void visitMethodInsn(final int opcode, final String owner,
@@ -769,7 +769,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitMethodInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitMethodInsn}.
      *
      * @param opcode
      *            the opcode of the type instruction to be visited. This opcode
@@ -777,11 +777,11 @@ public abstract class Printer {
      *            INVOKEINTERFACE.
      * @param owner
      *            the internal name of the method's owner class (see
-     *            {@link org.objectweb.asm.Type#getInternalName() getInternalName}).
+     *            {@link io.awacs.plugin.org.objectweb.asm.Type#getInternalName() getInternalName}).
      * @param name
      *            the method's name.
      * @param desc
-     *            the method's descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            the method's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      * @param itf
      *            if the method's owner class is an interface.
      */
@@ -800,20 +800,20 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitInvokeDynamicInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitInvokeDynamicInsn}.
      *
      * Visits an invokedynamic instruction.
      *
      * @param name
      *            the method's name.
      * @param desc
-     *            the method's descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            the method's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      * @param bsm
      *            the bootstrap method.
      * @param bsmArgs
      *            the bootstrap method constant arguments. Each argument must be
      *            an {@link Integer}, {@link Float}, {@link Long},
-     *            {@link Double}, {@link String}, {@link org.objectweb.asm.Type} or {@link Handle}
+     *            {@link Double}, {@link String}, {@link io.awacs.plugin.org.objectweb.asm.Type} or {@link Handle}
      *            value. This method is allowed to modify the content of the
      *            array so a caller should expect that this array may change.
      */
@@ -822,7 +822,7 @@ public abstract class Printer {
 
     /**
      * Method jump instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitJumpInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitJumpInsn}.
      *
      * @param opcode
      *            the opcode of the type instruction to be visited. This opcode
@@ -838,7 +838,7 @@ public abstract class Printer {
 
     /**
      * Method label.
-     * See {@link org.objectweb.asm.MethodVisitor#visitLabel}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitLabel}.
      *
      * @param label
      *            a {@link Label Label} object.
@@ -847,7 +847,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitLdcInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitLdcInsn}.
      *
      * Visits a LDC instruction. Note that new constant types may be added in
      * future versions of the Java Virtual Machine. To easily detect new
@@ -886,9 +886,9 @@ public abstract class Printer {
      * @param cst
      *            the constant to be loaded on the stack. This parameter must be
      *            a non null {@link Integer}, a {@link Float}, a {@link Long}, a
-     *            {@link Double}, a {@link String}, a {@link org.objectweb.asm.Type}
+     *            {@link Double}, a {@link String}, a {@link io.awacs.plugin.org.objectweb.asm.Type}
      *            of OBJECT or ARRAY sort for <tt>.class</tt> constants, for classes whose
-     *            version is 49.0, a {@link org.objectweb.asm.Type} of METHOD sort or a
+     *            version is 49.0, a {@link io.awacs.plugin.org.objectweb.asm.Type} of METHOD sort or a
      *            {@link Handle} for MethodType and MethodHandle constants, for
      *            classes whose version is 51.0.
      */
@@ -896,7 +896,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitIincInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitIincInsn}.
      *
      * @param var
      *            index of the local variable to be incremented.
@@ -907,7 +907,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitTableSwitchInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitTableSwitchInsn}.
      *
      * @param min
      *            the minimum key value.
@@ -924,7 +924,7 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitLookupSwitchInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitLookupSwitchInsn}.
      *
      * @param dflt
      *            beginning of the default handler block.
@@ -939,10 +939,10 @@ public abstract class Printer {
 
     /**
      * Method instruction.
-     * See {@link org.objectweb.asm.MethodVisitor#visitMultiANewArrayInsn}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitMultiANewArrayInsn}.
      *
      * @param desc
-     *            an array type descriptor (see {@link org.objectweb.asm.Type Type}).
+     *            an array type descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type Type}).
      * @param dims
      *            number of dimensions of the array to allocate.
      */
@@ -951,20 +951,20 @@ public abstract class Printer {
 
     /**
      * Instruction type annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitInsnAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitInsnAnnotation}.
      *
      * @param typeRef
      *            a reference to the annotated type. The sort of this type
-     *            reference must be {@link org.objectweb.asm.TypeReference#INSTANCEOF INSTANCEOF},
-     *            {@link org.objectweb.asm.TypeReference#NEW NEW},
-     *            {@link org.objectweb.asm.TypeReference#CONSTRUCTOR_REFERENCE CONSTRUCTOR_REFERENCE},
-     *            {@link org.objectweb.asm.TypeReference#METHOD_REFERENCE METHOD_REFERENCE},
-     *            {@link org.objectweb.asm.TypeReference#CAST CAST},
-     *            {@link org.objectweb.asm.TypeReference#CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT},
-     *            {@link org.objectweb.asm.TypeReference#METHOD_INVOCATION_TYPE_ARGUMENT METHOD_INVOCATION_TYPE_ARGUMENT},
-     *            {@link org.objectweb.asm.TypeReference#CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT},
-     *            or {@link org.objectweb.asm.TypeReference#METHOD_REFERENCE_TYPE_ARGUMENT METHOD_REFERENCE_TYPE_ARGUMENT}.
-     *            See {@link org.objectweb.asm.TypeReference}.
+     *            reference must be {@link io.awacs.plugin.org.objectweb.asm.TypeReference#INSTANCEOF INSTANCEOF},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#NEW NEW},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CONSTRUCTOR_REFERENCE CONSTRUCTOR_REFERENCE},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#METHOD_REFERENCE METHOD_REFERENCE},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CAST CAST},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#METHOD_INVOCATION_TYPE_ARGUMENT METHOD_INVOCATION_TYPE_ARGUMENT},
+     *            {@link io.awacs.plugin.org.objectweb.asm.TypeReference#CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT},
+     *            or {@link io.awacs.plugin.org.objectweb.asm.TypeReference#METHOD_REFERENCE_TYPE_ARGUMENT METHOD_REFERENCE_TYPE_ARGUMENT}.
+     *            See {@link io.awacs.plugin.org.objectweb.asm.TypeReference}.
      * @param typePath
      *            the path to the annotated type argument, wildcard bound, array
      *            element type, or static inner type within 'typeRef'. May be
@@ -982,7 +982,7 @@ public abstract class Printer {
 
     /**
      * Method exception handler.
-     * See {@link org.objectweb.asm.MethodVisitor#visitTryCatchBlock}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitTryCatchBlock}.
      *
      * @param start
      *            beginning of the exception handler's scope (inclusive).
@@ -1003,13 +1003,13 @@ public abstract class Printer {
 
     /**
      * Try catch block type annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitTryCatchAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitTryCatchAnnotation}.
      *
      * @param typeRef
      *            a reference to the annotated type. The sort of this type
-     *            reference must be {@link org.objectweb.asm.TypeReference#EXCEPTION_PARAMETER
+     *            reference must be {@link io.awacs.plugin.org.objectweb.asm.TypeReference#EXCEPTION_PARAMETER
      *            EXCEPTION_PARAMETER}.
-     *            See {@link org.objectweb.asm.TypeReference}.
+     *            See {@link io.awacs.plugin.org.objectweb.asm.TypeReference}.
      * @param typePath
      *            the path to the annotated type argument, wildcard bound, array
      *            element type, or static inner type within 'typeRef'. May be
@@ -1027,7 +1027,7 @@ public abstract class Printer {
 
     /**
      * Method debug info.
-     * See {@link org.objectweb.asm.MethodVisitor#visitLocalVariable}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitLocalVariable}.
      *
      * @param name
      *            the name of a local variable.
@@ -1055,14 +1055,14 @@ public abstract class Printer {
 
     /**
      * Local variable type annotation.
-     * See {@link org.objectweb.asm.MethodVisitor#visitTryCatchAnnotation}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitTryCatchAnnotation}.
      *
      * @param typeRef
      *            a reference to the annotated type. The sort of this type
-     *            reference must be {@link org.objectweb.asm.TypeReference#LOCAL_VARIABLE
-     *            LOCAL_VARIABLE} or {@link org.objectweb.asm.TypeReference#RESOURCE_VARIABLE
+     *            reference must be {@link io.awacs.plugin.org.objectweb.asm.TypeReference#LOCAL_VARIABLE
+     *            LOCAL_VARIABLE} or {@link io.awacs.plugin.org.objectweb.asm.TypeReference#RESOURCE_VARIABLE
      *            RESOURCE_VARIABLE}.
-     *            See {@link org.objectweb.asm.TypeReference}.
+     *            See {@link io.awacs.plugin.org.objectweb.asm.TypeReference}.
      * @param typePath
      *            the path to the annotated type argument, wildcard bound, array
      *            element type, or static inner type within 'typeRef'. May be
@@ -1091,7 +1091,7 @@ public abstract class Printer {
 
     /**
      * Method debug info.
-     * See {@link org.objectweb.asm.MethodVisitor#visitLineNumber}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitLineNumber}.
      *
      * @param line
      *            a line number. This number refers to the source file from
@@ -1106,7 +1106,7 @@ public abstract class Printer {
 
     /**
      * Method max stack and max locals.
-     * See {@link org.objectweb.asm.MethodVisitor#visitMaxs}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitMaxs}.
      *
      * @param maxStack
      *            maximum stack size of the method.
@@ -1117,7 +1117,7 @@ public abstract class Printer {
 
     /**
      * Method end.
-     * See {@link org.objectweb.asm.MethodVisitor#visitEnd}.
+     * See {@link io.awacs.plugin.org.objectweb.asm.MethodVisitor#visitEnd}.
      */
     public abstract void visitMethodEnd();
 

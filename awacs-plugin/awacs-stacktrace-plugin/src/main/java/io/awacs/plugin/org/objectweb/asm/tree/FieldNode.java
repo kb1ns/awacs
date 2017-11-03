@@ -27,17 +27,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.objectweb.asm.tree;
+package io.awacs.plugin.org.objectweb.asm.tree;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.TypePath;
+import io.awacs.plugin.org.objectweb.asm.AnnotationVisitor;
+import io.awacs.plugin.org.objectweb.asm.Attribute;
+import io.awacs.plugin.org.objectweb.asm.ClassVisitor;
+import io.awacs.plugin.org.objectweb.asm.FieldVisitor;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.TypePath;
 
 /**
  * A node that represents a field.
@@ -47,7 +47,7 @@ import org.objectweb.asm.TypePath;
 public class FieldNode extends FieldVisitor {
 
     /**
-     * The field's access flags (see {@link org.objectweb.asm.Opcodes}). This
+     * The field's access flags (see {@link io.awacs.plugin.org.objectweb.asm.Opcodes}). This
      * field also indicates if the field is synthetic and/or deprecated.
      */
     public int access;
@@ -58,7 +58,7 @@ public class FieldNode extends FieldVisitor {
     public String name;
 
     /**
-     * The field's descriptor (see {@link org.objectweb.asm.Type}).
+     * The field's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type}).
      */
     public String desc;
 
@@ -78,7 +78,7 @@ public class FieldNode extends FieldVisitor {
      * The runtime visible annotations of this field. This list is a list of
      * {@link AnnotationNode} objects. May be <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.tree.AnnotationNode
+     * @associates io.awacs.plugin.org.objectweb.asm.tree.AnnotationNode
      * @label visible
      */
     public List<AnnotationNode> visibleAnnotations;
@@ -87,7 +87,7 @@ public class FieldNode extends FieldVisitor {
      * The runtime invisible annotations of this field. This list is a list of
      * {@link AnnotationNode} objects. May be <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.tree.AnnotationNode
+     * @associates io.awacs.plugin.org.objectweb.asm.tree.AnnotationNode
      * @label invisible
      */
     public List<AnnotationNode> invisibleAnnotations;
@@ -96,7 +96,7 @@ public class FieldNode extends FieldVisitor {
      * The runtime visible type annotations of this field. This list is a list
      * of {@link TypeAnnotationNode} objects. May be <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.tree.TypeAnnotationNode
+     * @associates io.awacs.plugin.org.objectweb.asm.tree.TypeAnnotationNode
      * @label visible
      */
     public List<TypeAnnotationNode> visibleTypeAnnotations;
@@ -105,7 +105,7 @@ public class FieldNode extends FieldVisitor {
      * The runtime invisible type annotations of this field. This list is a list
      * of {@link TypeAnnotationNode} objects. May be <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.tree.TypeAnnotationNode
+     * @associates io.awacs.plugin.org.objectweb.asm.tree.TypeAnnotationNode
      * @label invisible
      */
     public List<TypeAnnotationNode> invisibleTypeAnnotations;
@@ -114,7 +114,7 @@ public class FieldNode extends FieldVisitor {
      * The non standard attributes of this field. This list is a list of
      * {@link Attribute} objects. May be <tt>null</tt>.
      * 
-     * @associates org.objectweb.asm.Attribute
+     * @associates io.awacs.plugin.org.objectweb.asm.Attribute
      */
     public List<Attribute> attrs;
 
@@ -125,12 +125,12 @@ public class FieldNode extends FieldVisitor {
      * 
      * @param access
      *            the field's access flags (see
-     *            {@link org.objectweb.asm.Opcodes}). This parameter also
+     *            {@link io.awacs.plugin.org.objectweb.asm.Opcodes}). This parameter also
      *            indicates if the field is synthetic and/or deprecated.
      * @param name
      *            the field's name.
      * @param desc
-     *            the field's descriptor (see {@link org.objectweb.asm.Type
+     *            the field's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type
      *            Type}).
      * @param signature
      *            the field's signature.
@@ -159,12 +159,12 @@ public class FieldNode extends FieldVisitor {
      *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      * @param access
      *            the field's access flags (see
-     *            {@link org.objectweb.asm.Opcodes}). This parameter also
+     *            {@link io.awacs.plugin.org.objectweb.asm.Opcodes}). This parameter also
      *            indicates if the field is synthetic and/or deprecated.
      * @param name
      *            the field's name.
      * @param desc
-     *            the field's descriptor (see {@link org.objectweb.asm.Type
+     *            the field's descriptor (see {@link io.awacs.plugin.org.objectweb.asm.Type
      *            Type}).
      * @param signature
      *            the field's signature.

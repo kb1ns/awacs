@@ -21,10 +21,10 @@ import io.awacs.agent.AWACS;
 import io.awacs.agent.Plugin;
 import io.awacs.agent.Sender;
 import io.awacs.common.Configuration;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.ClassNode;
+import io.awacs.plugin.org.objectweb.asm.ClassReader;
+import io.awacs.plugin.org.objectweb.asm.ClassWriter;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
 import java.io.FileOutputStream;
