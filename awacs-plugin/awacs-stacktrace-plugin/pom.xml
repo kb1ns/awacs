@@ -20,7 +20,7 @@
     <parent>
         <artifactId>awacs-plugin</artifactId>
         <groupId>io.awacs</groupId>
-        <version>0.2.2</version>
+        <version>0.2.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,11 +31,6 @@
             <groupId>io.awacs</groupId>
             <artifactId>awacs-agent</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-all</artifactId>
-            <version>5.1</version>
         </dependency>
     </dependencies>
 

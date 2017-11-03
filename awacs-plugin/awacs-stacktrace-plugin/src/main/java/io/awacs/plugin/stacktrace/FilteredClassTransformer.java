@@ -16,10 +16,10 @@
 
 package io.awacs.plugin.stacktrace;
 
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
+import io.awacs.plugin.org.objectweb.asm.Opcodes;
+import io.awacs.plugin.org.objectweb.asm.tree.AnnotationNode;
+import io.awacs.plugin.org.objectweb.asm.tree.ClassNode;
+import io.awacs.plugin.org.objectweb.asm.tree.MethodNode;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,7 +61,9 @@ class FilteredClassTransformer extends ClassTransformer {
         } else if (filterClassPrefix == null || filterClassPrefix.length == 0) {
             return !(className.startsWith("java") ||
                     className.startsWith("jdk") ||
-                    className.startsWith("com/sun/"));
+                    className.startsWith("com/sun/") ||
+                    className.startsWith("com/intellij/") ||
+                    className.startsWith("org/"));
         } else {
             boolean flag = false;
             for (String prefix : filterClassPrefix) {

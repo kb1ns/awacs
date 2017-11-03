@@ -53,7 +53,7 @@ public class CallElement {
     }
 
     public boolean isNoneCost() {
-        return this.elapsedTime <= StackTracePlugin.Config.F.methodExecutionThreshold;
+        return this.elapsedTime < StackTracePlugin.Config.F.methodExecutionThreshold;
     }
 
     public CallElement callSub(CallElement callee) {

@@ -21,7 +21,7 @@
 
     <groupId>io.awacs</groupId>
     <artifactId>awacs-root</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3</version>
     <modules>
         <module>awacs-agent</module>
         <module>awacs-common</module>
@@ -170,6 +170,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludePackageNames>io.awacs.plugin</excludePackageNames>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
