@@ -1,7 +1,7 @@
 # AWACS
-[![Build Status](https://travis-ci.org/Archerfeel/awacs.svg?branch=master)](https://travis-ci.org/Archerfeel/awacs)
-[![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/ArcherFeel/awacs/blob/master/LICENSE)
-[![Version](https://img.shields.io/badge/AWACS-0.2.3-orange.svg)](https://github.com/ArcherFeel/awacs/tree/0.2.3)
+[![Build Status](https://travis-ci.org/archerfeel/awacs.svg?branch=master)](https://travis-ci.org/archerfeel/awacs)
+[![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](https://github.com/archerfeel/awacs/blob/master/LICENSE)
+[![Version](https://img.shields.io/badge/AWACS-0.2.4-orange.svg)](https://github.com/archerfeel/awacs/tree/0.2.4)
 
 
 ## Overview
