@@ -66,9 +66,7 @@ public final class ServerEntry implements Server, Configurable {
 
     private Components components;
 
-    @Override
-    public void load(Components components) {
-        this.components = components;
+    private void initHandler() {
         Reflections ref = new Reflections("io.awacs.server.handler");
         Set<Class<? extends Handler>> classes = ref.getSubTypesOf(Handler.class);
         for (Class<? extends Handler> clazz : classes) {
@@ -126,6 +124,9 @@ public final class ServerEntry implements Server, Configurable {
 
     @Override
     public void init(Configuration configuration) {
+        components = new Components();
+        components.init(configuration);
+        initHandler();
         host = configuration.getString(Configurations.CFG_BIND_HOST, Configurations.DEFAULT_BIND_HOST);
         port = configuration.getInteger(Configurations.CFG_BIND_PORT, Configurations.DEFAULT_BIND_PORT);
         int bossCore = configuration.getInteger(Configurations.CFG_BOSS_CORE, Configurations.DEFAULT_BOSS_CORE);
@@ -135,10 +136,6 @@ public final class ServerEntry implements Server, Configurable {
         businessGroup = new DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors());
     }
 
-
-    /**
-     * Created by pixyonly on 8/24/16.
-     */
     public static class Dispatcher extends SimpleChannelInboundHandler<Packet> {
 
         private ServerEntry ref;

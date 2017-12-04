@@ -21,6 +21,7 @@ import io.awacs.common.format.Influx;
 import io.awacs.common.net.Packet;
 import io.awacs.component.fernflower.FernflowerComponent;
 import io.awacs.component.influxdb.InfluxdbComponent;
+import io.awacs.component.mail.MailComponent;
 import io.awacs.server.Handler;
 import io.awacs.server.Inject;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by pixyonly on 12/10/2017.
@@ -36,8 +38,8 @@ public class ExceptionstackHandler implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionstackHandler.class);
 
-//    @Inject("mail")
-//    private MailComponent mail;
+    @Inject("email")
+    private MailComponent mail;
 
     @Inject("influxdb")
     private InfluxdbComponent influxdb;
@@ -49,15 +51,37 @@ public class ExceptionstackHandler implements Handler {
     public Packet onReceive(Packet packet, InetSocketAddress address) {
         String namespace = packet.getNamespace();
         String content = new String(packet.getBody());
-        //TODO do decompile
         JSONObject json = JSONObject.parseObject(content);
+        List stack = Arrays.asList(json.getJSONArray("stack").toArray());
+        //TODO do decompile
+        StringBuilder text = new StringBuilder();
+        text.append("hostname=");
+        text.append(json.getString("hostname"));
+        text.append("\n");
+        text.append("ip=");
+        text.append(address.getHostString());
+        text.append("\n");
+        text.append("thread=");
+        text.append(json.getString("thread"));
+        text.append("\n");
+        text.append("exception=");
+        text.append(json.getString("entry"));
+        text.append(": ");
+        text.append(json.getString("message"));
+        text.append("\n");
+        for(Object ele : stack) {
+            text.append("\t at ");
+            text.append(ele.toString());
+            text.append("\n");
+        }
+        mail.alert(namespace, text.toString());
         String r = Influx.measurement(namespace)
                 .tag("entry", json.getString("entry"))
                 .tag("namespace", namespace)
                 .tag("hostname", json.getString("hostname"))
                 .addField("thread", json.getString("thread"))
                 .addField("message", json.getString("message"))
-                .addField("stack", Arrays.asList(json.getJSONArray("stack").toArray()).toString())
+                .addField("stack", stack.toString())
                 .build()
                 .lineProtocol();
         log.debug(r);

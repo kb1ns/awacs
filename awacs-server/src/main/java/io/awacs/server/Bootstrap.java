@@ -27,11 +27,8 @@ public class Bootstrap {
 
     public static void main(String[] args) throws Exception {
         Configuration configuration = Configurations.loadConfigurations();
-        Components components = new Components();
-        components.init(configuration);
         ServerEntry server = new ServerEntry();
         server.init(configuration);
-        server.load(components);
         server.start();
     }
 }
