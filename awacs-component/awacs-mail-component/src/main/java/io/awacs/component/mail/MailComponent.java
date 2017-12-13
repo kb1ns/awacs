@@ -20,6 +20,8 @@ public class MailComponent implements Configurable, Releasable {
 
     private Map<String, Group> interests;
 
+    private MailQueue queue;
+
     @Override
     public void init(Configuration configuration) {
         username = configuration.getString("username");
@@ -42,6 +44,13 @@ public class MailComponent implements Configurable, Releasable {
         for (String namespace : namespaceses) {
             interests.put(namespace, new Group(configuration.getArray("interest_namespace." + namespace)));
         }
+        queue = new MailQueue(50);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                queue.clear();
+            }
+        }, 8 * 60 * 60 * 1000, 8 * 60 * 60 * 1000);
     }
 
     @Override
@@ -50,19 +59,21 @@ public class MailComponent implements Configurable, Releasable {
     }
 
     public void alert(String namespace, String content) {
-        try {
-            Group group = interests.get(namespace);
-            MimeMessage mail = new MimeMessage(session);
-            mail.setFrom(new InternetAddress(username));
-            mail.setText(content);
-            mail.setSentDate(new Date());
-            mail.setSubject(String.format("Application exception of %s", namespace));
-            mail.setRecipients(Message.RecipientType.TO, group.recipients);
-            Transport.send(mail);
-        } catch (Exception e) {
-            //TODO
-            e.printStackTrace();
-        }
+        queue.checkOnFire(content, s -> {
+            try {
+                Group group = interests.get(namespace);
+                MimeMessage mail = new MimeMessage(session);
+                mail.setFrom(new InternetAddress(username));
+                mail.setText(content);
+                mail.setSentDate(new Date());
+                mail.setSubject(String.format("Application exception of %s", namespace));
+                mail.setRecipients(Message.RecipientType.TO, group.recipients);
+                Transport.send(mail);
+            } catch (Exception e) {
+                //TODO
+                e.printStackTrace();
+            }
+        });
     }
 
     private static class Group {
