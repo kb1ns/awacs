@@ -61,9 +61,9 @@ public class ExceptionstackHandler implements Handler {
         text.append("ip=");
         text.append(address.getHostString());
         text.append("\n");
-        text.append("thread=");
-        text.append(json.getString("thread"));
-        text.append("\n");
+//        text.append("thread=");
+//        text.append(json.getString("thread"));
+//        text.append("\n");
         text.append("exception=");
         text.append(json.getString("entry"));
         text.append(": ");

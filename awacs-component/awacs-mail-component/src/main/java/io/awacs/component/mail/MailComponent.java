@@ -22,6 +22,8 @@ public class MailComponent implements Configurable, Releasable {
 
     private MailQueue queue;
 
+    private Timer timer;
+
     @Override
     public void init(Configuration configuration) {
         username = configuration.getString("username");
@@ -45,7 +47,8 @@ public class MailComponent implements Configurable, Releasable {
             interests.put(namespace, new Group(configuration.getArray("interest_namespace." + namespace)));
         }
         queue = new MailQueue(50);
-        new Timer().schedule(new TimerTask() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 queue.clear();
@@ -55,7 +58,7 @@ public class MailComponent implements Configurable, Releasable {
 
     @Override
     public void release() {
-
+        timer.cancel();
     }
 
     public void alert(String namespace, String content) {
