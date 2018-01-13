@@ -41,6 +41,7 @@ public class TestController {
 
     private static final Cage cage = new GCage();
 
+    @Entry
     @RequestMapping(value = "/test/{id}", produces = "application/json")
     public String test(@PathVariable("id") String id) {
         Random r1 = new Random();
